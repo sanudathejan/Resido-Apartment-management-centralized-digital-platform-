@@ -160,9 +160,7 @@ function saveChanges() {
 // 3. Contact Form with EmailJS Integration
 // Initialize EmailJS with your public key
 (function() {
-    // You need to add your EmailJS public key here
-    // Get it from: EmailJS Dashboard > Account > API Keys
-    emailjs.init("YOUR_PUBLIC_KEY"); // Replace with your actual public key
+    emailjs.init("L5_6y1OrPunB6CcEn");
 })();
 
 function handleContact(event) {
