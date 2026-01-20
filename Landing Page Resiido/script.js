@@ -157,29 +157,57 @@ function saveChanges() {
     }, 1000);
 }
 
-// 3. Contact Form Simulation
+// 3. Contact Form with EmailJS Integration
+// Initialize EmailJS with your public key
+(function() {
+    // You need to add your EmailJS public key here
+    // Get it from: EmailJS Dashboard > Account > API Keys
+    emailjs.init("YOUR_PUBLIC_KEY"); // Replace with your actual public key
+})();
+
 function handleContact(event) {
     event.preventDefault();
     const btn = document.getElementById('submitBtn');
     const originalText = btn.innerHTML;
     
+    // Get form data
+    const formData = {
+        from_name: document.getElementById('from_name').value,
+        from_email: document.getElementById('from_email').value,
+        message: document.getElementById('message').value
+    };
+    
     // Show loading state
     btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Sending...';
     btn.classList.add('opacity-75', 'cursor-not-allowed', 'pointer-events-none');
     
-    // Simulate network request
-    setTimeout(() => {
-        btn.innerHTML = '<i class="fas fa-check mr-2"></i>Message Sent!';
-        btn.classList.remove('opacity-75', 'cursor-not-allowed', 'pointer-events-none');
-        btn.classList.add('from-green-500', 'to-emerald-500');
-        
-        setTimeout(() => {
-            alert('Thank you for contacting the Resiido Team! We will get back to you soon.');
-            btn.innerHTML = originalText;
-            btn.classList.remove('from-green-500', 'to-emerald-500');
-            event.target.reset();
-        }, 500);
-    }, 1500);
+    // Send email using EmailJS
+    emailjs.send('service_tkxd41h', 'template_n5d75fg', formData)
+        .then(function(response) {
+            console.log('SUCCESS!', response.status, response.text);
+            btn.innerHTML = '<i class="fas fa-check mr-2"></i>Message Sent!';
+            btn.classList.remove('opacity-75', 'cursor-not-allowed', 'pointer-events-none');
+            btn.classList.add('from-green-500', 'to-emerald-500');
+            
+            setTimeout(() => {
+                alert('Thank you for contacting the Resiido Team! We will get back to you soon.');
+                btn.innerHTML = originalText;
+                btn.classList.remove('from-green-500', 'to-emerald-500');
+                document.getElementById('contactForm').reset();
+            }, 500);
+        })
+        .catch(function(error) {
+            console.log('FAILED...', error);
+            btn.innerHTML = '<i class="fas fa-times mr-2"></i>Failed to Send';
+            btn.classList.remove('opacity-75', 'cursor-not-allowed', 'pointer-events-none');
+            btn.classList.add('from-red-500', 'to-red-600');
+            
+            setTimeout(() => {
+                alert('Sorry, there was an error sending your message. Please try again later.');
+                btn.innerHTML = originalText;
+                btn.classList.remove('from-red-500', 'to-red-600');
+            }, 500);
+        });
 }
 
 // Close mobile menu on window resize
