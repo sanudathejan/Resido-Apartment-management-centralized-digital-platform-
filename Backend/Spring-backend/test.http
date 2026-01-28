@@ -32,3 +32,23 @@ POST http://localhost:8080/api/sos/1
 
 ### See all ongoing SOS situations
 GET http://localhost:8080/api/sos/active
+
+### Manager creates a Rent bill
+POST http://localhost:8080/api/payments
+Content-Type: application/json
+
+{
+    "amount": 1100.00,
+    "type": "RENT",
+    "dueDate": "2024-06-01",
+    "paid": false,
+    "resident": {
+        "id": 1
+    }
+}
+
+### Get unpaid bills for Resident #1
+GET http://localhost:8080/api/payments/resident/1/unpaid
+
+### Mark bill as paid
+PUT http://localhost:8080/api/payments/4/pay
