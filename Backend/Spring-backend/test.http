@@ -1,0 +1,28 @@
+POST http://localhost:8080/api/users
+Content-Type: application/json
+
+{
+    "name": "John Doe",
+    "email": "john@example.com",
+    "password": "password123",
+    "role": "RESIDENT"
+}
+
+### Create a Maintenance Request
+POST http://localhost:8080/api/maintenance
+Content-Type: application/json
+
+{
+    "title": "Broken Window",
+    "description": "Cracked glass in living room",
+    "status": "PENDING",
+    "resident": {
+        "id": 1
+    }
+}
+
+### Manager updates the status to IN_PROGRESS
+PUT http://localhost:8080/api/maintenance/1/status
+Content-Type: text/plain
+
+IN_PROGRESS

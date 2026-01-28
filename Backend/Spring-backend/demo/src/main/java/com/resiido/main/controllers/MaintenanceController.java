@@ -31,4 +31,14 @@ public class MaintenanceController {
     public List<MaintenanceRequest> getRequestsByResident(@PathVariable Long residentId) {
         return maintenanceRepository.findByResidentId(residentId);
     }
+
+    // 4. Update the status of a request (Manager Action)
+    @PutMapping("/{id}/status")
+    public MaintenanceRequest updateStatus(@PathVariable Long id, @RequestBody String newStatus) {
+        MaintenanceRequest request = maintenanceRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Request not found"));
+
+        request.setStatus(newStatus);
+        return maintenanceRepository.save(request);
+    }
 }
