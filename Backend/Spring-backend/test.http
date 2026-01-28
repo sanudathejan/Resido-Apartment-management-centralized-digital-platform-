@@ -26,3 +26,9 @@ PUT http://localhost:8080/api/maintenance/1/status
 Content-Type: text/plain
 
 IN_PROGRESS
+
+### Resident #1 hits the SOS Button
+POST http://localhost:8080/api/sos/1
+
+### See all ongoing SOS situations
+GET http://localhost:8080/api/sos/active
