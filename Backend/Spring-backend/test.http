@@ -52,3 +52,37 @@ GET http://localhost:8080/api/payments/resident/1/unpaid
 
 ### Mark bill as paid
 PUT http://localhost:8080/api/payments/4/pay
+
+### make parking spot avaiable = true
+PUT http://localhost:8080/api/parking/slot/1/availability?available=true
+
+###
+POST http://localhost:8080/api/users
+Content-Type: application/json
+
+{
+    "name": "Mark Rober",
+    "email": "mark@example.com",
+    "password": "password12345",
+    "role": "RESIDENT"
+}
+
+###
+POST http://localhost:8080/api/parking/request
+Content-Type: application/json
+
+{
+    "startTime": "2024-06-01T10:00:00",
+    "endTime": "2024-06-01T18:00:00",
+    "requester": { "id": 2 },
+    "slot": { "id": 1 }
+}
+
+### 1. OWNER checks for new requests
+GET http://localhost:8080/api/parking/owner/1/pending
+
+### 2. OWNER approves the request (Change the '1' to your Request ID)
+PUT http://localhost:8080/api/parking/request/1?status=APPROVED
+
+### 3. REQUESTER checks if they got the spot
+GET http://localhost:8080/api/parking/requester/2/updates
