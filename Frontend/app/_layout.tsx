@@ -1,24 +1,54 @@
+/**
+ * Root Layout for Resiido App
+ * Handles navigation structure and auth flow
+ */
+
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { AuthProvider } from '@/context/AuthContext';
 
 export const unstable_settings = {
-  anchor: '(tabs)',
+  initialRouteName: 'welcome',
 };
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
+    <AuthProvider>
+      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+        <Stack screenOptions={{ headerShown: false }}>
+          {/* Public Screens */}
+          <Stack.Screen name="welcome" />
+          <Stack.Screen name="login" />
+          <Stack.Screen name="register" />
+          
+          {/* Authenticated Screens */}
+          <Stack.Screen name="(tabs)" />
+          
+          {/* Modal Screens */}
+          <Stack.Screen 
+            name="modal" 
+            options={{ 
+              presentation: 'modal', 
+              title: 'Modal' 
+            }} 
+          />
+          <Stack.Screen 
+            name="maintenance" 
+            options={{ 
+              presentation: 'modal',
+              headerShown: true,
+              title: 'Maintenance Request'
+            }} 
+          />
+        </Stack>
+        <StatusBar style="auto" />
+      </ThemeProvider>
+    </AuthProvider>
   );
 }
