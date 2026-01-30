@@ -1,0 +1,101 @@
+/**
+ * Resiido App Configuration
+ */
+
+// API Configuration
+export const API_CONFIG = {
+  BASE_URL: 'http://10.0.2.2:8080', // Android emulator localhost
+  // BASE_URL: 'http://localhost:8080', // iOS simulator or web
+  // BASE_URL: 'http://YOUR_IP:8080', // Physical device - replace with your machine's IP
+  
+  ENDPOINTS: {
+    // Auth
+    LOGIN: '/api/auth/login',
+    REGISTER: '/api/auth/register',
+    
+    // Users
+    USERS: '/api/users',
+    USER_BY_ID: (id: number) => `/api/users/${id}`,
+    
+    // Payments
+    PAYMENTS: '/api/payments',
+    PAYMENTS_BY_USER: (userId: number) => `/api/payments/user/${userId}`,
+    
+    // Maintenance
+    MAINTENANCE: '/api/maintenance',
+    MAINTENANCE_BY_USER: (userId: number) => `/api/maintenance/user/${userId}`,
+    
+    // Parking
+    PARKING_SLOTS: '/api/parking/slots',
+    PARKING_REQUESTS: '/api/parking/requests',
+    PARKING_BY_USER: (userId: number) => `/api/parking/user/${userId}`,
+    
+    // SOS
+    SOS: '/api/sos',
+    SOS_ACTIVE: '/api/sos/active',
+    
+    // Announcements
+    ANNOUNCEMENTS: '/api/announcements',
+  },
+  
+  TIMEOUT: 30000, // 30 seconds
+};
+
+// App Configuration
+export const APP_CONFIG = {
+  NAME: 'Resiido',
+  VERSION: '1.0.0',
+  
+  // Storage keys
+  STORAGE_KEYS: {
+    AUTH_TOKEN: '@resiido_auth_token',
+    USER_DATA: '@resiido_user_data',
+    THEME: '@resiido_theme',
+    ONBOARDING_COMPLETE: '@resiido_onboarding',
+  },
+  
+  // User roles
+  ROLES: {
+    RESIDENT: 'RESIDENT',
+    ADMIN: 'ADMIN',
+    SECURITY: 'SECURITY',
+    MAINTENANCE: 'MAINTENANCE',
+  },
+  
+  // Payment types
+  PAYMENT_TYPES: {
+    RENT: 'RENT',
+    PARKING: 'PARKING',
+    LATE_FEE: 'LATE_FEE',
+    UTILITY: 'UTILITY',
+    MAINTENANCE: 'MAINTENANCE',
+  },
+  
+  // Maintenance status
+  MAINTENANCE_STATUS: {
+    PENDING: 'PENDING',
+    IN_PROGRESS: 'IN_PROGRESS',
+    COMPLETED: 'COMPLETED',
+    CANCELLED: 'CANCELLED',
+  },
+  
+  // Pagination
+  PAGE_SIZE: 10,
+};
+
+// Feature flags
+export const FEATURES = {
+  SOS_ENABLED: true,
+  PARKING_ENABLED: true,
+  MAINTENANCE_ENABLED: true,
+  PAYMENTS_ENABLED: true,
+  ANNOUNCEMENTS_ENABLED: true,
+  DARK_MODE_ENABLED: true,
+  OTP_LOGIN_ENABLED: false,
+};
+
+export default {
+  API: API_CONFIG,
+  APP: APP_CONFIG,
+  FEATURES,
+};
