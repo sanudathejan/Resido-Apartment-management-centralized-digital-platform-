@@ -5,7 +5,9 @@ import com.resiido.main.models.ParkingSlot;
 import com.resiido.main.repositories.ParkingRequestRepository;
 import com.resiido.main.repositories.ParkingSlotRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -37,6 +39,15 @@ public class ParkingController {
     // 3. Borrower: Request a specific slot
     @PostMapping("/request")
     public ParkingRequest createRequest(@RequestBody ParkingRequest request) {
+        // 1. Fetch the slot to see who owns it
+        ParkingSlot slot = slotRepository.findById(request.getSlot().getId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Slot not found"));
+
+        // 2. Prevent the owner from requesting their own slot
+        if (slot.getOwner().getId().equals(request.getRequester().getId())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You cannot request your own parking spot!");
+        }
+
         return requestRepository.save(request);
     }
 
