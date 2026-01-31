@@ -86,3 +86,9 @@ PUT http://localhost:8080/api/parking/request/1?status=APPROVED
 
 ### 3. REQUESTER checks if they got the spot
 GET http://localhost:8080/api/parking/requester/2/updates
+
+### Get payments for a non-existent user
+GET http://localhost:8080/api/payments/resident/9999/unpaid
+
+### Try to pay an already paid bill (use the ID of a paid bill, e.g., 1)
+PUT http://localhost:8080/api/payments/1/pay
