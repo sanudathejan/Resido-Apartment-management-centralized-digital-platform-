@@ -43,25 +43,23 @@ export default function WelcomeScreen() {
           <Text style={styles.appName}>RESIIDO</Text>
         </View>
 
-        {/* Bottom Buttons Section */}
+        {/* Bottom Buttons Section - Vertical Layout */}
         <View style={styles.buttonSection}>
-          <View style={styles.buttonRow}>
-            <TouchableOpacity
-              style={styles.registerButton}
-              onPress={() => router.push('/register')}
-              activeOpacity={0.8}
-            >
-              <Text style={styles.registerButtonText}>Register</Text>
-            </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.registerButton}
+            onPress={() => router.push('/register')}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.registerButtonText}>Register</Text>
+          </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.loginButton}
-              onPress={() => router.push('/login')}
-              activeOpacity={0.8}
-            >
-              <Text style={styles.loginButtonText}>Log in</Text>
-            </TouchableOpacity>
-          </View>
+          <TouchableOpacity
+            style={styles.loginButton}
+            onPress={() => router.push('/login')}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.loginButtonText}>Log in</Text>
+          </TouchableOpacity>
         </View>
       </SafeAreaView>
     </LinearGradient>
@@ -99,43 +97,37 @@ const styles = StyleSheet.create({
   buttonSection: {
     paddingHorizontal: 30,
     paddingBottom: 50,
-  },
-  buttonRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
     gap: 15,
   },
   registerButton: {
-    backgroundColor: 'rgba(255, 255, 255, 0.25)',
-    paddingVertical: 14,
+    backgroundColor: '#3498DB',
+    paddingVertical: 16,
     paddingHorizontal: 35,
-    borderRadius: 25,
-    borderWidth: 2,
-    borderColor: Colors.white,
-    minWidth: 130,
-  },
-  registerButtonText: {
-    color: Colors.white,
-    fontSize: 16,
-    fontWeight: '600',
-    textAlign: 'center',
-  },
-  loginButton: {
-    backgroundColor: Colors.white,
-    paddingVertical: 14,
-    paddingHorizontal: 35,
-    borderRadius: 25,
-    minWidth: 130,
+    borderRadius: 30,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
+    shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 3,
   },
+  registerButtonText: {
+    color: Colors.white,
+    fontSize: 18,
+    fontWeight: '700',
+    textAlign: 'center',
+  },
+  loginButton: {
+    backgroundColor: 'transparent',
+    paddingVertical: 16,
+    paddingHorizontal: 35,
+    borderRadius: 30,
+    borderWidth: 2,
+    borderColor: Colors.white,
+  },
   loginButtonText: {
-    color: '#2ECC71',
-    fontSize: 16,
-    fontWeight: '600',
+    color: Colors.white,
+    fontSize: 18,
+    fontWeight: '700',
     textAlign: 'center',
   },
 });
