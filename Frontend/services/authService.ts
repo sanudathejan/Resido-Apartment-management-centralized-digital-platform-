@@ -1,5 +1,6 @@
 /**
  * Authentication Service for Resiido
+ * Supports demo mode when backend is not available
  */
 
 import apiService from './api';
@@ -7,13 +8,70 @@ import { API_CONFIG, APP_CONFIG } from '@/constants/config';
 import { User, LoginRequest, RegisterRequest, AuthResponse } from '@/types';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+// Demo mode flag - set to true when backend is not available
+const DEMO_MODE = true;
+
+// Demo users for testing
+const DEMO_USERS: User[] = [
+  {
+    id: 1,
+    name: 'John Resident',
+    email: 'resident@demo.com',
+    password: 'demo123',
+    role: 'RESIDENT',
+    phone: '+94 77 123 4567',
+    apartmentNumber: 'A-101',
+  },
+  {
+    id: 2,
+    name: 'Sarah Manager',
+    email: 'manager@demo.com',
+    password: 'demo123',
+    role: 'MANAGER',
+    phone: '+94 77 987 6543',
+    apartmentNumber: 'A-001',
+    managedApartment: {
+      id: 1,
+      name: 'PrimeLux Residence Colombo',
+      location: '23/A, Bakers street, Colombo 7',
+      address: '23/A, Bakers street, Colombo 7, Sri Lanka',
+      numberOfUnits: 64,
+    },
+  },
+];
+
 class AuthService {
   /**
    * Login user with email and password
    */
   async login(credentials: LoginRequest): Promise<AuthResponse> {
     try {
-      // For now, using basic user endpoint until auth endpoint is ready
+      // Demo mode - use local demo users
+      if (DEMO_MODE) {
+        const user = DEMO_USERS.find(
+          (u) => u.email === credentials.email && u.password === credentials.password
+        );
+
+        if (user) {
+          const { password, ...safeUser } = user;
+          await this.saveUserData(safeUser as User);
+          return { user: safeUser as User, message: 'Login successful', token: 'demo-token' };
+        }
+
+        // Allow any email/password in demo mode for testing
+        const demoUser: User = {
+          id: Date.now(),
+          name: credentials.email.split('@')[0],
+          email: credentials.email,
+          role: 'RESIDENT',
+          apartmentNumber: 'B-4',
+          phone: '+94 XX XXX XXXX',
+        };
+        await this.saveUserData(demoUser);
+        return { user: demoUser, message: 'Demo login successful', token: 'demo-token' };
+      }
+
+      // Production mode - call API
       const users = await apiService.get<User[]>(API_CONFIG.ENDPOINTS.USERS);
       
       const user = users.find(
@@ -37,14 +95,41 @@ class AuthService {
    */
   async register(userData: RegisterRequest): Promise<AuthResponse> {
     try {
-      const newUser: Partial<User> = {
+      // Demo mode - create user locally
+      if (DEMO_MODE) {
+        const newUser: User = {
+          id: Date.now(),
+          name: userData.name || userData.email.split('@')[0],
+          email: userData.email,
+          role: userData.role || 'RESIDENT',
+          phone: userData.phone,
+          apartmentNumber: 'B-' + Math.floor(Math.random() * 20 + 1),
+        };
+
+        // If registering as manager, add managed apartment
+        if (userData.role === 'MANAGER') {
+          newUser.managedApartment = {
+            id: 1,
+            name: 'PrimeLux Residence Colombo',
+            location: '23/A, Bakers street, Colombo 7',
+            address: '23/A, Bakers street, Colombo 7, Sri Lanka',
+            numberOfUnits: 64,
+          };
+        }
+
+        await this.saveUserData(newUser);
+        return { user: newUser, message: 'Registration successful', token: 'demo-token' };
+      }
+
+      // Production mode - call API
+      const newUserData: Partial<User> = {
         name: userData.name,
         email: userData.email,
         password: userData.password,
         role: userData.role || 'RESIDENT',
       };
 
-      const user = await apiService.post<User>(API_CONFIG.ENDPOINTS.USERS, newUser);
+      const user = await apiService.post<User>(API_CONFIG.ENDPOINTS.USERS, newUserData);
       await this.saveUserData(user);
       
       return { user, message: 'Registration successful' };
