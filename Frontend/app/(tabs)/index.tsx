@@ -156,7 +156,7 @@ export default function HomeScreen() {
 
           <TouchableOpacity 
             style={styles.featureCard}
-            onPress={() => router.push('/common-area')}
+            onPress={() => router.push('/common-area' as any)}
             activeOpacity={0.8}
           >
             <LinearGradient
@@ -267,7 +267,7 @@ export default function HomeScreen() {
       {/* Dashboard Card */}
       <TouchableOpacity 
         style={styles.dashboardCard}
-        onPress={() => router.push('/manager-dashboard')}
+        onPress={() => router.push('/manager-dashboard' as any)}
         activeOpacity={0.8}
       >
         <LinearGradient
