@@ -3,9 +3,9 @@ POST http://localhost:8080/api/users
 Content-Type: application/json
 
 {
-    "name": "John Doe",
-    "email": "john@example.com",
-    "password": "password123",
+    "name": "Vidupa Doe",
+    "email": "vidu@example.com",
+    "password": "vidu123",
     "role": "RESIDENT"
 }
 
