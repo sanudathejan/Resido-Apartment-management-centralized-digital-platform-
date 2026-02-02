@@ -36,6 +36,20 @@ export const API_CONFIG = {
     
     // Announcements
     ANNOUNCEMENTS: '/api/announcements',
+    
+    // Common Areas & Bookings
+    COMMON_AREAS: '/api/common-areas',
+    BOOKINGS: '/api/bookings',
+    BOOKINGS_BY_USER: (userId: number) => `/api/bookings/user/${userId}`,
+    
+    // Visitors
+    VISITORS: '/api/visitors',
+    VISITORS_BY_USER: (userId: number) => `/api/visitors/user/${userId}`,
+    
+    // Apartments (Manager)
+    APARTMENTS: '/api/apartments',
+    APARTMENT_BY_ID: (id: number) => `/api/apartments/${id}`,
+    APARTMENT_RESIDENTS: (id: number) => `/api/apartments/${id}/residents`,
   },
   
   TIMEOUT: 30000, // 30 seconds
@@ -57,6 +71,7 @@ export const APP_CONFIG = {
   // User roles
   ROLES: {
     RESIDENT: 'RESIDENT',
+    MANAGER: 'MANAGER',
     ADMIN: 'ADMIN',
     SECURITY: 'SECURITY',
     MAINTENANCE: 'MAINTENANCE',
@@ -92,7 +107,12 @@ export const FEATURES = {
   ANNOUNCEMENTS_ENABLED: true,
   DARK_MODE_ENABLED: true,
   OTP_LOGIN_ENABLED: false,
+  COMMON_AREA_BOOKING_ENABLED: true,
+  VISITOR_MANAGEMENT_ENABLED: true,
 };
+
+// API endpoint aliases for backward compatibility
+export const API_ENDPOINTS = API_CONFIG.ENDPOINTS;
 
 export default {
   API: API_CONFIG,
