@@ -12,9 +12,52 @@ export interface User {
   phone?: string;
   apartmentNumber?: string;
   profileImage?: string;
+  // Manager-specific fields
+  managedApartmentId?: number;
+  managedApartment?: Apartment;
 }
 
-export type UserRole = 'RESIDENT' | 'ADMIN' | 'SECURITY' | 'MAINTENANCE';
+export type UserRole = 'RESIDENT' | 'MANAGER' | 'ADMIN' | 'SECURITY' | 'MAINTENANCE';
+
+// Apartment/Building types
+export interface Apartment {
+  id: number;
+  name: string;
+  location: string;
+  address: string;
+  numberOfUnits: number;
+  numberOfFloors?: number;
+  amenities?: string[];
+  managerId?: number;
+  createdAt?: string;
+}
+
+// Common Area Booking types
+export interface CommonArea {
+  id: number;
+  name: string;
+  description?: string;
+  capacity?: number;
+  isAvailable: boolean;
+  apartmentId: number;
+  images?: string[];
+  rules?: string[];
+  openTime?: string;
+  closeTime?: string;
+}
+
+export interface CommonAreaBooking {
+  id: number;
+  commonArea: CommonArea;
+  resident: User;
+  date: string;
+  startTime: string;
+  endTime: string;
+  purpose?: string;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'CANCELLED';
+  createdAt?: string;
+  approvedBy?: User;
+}
 
 // Auth types
 export interface LoginRequest {
