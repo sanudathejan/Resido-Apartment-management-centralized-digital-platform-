@@ -1,3 +1,4 @@
+###example resident
 POST http://localhost:8080/api/users
 Content-Type: application/json
 
@@ -6,6 +7,17 @@ Content-Type: application/json
     "email": "john@example.com",
     "password": "password123",
     "role": "RESIDENT"
+}
+
+### example manager
+POST http://localhost:8080/api/users
+Content-Type: application/json
+
+{
+    "name": "Shenal Arosha",
+    "email": "shenalA@example.com",
+    "password": "shenal123",
+    "role": "MANAGER"
 }
 
 ### Create a Maintenance Request
@@ -92,3 +104,39 @@ GET http://localhost:8080/api/payments/resident/9999/unpaid
 
 ### Try to pay an already paid bill (use the ID of a paid bill, e.g., 1)
 PUT http://localhost:8080/api/payments/1/pay
+
+### Manager creates a notice
+POST http://localhost:8080/api/notices
+Content-Type: application/json
+
+{
+    "title": "Water Maintenance",
+    "content": "Water supply will be suspended this Sunday from 9 AM to 12 PM.",
+    "author": { "id": 1 }
+}
+
+### Get the notice board feed
+GET http://localhost:8080/api/notices
+
+### Resident tries to post a notice
+POST http://localhost:8080/api/notices/2
+Content-Type: application/json
+
+{
+    "title": "I am a Hacker",
+    "content": "I shouldn't be able to post this!"
+}
+
+### Manager posts a notice
+POST http://localhost:8080/api/notices/3
+Content-Type: application/json
+
+{
+    "title": "Official Notice",
+    "content": "This is a legitimate manager post."
+}
+
+### Manager deletes a notice
+# Replace {noticeId} with the ID of the notice (e.g., 1)
+# Replace {managerId} with the ID of a user with the 'MANAGER' role (e.g., 1)
+DELETE http://localhost:8080/api/notices/3/3
