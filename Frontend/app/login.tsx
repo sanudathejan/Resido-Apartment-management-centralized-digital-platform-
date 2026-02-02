@@ -52,11 +52,6 @@ export default function LoginScreen() {
     }
   };
 
-  // Demo login for testing
-  const handleDemoLogin = () => {
-    router.replace('/(tabs)');
-  };
-
   return (
     <View style={styles.container}>
       {/* Gradient Header */}
@@ -189,13 +184,28 @@ export default function LoginScreen() {
               </TouchableOpacity>
             </View>
 
-            {/* Demo Login (for testing) */}
-            <TouchableOpacity 
-              style={styles.demoButton}
-              onPress={handleDemoLogin}
-            >
-              <Text style={styles.demoButtonText}>Demo Login (Skip)</Text>
-            </TouchableOpacity>
+            {/* Demo Login Options */}
+            <View style={styles.demoSection}>
+              <Text style={styles.demoTitle}>Demo Accounts</Text>
+              <TouchableOpacity 
+                style={styles.demoButton}
+                onPress={() => {
+                  setEmail('resident@demo.com');
+                  setPassword('demo123');
+                }}
+              >
+                <Text style={styles.demoButtonText}>🏠 Fill Resident Demo</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={styles.demoButton}
+                onPress={() => {
+                  setEmail('manager@demo.com');
+                  setPassword('demo123');
+                }}
+              >
+                <Text style={styles.demoButtonText}>👔 Fill Manager Demo</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -342,14 +352,31 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: Colors.text.primary,
   },
+  demoSection: {
+    marginTop: 24,
+    padding: 16,
+    backgroundColor: Colors.gray[50],
+    borderRadius: 12,
+    gap: 10,
+  },
+  demoTitle: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: Colors.gray[500],
+    textAlign: 'center',
+    marginBottom: 8,
+  },
   demoButton: {
-    marginTop: 20,
+    backgroundColor: Colors.white,
     alignItems: 'center',
     paddingVertical: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: Colors.gray[200],
   },
   demoButtonText: {
-    color: Colors.gray[400],
+    color: Colors.text.primary,
     fontSize: 14,
-    textDecorationLine: 'underline',
+    fontWeight: '500',
   },
 });
