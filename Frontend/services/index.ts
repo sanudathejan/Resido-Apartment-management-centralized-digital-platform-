@@ -9,3 +9,4 @@ export { default as maintenanceService } from './maintenanceService';
 export { default as parkingService } from './parkingService';
 export { default as sosService } from './sosService';
 export { default as announcementService } from './announcementService';
+export { default as bookingService } from './bookingService';
