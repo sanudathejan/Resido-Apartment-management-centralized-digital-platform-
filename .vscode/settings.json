@@ -1,0 +1,11 @@
+{
+  "java.project.sourcePaths": [],
+  "java.import.exclusions": [
+    "**/Frontend/**",
+    "**/node_modules/**",
+    "**/.metadata/**",
+    "**/archetype-resources/**",
+    "**/META-INF/maven/**"
+  ],
+  "java.configuration.updateBuildConfiguration": "automatic"
+}
