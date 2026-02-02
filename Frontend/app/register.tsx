@@ -1,6 +1,7 @@
 /**
  * Register Screen - CREATE ACCOUNT
  * Matching High Fidelity Prototype with gradient header and white form
+ * Includes Resident/Manager role toggle
  */
 
 import React, { useState } from 'react';
@@ -16,6 +17,7 @@ import {
   TextInput,
   Image,
   Dimensions,
+  Switch,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -23,6 +25,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Colors } from '@/constants/colors';
 import { useAuth } from '@/context/AuthContext';
+import { UserRole } from '@/types';
 
 const { width } = Dimensions.get('window');
 
@@ -36,6 +39,7 @@ export default function RegisterScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isManager, setIsManager] = useState(false);
 
   const handleRegister = async () => {
     if (!email || !password || !confirmPassword) {
@@ -48,18 +52,19 @@ export default function RegisterScreen() {
       return;
     }
 
-    if (password.length < 6) {
-      Alert.alert('Error', 'Password must be at least 6 characters');
+    if (password.length < 4 || password.length > 12) {
+      Alert.alert('Error', 'Password must be 4-12 characters');
       return;
     }
     
     setIsLoading(true);
     try {
+      const role: UserRole = isManager ? 'MANAGER' : 'RESIDENT';
       await register({
         email,
         password,
         name: email.split('@')[0],
-        role: 'RESIDENT',
+        role,
       });
       Alert.alert('Success', 'Account created successfully!', [
         { text: 'Continue', onPress: () => router.replace('/(tabs)') }
@@ -112,10 +117,11 @@ export default function RegisterScreen() {
         >
           <View style={styles.formCard}>
             {/* Email Input */}
+            <Text style={styles.inputLabel}>Email</Text>
             <View style={styles.inputContainer}>
               <TextInput
                 style={styles.input}
-                placeholder="Email"
+                placeholder="example@email.com"
                 placeholderTextColor={Colors.gray[400]}
                 value={email}
                 onChangeText={setEmail}
@@ -125,10 +131,11 @@ export default function RegisterScreen() {
             </View>
 
             {/* Password Input */}
+            <Text style={styles.inputLabel}>Password</Text>
             <View style={styles.inputContainer}>
               <TextInput
                 style={styles.input}
-                placeholder="Password"
+                placeholder="4-12 characters"
                 placeholderTextColor={Colors.gray[400]}
                 value={password}
                 onChangeText={setPassword}
@@ -146,29 +153,25 @@ export default function RegisterScreen() {
               </TouchableOpacity>
             </View>
 
-            {/* Confirm Password Input */}
-            <View style={styles.inputContainer}>
-              <TextInput
-                style={styles.input}
-                placeholder="Confirm Password"
-                placeholderTextColor={Colors.gray[400]}
-                value={confirmPassword}
-                onChangeText={setConfirmPassword}
-                secureTextEntry={!showConfirmPassword}
+            {/* Role Toggle - Resident/Manager */}
+            <View style={styles.roleToggleContainer}>
+              <Text style={[styles.roleLabel, !isManager && styles.roleLabelActive]}>
+                Resident
+              </Text>
+              <Switch
+                value={isManager}
+                onValueChange={setIsManager}
+                trackColor={{ false: Colors.primary, true: Colors.primary }}
+                thumbColor={Colors.white}
+                ios_backgroundColor={Colors.primary}
+                style={styles.roleSwitch}
               />
-              <TouchableOpacity 
-                style={styles.eyeIcon}
-                onPress={() => setShowConfirmPassword(!showConfirmPassword)}
-              >
-                <Ionicons 
-                  name={showConfirmPassword ? "eye-off-outline" : "eye-outline"} 
-                  size={22} 
-                  color={Colors.gray[400]} 
-                />
-              </TouchableOpacity>
+              <Text style={[styles.roleLabel, isManager && styles.roleLabelActive]}>
+                Manager
+              </Text>
             </View>
 
-            {/* Sign Up Button */}
+            {/* Register Button */}
             <TouchableOpacity
               style={[styles.signUpButton, isLoading && styles.signUpButtonDisabled]}
               onPress={handleRegister}
@@ -182,7 +185,7 @@ export default function RegisterScreen() {
                 end={{ x: 1, y: 0 }}
               >
                 <Text style={styles.signUpButtonText}>
-                  {isLoading ? 'Creating account...' : 'Sign up'}
+                  {isLoading ? 'Creating account...' : 'Register'}
                 </Text>
               </LinearGradient>
             </TouchableOpacity>
@@ -277,6 +280,12 @@ const styles = StyleSheet.create({
   formCard: {
     flex: 1,
   },
+  inputLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: Colors.text.primary,
+    marginBottom: 8,
+  },
   inputContainer: {
     backgroundColor: Colors.white,
     borderRadius: 12,
@@ -295,6 +304,26 @@ const styles = StyleSheet.create({
   },
   eyeIcon: {
     paddingHorizontal: 16,
+  },
+  roleToggleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginVertical: 20,
+    paddingVertical: 10,
+  },
+  roleLabel: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: Colors.gray[400],
+    marginHorizontal: 12,
+  },
+  roleLabelActive: {
+    color: Colors.text.primary,
+    fontWeight: '700',
+  },
+  roleSwitch: {
+    transform: [{ scaleX: 1.1 }, { scaleY: 1.1 }],
   },
   signUpButton: {
     borderRadius: 12,
