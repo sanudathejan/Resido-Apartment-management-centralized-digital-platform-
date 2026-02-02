@@ -90,7 +90,7 @@ export default function RegisterScreen() {
           
           <View style={styles.headerContent}>
             <Image
-              source={require('@/assets/images/ResiiDo_logo_nobg.png')}
+              source={require('../assets/images/ResiiDo_logo_nobg.png')}
               style={styles.logo}
               resizeMode="contain"
             />
