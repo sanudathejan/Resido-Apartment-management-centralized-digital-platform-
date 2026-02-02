@@ -140,3 +140,9 @@ Content-Type: application/json
 # Replace {noticeId} with the ID of the notice (e.g., 1)
 # Replace {managerId} with the ID of a user with the 'MANAGER' role (e.g., 1)
 DELETE http://localhost:8080/api/notices/3/3
+
+### Resident tries to update status (Should Fail - 403 Forbidden)
+PUT http://localhost:8080/api/maintenance/2/status/3
+Content-Type: text/plain
+
+COMPLETED
