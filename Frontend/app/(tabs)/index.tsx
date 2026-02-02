@@ -71,7 +71,7 @@ export default function HomeScreen() {
               {/* Logo Section */}
               <View style={styles.logoSection}>
                 <Image
-                  source={require('@/assets/images/ResiiDo_logo_nobg.png')}
+                  source={require('../../assets/images/ResiiDo_logo_nobg.png')}
                   style={styles.logo}
                   resizeMode="contain"
                 />
