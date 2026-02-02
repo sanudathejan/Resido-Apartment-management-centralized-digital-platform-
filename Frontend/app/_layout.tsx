@@ -42,8 +42,29 @@ export default function RootLayout() {
             name="maintenance" 
             options={{ 
               presentation: 'modal',
-              headerShown: true,
+              headerShown: false,
               title: 'Maintenance Request'
+            }} 
+          />
+          <Stack.Screen 
+            name="common-area" 
+            options={{ 
+              headerShown: false,
+              title: 'Common Area Booking'
+            }} 
+          />
+          <Stack.Screen 
+            name="manager-dashboard" 
+            options={{ 
+              headerShown: false,
+              title: 'Manager Dashboard'
+            }} 
+          />
+          <Stack.Screen 
+            name="visitor-management" 
+            options={{ 
+              headerShown: false,
+              title: 'Visitor Management'
             }} 
           />
         </Stack>
