@@ -163,9 +163,9 @@ POST http://localhost:8080/api/auth/register
 Content-Type: application/json
 
 {
-  "name": "Alice Resident",
-  "email": "alice@test.com",
-  "password": "password123",
+  "name": "Amy Parker",
+  "email": "aparker@test.com",
+  "password": "amyp@143",
   "role": "RESIDENT"
 }
 
@@ -174,8 +174,8 @@ POST http://localhost:8080/api/auth/login
 Content-Type: application/json
 
 {
-  "email": "alice@test.com",
-  "password": "password123"
+  "email": "aparker@test.com",
+  "password": "amyp@143"
 }
 
 ### 3. Try to get requests WITHOUT Token (Should Fail)
@@ -271,3 +271,12 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhbGljZUB0ZXN0LmNvbSIsImlhd
 # Make sure to grab the ID from Step 2 result (likely ID: 1)
 PUT http://localhost:8080/api/sos/2/clear
 Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqYXNvbmxvbHNAdGVzdC5jb20iLCJpYXQiOjE3NzAyMDIwNzYsImV4cCI6MTc3MDIzODA3Nn0.y0jNOCDIlyU-45xgXtclrhSMg8qMtMzL85LfhqsCWUo
+
+### 1. (Manager Only) List all Users to find the IDs
+GET http://localhost:8080/api/users
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqYXNvbmxvbHNAdGVzdC5jb20iLCJpYXQiOjE3NzAyMTA2NzQsImV4cCI6MTc3MDI0NjY3NH0.vAxu4gmdo3fr8Y00y70PnJV8fLPMaQYWEgbu3HD4aSw
+
+
+### Replace '123' with the actual ID you see in the list above
+DELETE http://localhost:8080/api/users/3
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqYXNvbmxvbHNAdGVzdC5jb20iLCJpYXQiOjE3NzAyMTA2NzQsImV4cCI6MTc3MDI0NjY3NH0.vAxu4gmdo3fr8Y00y70PnJV8fLPMaQYWEgbu3HD4aSw

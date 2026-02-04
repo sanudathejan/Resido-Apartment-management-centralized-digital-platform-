@@ -21,4 +21,10 @@ Info - These features must be implemented!
 
 -PARKING
 
--For parking, all residents are required to enter their garage lot number.   
+-For parking, all residents are required to enter their garage lot number. 
+
+
+
+-SOS Alert
+
+-An alert will be sent to all residents of the requester's floor.
