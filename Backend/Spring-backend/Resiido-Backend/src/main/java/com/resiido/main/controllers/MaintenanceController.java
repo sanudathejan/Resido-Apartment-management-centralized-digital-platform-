@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
-
+import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -21,45 +21,57 @@ public class MaintenanceController {
     @Autowired
     private UserRepository userRepository;
 
-    // 1. Create a new request
+    // Helper method to get the currently logged-in User
+    private User getLoggedInUser(Principal principal) {
+        return userRepository.findByEmail(principal.getName())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found"));
+    }
+
+    // 1. Create a new request (Auto-links to the logged-in user)
     @PostMapping
-    public MaintenanceRequest createRequest(@RequestBody MaintenanceRequest request) {
+    public MaintenanceRequest createRequest(@RequestBody MaintenanceRequest request, Principal principal) {
+        User currentUser = getLoggedInUser(principal);
+
+        // Force the resident to be the logged-in user
+        request.setResident(currentUser);
+        request.setStatus("PENDING"); // Force status to start as PENDING
+
         return maintenanceRepository.save(request);
     }
 
-    // 2. Get all requests (for the Manager's view)
+    // 2. "Get All" (Manager sees ALL, Resident sees THEIRS)
     @GetMapping
-    public List<MaintenanceRequest> getAllRequests() {
-        return maintenanceRepository.findAll();
+    public List<MaintenanceRequest> getAllRequests(Principal principal) {
+        User currentUser = getLoggedInUser(principal);
+
+        if ("MANAGER".equalsIgnoreCase(currentUser.getRole())) {
+            // Manager: Returns everyone's requests
+            return maintenanceRepository.findAll();
+        } else {
+            // Resident: Returns only THEIR requests
+            return maintenanceRepository.findByResident(currentUser);
+        }
     }
 
-    // 3. Get requests for a specific resident
-    @GetMapping("/resident/{residentId}")
-    public List<MaintenanceRequest> getRequestsByResident(@PathVariable Long residentId) {
-        return maintenanceRepository.findByResidentId(residentId);
-    }
-
-    // 4. Update the status of a request (Manager Action)
-    @PutMapping("/{id}/status/{managerId}")
+    // 3. Update Status (Manager Only - Secured by Token)
+    @PutMapping("/{id}/status")
     public MaintenanceRequest updateStatus(
             @PathVariable Long id,
-            @PathVariable Long managerId,
-            @RequestBody String newStatus) {
+            @RequestBody String newStatus,
+            Principal principal) {
 
-        // A. Verify the User exists
-        User manager = userRepository.findById(managerId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        User currentUser = getLoggedInUser(principal);
 
-        // B. Security Check: Is this user actually a Manager?
-        if (!"MANAGER".equalsIgnoreCase(manager.getRole())) {
+        // A. Security Check: Is this user actually a Manager?
+        if (!"MANAGER".equalsIgnoreCase(currentUser.getRole())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access Denied: Only managers can update status.");
         }
 
-        // C. Find the maintenance request
+        // B. Find the maintenance request
         MaintenanceRequest request = maintenanceRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Maintenance Request not found"));
 
-        // D. Perform the update
+        // C. Perform the update
         request.setStatus(newStatus);
         return maintenanceRepository.save(request);
     }
