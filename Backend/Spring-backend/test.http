@@ -280,3 +280,28 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqYXNvbmxvbHNAdGVzdC5jb20iL
 ### Replace '123' with the actual ID you see in the list above
 DELETE http://localhost:8080/api/users/3
 Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqYXNvbmxvbHNAdGVzdC5jb20iLCJpYXQiOjE3NzAyMTA2NzQsImV4cCI6MTc3MDI0NjY3NH0.vAxu4gmdo3fr8Y00y70PnJV8fLPMaQYWEgbu3HD4aSw
+
+
+### 1. Post Notice as Manager (Should work)
+POST http://localhost:8080/api/notices
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqYXNvbmxvbHNAdGVzdC5jb20iLCJpYXQiOjE3NzAyMjEwNzMsImV4cCI6MTc3MDI1NzA3M30.e1F4q5Yysq92-LXdIJSK55i91TpEXHDBbSvnRAL8oLw
+
+{
+  "title": "Water Maintenance",
+  "content": "Water will be shut off on Friday from 10 AM to 2 PM."
+}
+
+### 2. Post Notice as Alice (Should fail with 403 Forbidden)
+POST http://localhost:8080/api/notices
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhcGFya2VyQHRlc3QuY29tIiwiaWF0IjoxNzcwMjIxMTQ2LCJleHAiOjE3NzAyNTcxNDZ9.P-XHojPuXfedUaE3lRRgROYXDWG5l8L2dmCiyDxQn1o
+
+{
+  "title": "I am a Hacker",
+  "content": "Hehehe"
+}
+
+### 3. View Notices (Anyone can see these)
+GET http://localhost:8080/api/notices
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhcGFya2VyQHRlc3QuY29tIiwiaWF0IjoxNzcwMjIxMTQ2LCJleHAiOjE3NzAyNTcxNDZ9.P-XHojPuXfedUaE3lRRgROYXDWG5l8L2dmCiyDxQn1o
