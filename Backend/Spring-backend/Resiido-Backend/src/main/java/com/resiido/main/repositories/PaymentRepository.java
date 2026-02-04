@@ -1,6 +1,7 @@
 package com.resiido.main.repositories;
 
 import com.resiido.main.models.Payment;
+import com.resiido.main.models.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import java.util.List;
@@ -16,4 +17,10 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
     // 3. Find all payments of a certain type (e.g., all "LATE_FEE" records)
     List<Payment> findByType(String type);
+
+    // 4. Find all payments for a specific user (History)
+    List<Payment> findByResident(User resident);
+
+    // 5. Find only UNPAID bills for a specific user (To Do List)
+    List<Payment> findByResidentAndIsPaidFalse(User resident);
 }

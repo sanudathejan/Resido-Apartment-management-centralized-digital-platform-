@@ -176,3 +176,17 @@ GET http://localhost:8080/api/maintenance
 ### 4. Try to get requests WITH Token (Should Succeed)
 GET http://localhost:8080/api/maintenance
 Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhbGljZUB0ZXN0LmNvbSIsImlhdCI6MTc3MDE5MTM4MywiZXhwIjoxNzcwMjI3MzgzfQ.JwupUpBew96Zn2i3I5fn7yz_KAxtkD4zU9X6g0XAMpE
+
+### 2. Create a Maintenance Request (Auto-linked to Alice)
+POST http://localhost:8080/api/maintenance
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhbGljZUB0ZXN0LmNvbSIsImlhdCI6MTc3MDE5MzQxMSwiZXhwIjoxNzcwMjI5NDExfQ.qiQfThaUYaOa04KV7mpcOXPafumqH0WrelRcIFWcZlM
+
+{
+  "title": "Leaking Sink",
+  "description": "Kitchen sink is dripping constantly."
+}
+
+### 3. Get Requests (Should show ONLY Alice's request)
+GET http://localhost:8080/api/maintenance
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhbGljZUB0ZXN0LmNvbSIsImlhdCI6MTc3MDE5MzQxMSwiZXhwIjoxNzcwMjI5NDExfQ.qiQfThaUYaOa04KV7mpcOXPafumqH0WrelRcIFWcZlM
