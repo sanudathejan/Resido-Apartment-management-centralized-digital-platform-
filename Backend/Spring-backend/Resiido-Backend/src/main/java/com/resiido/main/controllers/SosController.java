@@ -1,11 +1,15 @@
 package com.resiido.main.controllers;
 
 import com.resiido.main.models.SosAlert;
-import com.resiido.main.repositories.SosRepository;
 import com.resiido.main.models.User;
+import com.resiido.main.repositories.SosRepository;
+import com.resiido.main.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
+import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -16,33 +20,51 @@ public class SosController {
     @Autowired
     private SosRepository sosRepository;
 
-    // 1. Trigger an SOS Alert
-    @PostMapping("/{residentId}")
-    public SosAlert triggerSos(@PathVariable Long residentId) {
+    @Autowired
+    private UserRepository userRepository;
+
+    // Helper: Get logged-in user
+    private User getLoggedInUser(Principal principal) {
+        return userRepository.findByEmail(principal.getName())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found"));
+    }
+
+    // 1. Trigger SOS
+    // URL is just POST /api/sos (No ID needed)
+    @PostMapping
+    public SosAlert triggerSos(Principal principal) {
+        User currentUser = getLoggedInUser(principal);
+
         SosAlert alert = new SosAlert();
-
-        // Create a "dummy" user object with just the ID to link the relationship
-        User resident = new User();
-        resident.setId(residentId);
-
-        alert.setResident(resident);
-        alert.setTimestamp(LocalDateTime.now()); // Sets exact current time
+        alert.setResident(currentUser); // Auto-link to current resident
+        alert.setTimestamp(LocalDateTime.now());
         alert.setActive(true);
 
         return sosRepository.save(alert);
     }
 
-    // 2. View all active SOS alerts (For Managers and nearby Residents)
+    // 2. View Active Alerts (Managers & Residents need to see this)
     @GetMapping("/active")
     public List<SosAlert> getActiveAlerts() {
         return sosRepository.findByIsActiveTrue();
     }
 
-    // 3. Deactivate/Clear an SOS (When help arrives)
+    // 3. Clear/Deactivate SOS (Secure: Only Managers or the Owner)
     @PutMapping("/{id}/clear")
-    public SosAlert clearSos(@PathVariable Long id) {
+    public SosAlert clearSos(@PathVariable Long id, Principal principal) {
+        User currentUser = getLoggedInUser(principal);
+
         SosAlert alert = sosRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Alert not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Alert not found"));
+
+        // Security Check: Only MANAGER or the person who triggered it can clear it
+        boolean isManager = "MANAGER".equalsIgnoreCase(currentUser.getRole());
+        boolean isOwner = alert.getResident().getId().equals(currentUser.getId());
+
+        if (!isManager && !isOwner) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You cannot clear this alert.");
+        }
+
         alert.setActive(false);
         return sosRepository.save(alert);
     }

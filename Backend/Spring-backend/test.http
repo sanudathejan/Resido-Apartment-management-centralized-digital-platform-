@@ -253,3 +253,21 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqYXNvbmxvbHNAdGVzdC5jb20iL
 ### 4. Alice checks her UNPAID bills (Using ALICE'S Token)
 GET http://localhost:8080/api/payments/unpaid
 Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhbGljZUB0ZXN0LmNvbSIsImlhdCI6MTc3MDE5MzQxMSwiZXhwIjoxNzcwMjI5NDExfQ.qiQfThaUYaOa04KV7mpcOXPafumqH0WrelRcIFWcZlM
+
+### 1. Trigger SOS (Using ALICE'S Token)
+POST http://localhost:8080/api/sos
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhbGljZUB0ZXN0LmNvbSIsImlhdCI6MTc3MDIwMTgwMywiZXhwIjoxNzcwMjM3ODAzfQ.V6H5iRTLGomt1_dBAjiA03bQ98kqVN7p8KuHS0a2thw
+
+{}
+
+
+### 2. View Active Alerts
+GET http://localhost:8080/api/sos/active
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhbGljZUB0ZXN0LmNvbSIsImlhdCI6MTc3MDIwMTgwMywiZXhwIjoxNzcwMjM3ODAzfQ.V6H5iRTLGomt1_dBAjiA03bQ98kqVN7p8KuHS0a2thw
+
+
+### 3. Clear SOS (Manager clears it)
+# Make sure to grab the ID from Step 2 result (likely ID: 1)
+PUT http://localhost:8080/api/sos/2/clear
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqYXNvbmxvbHNAdGVzdC5jb20iLCJpYXQiOjE3NzAyMDIwNzYsImV4cCI6MTc3MDIzODA3Nn0.y0jNOCDIlyU-45xgXtclrhSMg8qMtMzL85LfhqsCWUo
