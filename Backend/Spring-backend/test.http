@@ -146,3 +146,4 @@ PUT http://localhost:8080/api/maintenance/2/status/3
 Content-Type: text/plain
 
 COMPLETED
+

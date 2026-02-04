@@ -25,9 +25,6 @@ public class MaintenanceRequest {
     @Column(nullable = false)
     private String status = "PENDING"; // Default status
 
-    @Column(nullable = true) // It's optional, not every request needs a photo
-    private String imagePath;
-
     // This creates a "resident_id" column in your SQL table
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "resident_id", nullable = false)
