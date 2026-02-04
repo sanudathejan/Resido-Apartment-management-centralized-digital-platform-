@@ -148,7 +148,15 @@ Content-Type: text/plain
 COMPLETED
 
 
+
+
+
+
 //BELOW TESTS ARE DONE AFTER JWT SECURITY IMPLIMENTATIONS
+
+
+
+
 
 ### 1. Register a New User
 POST http://localhost:8080/api/auth/register
@@ -189,4 +197,59 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhbGljZUB0ZXN0LmNvbSIsImlhd
 
 ### 3. Get Requests (Should show ONLY Alice's request)
 GET http://localhost:8080/api/maintenance
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhbGljZUB0ZXN0LmNvbSIsImlhdCI6MTc3MDE5MzQxMSwiZXhwIjoxNzcwMjI5NDExfQ.qiQfThaUYaOa04KV7mpcOXPafumqH0WrelRcIFWcZlM
+
+### 1. Try to Issue a Bill as Alice (SHOULD FAIL - 403 Forbidden)
+# Alice is a Resident, so she cannot create bills.
+POST http://localhost:8080/api/payments
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhbGljZUB0ZXN0LmNvbSIsImlhdCI6MTc3MDE5MzQxMSwiZXhwIjoxNzcwMjI5NDExfQ.qiQfThaUYaOa04KV7mpcOXPafumqH0WrelRcIFWcZlM
+
+{
+  "amount": 500.00,
+  "type": "RENT",
+  "dueDate": "2026-03-01",
+  "resident": { "id": 1 } 
+}
+
+### 2. View My Unpaid Bills (Should return empty list [] if none exist)
+GET http://localhost:8080/api/payments/unpaid
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhbGljZUB0ZXN0LmNvbSIsImlhdCI6MTc3MDE5MzQxMSwiZXhwIjoxNzcwMjI5NDExfQ.qiQfThaUYaOa04KV7mpcOXPafumqH0WrelRcIFWcZlM
+
+### 1. Register a MANAGER Account
+POST http://localhost:8080/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Jason lols",
+  "email": "jasonlols@test.com",
+  "password": "jasonl1234",
+  "role": "MANAGER"
+}
+
+### 2. Login as MANAGER (To get the Admin Token)
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "jasonlols@test.com",
+  "password": "jasonl1234"
+}
+
+### 3. Create a Payment Bill (Using MANAGER Token)
+POST http://localhost:8080/api/payments
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqYXNvbmxvbHNAdGVzdC5jb20iLCJpYXQiOjE3NzAxOTk2NzcsImV4cCI6MTc3MDIzNTY3N30.lGWSETcL33RetFnlIpDKwr6bvJ_mXy0pqX4djWD11M8
+
+{
+  "amount": 1200.00,
+  "type": "RENT",
+  "dueDate": "2026-03-01",
+  "resident": {
+    "id": 6
+  }
+}
+
+### 4. Alice checks her UNPAID bills (Using ALICE'S Token)
+GET http://localhost:8080/api/payments/unpaid
 Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhbGljZUB0ZXN0LmNvbSIsImlhdCI6MTc3MDE5MzQxMSwiZXhwIjoxNzcwMjI5NDExfQ.qiQfThaUYaOa04KV7mpcOXPafumqH0WrelRcIFWcZlM

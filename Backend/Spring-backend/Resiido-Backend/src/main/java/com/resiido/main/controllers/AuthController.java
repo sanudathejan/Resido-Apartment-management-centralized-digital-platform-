@@ -38,7 +38,13 @@ public class AuthController {
 
         // Hash the password before saving!
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        user.setRole("RESIDENT"); // Default role
+        // Check if a role was provided in JSON.
+        // If yes, use it (and uppercase it). If no, default to "RESIDENT".
+        if (user.getRole() != null && !user.getRole().isEmpty()) {
+            user.setRole(user.getRole().toUpperCase());
+        } else {
+            user.setRole("RESIDENT");
+        }
         userRepository.save(user);
 
         return ResponseEntity.ok("User registered successfully!");

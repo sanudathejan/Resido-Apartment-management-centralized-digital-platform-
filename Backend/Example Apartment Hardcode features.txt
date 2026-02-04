@@ -1,0 +1,24 @@
+Info - These features must be implemented!
+
+-Resiido application is hardcoded for each Apartment to fit their features, apartment layout and Resident/Manager registration
+
+
+-MANAGER
+
+-A manager named 'Admin0' is created by hardcoding when deploying to each apartment. These admin0 emails would be owned by the Resiido team. This entity cannot be deleted from the database.
+(Example: for Apartment named 'Example Residence', an email named Example_Residence_Admin0@gmail.com will be created manually.) 
+-When the first manager for the particular apartment is registered, a randomly generated security code will be sent to admin0 email. this will be provided to the first manager by the Resiido team.
+-For all subsequent manager registrations, all managers' emails (including admin0) will be sent an expirable token.
+-Managers must communicate and send the token to the new manager for them to register manually.
+
+
+
+-RESIDENT
+
+-A layout of each apartment will be hardcoded for each apartment client. when a resident is registered, they will have to enter their apartment residence address and request register. this will be sent to all managers. Managers can either accept or deny registration.
+
+
+
+-PARKING
+
+-For parking, all residents are required to enter their garage lot number.   
