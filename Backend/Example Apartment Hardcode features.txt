@@ -36,13 +36,16 @@ So in total, there are 77 houses in the apartment
 
 -PARKING
 
--For parking, all residents are required to enter their garage lot number. 
+-For parking, all residents are given a parking lot number since the number of houses = number of parking slots
 
 
 
 -SOS Alert
 
 -An alert will be sent to all residents of the requester's floor.
+For the notifications to work, Firebase Cloud Messaging (FCM) is needed. A free version is available for small scale projects.
+Need to update code when the project is deployed.
+For now a mock notification will be sent to server console
 
 
 WHEN DEVELOPING FRONTEND some requests might fail because Content-Type: application/json isn't stated specifically. Be carefull.

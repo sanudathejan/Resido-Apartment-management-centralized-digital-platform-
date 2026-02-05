@@ -40,7 +40,7 @@ Content-Type: text/plain
 IN_PROGRESS
 
 ### Resident #1 hits the SOS Button
-POST http://localhost:8080/api/sos/1
+POST http://localhost:8080/api/sos/3
 
 ### See all ongoing SOS situations
 GET http://localhost:8080/api/sos/active
@@ -279,20 +279,20 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhbGljZUB0ZXN0LmNvbSIsImlhd
 ### 1. Trigger SOS (Using ALICE'S Token)
 POST http://localhost:8080/api/sos
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhbGljZUB0ZXN0LmNvbSIsImlhdCI6MTc3MDIwMTgwMywiZXhwIjoxNzcwMjM3ODAzfQ.V6H5iRTLGomt1_dBAjiA03bQ98kqVN7p8KuHS0a2thw
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJmcmFua0ByZXNpZGVudC5jb20iLCJpYXQiOjE3NzAzMDcyNTEsImV4cCI6MTc3MDM0MzI1MX0.W9D7qCGB562eYsYdVHHM8xHxZNGyaSyueTwdrQOvquI
 
 {}
 
 
 ### 2. View Active Alerts
 GET http://localhost:8080/api/sos/active
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhbGljZUB0ZXN0LmNvbSIsImlhdCI6MTc3MDIwMTgwMywiZXhwIjoxNzcwMjM3ODAzfQ.V6H5iRTLGomt1_dBAjiA03bQ98kqVN7p8KuHS0a2thw
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJleGFtcGxlcmVzaWRlbmNlMUBnbWFpbC5jb20iLCJpYXQiOjE3NzAzMDc1ODAsImV4cCI6MTc3MDM0MzU4MH0.Ltag7XCl2IyGzI5u7u6wVzZdK3h57u0fEZdVN1otDgc
 
 
 ### 3. Clear SOS (Manager clears it)
 # Make sure to grab the ID from Step 2 result (likely ID: 1)
-PUT http://localhost:8080/api/sos/2/clear
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqYXNvbmxvbHNAdGVzdC5jb20iLCJpYXQiOjE3NzAyMDIwNzYsImV4cCI6MTc3MDIzODA3Nn0.y0jNOCDIlyU-45xgXtclrhSMg8qMtMzL85LfhqsCWUo
+PUT http://localhost:8080/api/sos/1/clear
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJleGFtcGxlcmVzaWRlbmNlMUBnbWFpbC5jb20iLCJpYXQiOjE3NzAzMDc1ODAsImV4cCI6MTc3MDM0MzU4MH0.Ltag7XCl2IyGzI5u7u6wVzZdK3h57u0fEZdVN1otDgc
 
 ### 1. (Manager Only) List all Users to find the IDs
 GET http://localhost:8080/api/users
@@ -556,7 +556,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhbGljZUB0ZXN0LmNvbSIsImlhd
 # Alice is in trouble and hits the button. 
 # Her identity is pulled automatically from the token.
 POST http://localhost:8080/api/sos
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhbGljZUB0ZXN0LmNvbSIsImlhdCI6MTc3MDI3MTY4MCwiZXhwIjoxNzcwMzA3NjgwfQ.At7aszeUA-N__060Nm1iWiGO-d-Pv95jm2qw6ErWGKQ
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJmcmFua0ByZXNpZGVudC5jb20iLCJpYXQiOjE3NzAzMDc3MzgsImV4cCI6MTc3MDM0MzczOH0.BV1bbS5NlrGkFvmkOY7iSyWYZkYd9LrL0DpcNJelKnw
 
 ### 2. MANAGER: View Active Emergencies
 # The security desk sees the active alert.
@@ -864,4 +864,28 @@ Content-Type: application/json
 {
   "email": "mike@manager.com",
   "code": "52707"
+}
+
+### 5. Register Resident (Harry -> House 2-01)
+# ACTION: Check Admin's Email (exampleresidence1@gmail.com) for the code
+POST http://localhost:8080/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Harry Resident",
+  "email": "harry@resident.com",
+  "password": "password123",
+  "role": "RESIDENT",
+  "requestedHouseNumber": "2-01"
+}
+
+### 2. Verify Harry (Enter Code)
+# REPLACE '12345' with the code from email
+# EXPECTED RESPONSE: "Verification successful! Housing and Parking assigned."
+POST http://localhost:8080/api/auth/verify-account
+Content-Type: application/json
+
+{
+  "email": "harry@resident.com",
+  "code": "24074"
 }
