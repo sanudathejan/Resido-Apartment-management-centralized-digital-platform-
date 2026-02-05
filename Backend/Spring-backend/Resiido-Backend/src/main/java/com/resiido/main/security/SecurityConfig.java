@@ -42,9 +42,6 @@ public class SecurityConfig {
                         // Allow OPTIONS (Pre-flight checks) for everyone
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                        // DEBUG: Temporarily allow common-area to test logic vs auth
-                        // .requestMatchers("/api/common-area/**").permitAll()
-
                         // Secure everything else
                         .anyRequest().authenticated()
                 )

@@ -46,13 +46,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 }
             }
         } catch (Exception e) {
-            // Log the error but DO NOT throw it.
-            // If we throw, the response becomes a 403 or 500 immediately.
-            // By catching it, we allow the request to proceed as "Anonymous".
             System.out.println("JWT Filter Warning: " + e.getMessage());
         }
 
-        // Always continue the chain!
         filterChain.doFilter(request, response);
     }
 }
