@@ -1,25 +1,3 @@
-###example resident
-POST http://localhost:8080/api/users
-Content-Type: application/json
-
-{
-    "name": "Sanithi Doe",
-    "email": "sanithi@example.com",
-    "password": "sanithi123",
-    "role": "RESIDENT"
-}
-
-### example manager
-POST http://localhost:8080/api/users
-Content-Type: application/json
-
-{
-    "name": "Shenal Arosha",
-    "email": "shenalA@example.com",
-    "password": "shenal123",
-    "role": "MANAGER"
-}
-
 ### Create a Maintenance Request
 POST http://localhost:8080/api/maintenance
 Content-Type: application/json
@@ -783,12 +761,12 @@ Content-Type: application/json
   "code": "69107"
 }
 
-### 5. Login as Frank (Should WORK now)
+### 5. Login as Gina
 POST http://localhost:8080/api/auth/login
 Content-Type: application/json
 
 {
-  "email": "frank@resident.com",
+  "email": "gina@resident.com",
   "password": "password123"
 }
 
@@ -889,3 +867,187 @@ Content-Type: application/json
   "email": "harry@resident.com",
   "code": "24074"
 }
+
+
+
+
+### A. Resident (Frank) books the Rooftop
+POST http://localhost:8080/api/common-area/book
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJmcmFua0ByZXNpZGVudC5jb20iLCJpYXQiOjE3NzAzMTc0MjIsImV4cCI6MTc3MDM1MzQyMn0.WE9wjUZVz2c03eQ_-yvdO-qTsQaPqaMXJaMCTXHHTxA
+
+{
+  "areaName": "Rooftop",
+  "startTime": "2026-05-20T10:00:00",
+  "endTime": "2026-05-20T12:00:00"
+}
+
+### B. Resident cancels their OWN booking
+# Replace '1' with the ID returned above
+DELETE http://localhost:8080/api/common-area/1
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJmcmFua0ByZXNpZGVudC5jb20iLCJpYXQiOjE3NzAzMTc0MjIsImV4cCI6MTc3MDM1MzQyMn0.WE9wjUZVz2c03eQ_-yvdO-qTsQaPqaMXJaMCTXHHTxA
+
+### C. Resident books again (for Manager to delete)
+POST http://localhost:8080/api/common-area/book
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJmcmFua0ByZXNpZGVudC5jb20iLCJpYXQiOjE3NzAzMTc0MjIsImV4cCI6MTc3MDM1MzQyMn0.WE9wjUZVz2c03eQ_-yvdO-qTsQaPqaMXJaMCTXHHTxA
+
+{
+  "areaName": "Swimming Pool",
+  "startTime": "2026-05-21T14:00:00",
+  "endTime": "2026-05-21T16:00:00"
+}
+
+### D. Manager deletes Resident's booking
+# Replace '2' with the ID returned above
+DELETE http://localhost:8080/api/common-area/2
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJleGFtcGxlcmVzaWRlbmNlMUBnbWFpbC5jb20iLCJpYXQiOjE3NzAzMTc0NjIsImV4cCI6MTc3MDM1MzQ2Mn0.bxy7KvkXxGOgnaTiyLvwPe1T4Dh64w-ZVsy2Rma9pJw
+
+
+
+### A. Resident creates a request
+POST http://localhost:8080/api/maintenance
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJmcmFua0ByZXNpZGVudC5jb20iLCJpYXQiOjE3NzAzMTc0MjIsImV4cCI6MTc3MDM1MzQyMn0.WE9wjUZVz2c03eQ_-yvdO-qTsQaPqaMXJaMCTXHHTxA
+
+{
+  "title": "Leaky Faucet",
+  "description": "Kitchen sink is dripping."
+}
+
+### B. Resident deletes their own request
+# Replace '1' with ID
+DELETE http://localhost:8080/api/maintenance/1
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJmcmFua0ByZXNpZGVudC5jb20iLCJpYXQiOjE3NzAzMTc0MjIsImV4cCI6MTc3MDM1MzQyMn0.WE9wjUZVz2c03eQ_-yvdO-qTsQaPqaMXJaMCTXHHTxA
+
+### C. Resident creates another request
+POST http://localhost:8080/api/maintenance
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJmcmFua0ByZXNpZGVudC5jb20iLCJpYXQiOjE3NzAzMTc0MjIsImV4cCI6MTc3MDM1MzQyMn0.WE9wjUZVz2c03eQ_-yvdO-qTsQaPqaMXJaMCTXHHTxA
+
+{
+  "title": "Broken Window",
+  "description": "Living room window won't close."
+}
+
+### D. Manager deletes the request
+# Replace '2' with ID
+DELETE http://localhost:8080/api/maintenance/2
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJleGFtcGxlcmVzaWRlbmNlMUBnbWFpbC5jb20iLCJpYXQiOjE3NzAzMTc0NjIsImV4cCI6MTc3MDM1MzQ2Mn0.bxy7KvkXxGOgnaTiyLvwPe1T4Dh64w-ZVsy2Rma9pJw
+
+
+### A. Manager posts a notice
+POST http://localhost:8080/api/notices
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJleGFtcGxlcmVzaWRlbmNlMUBnbWFpbC5jb20iLCJpYXQiOjE3NzAzMTc0NjIsImV4cCI6MTc3MDM1MzQ2Mn0.bxy7KvkXxGOgnaTiyLvwPe1T4Dh64w-ZVsy2Rma9pJw
+
+{
+  "title": "Test Notice",
+  "content": "This will be deleted."
+}
+
+### B. Manager deletes the notice
+# Replace '1' with ID
+DELETE http://localhost:8080/api/notices/1
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJleGFtcGxlcmVzaWRlbmNlMUBnbWFpbC5jb20iLCJpYXQiOjE3NzAzMTc0NjIsImV4cCI6MTc3MDM1MzQ2Mn0.bxy7KvkXxGOgnaTiyLvwPe1T4Dh64w-ZVsy2Rma9pJw
+
+
+
+
+
+### A. Gina requests Frank's Slot (P-1-05)
+# Ensure Frank has set his slot to 'Available' first!
+POST http://localhost:8080/api/parking/request
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJnaW5hQHJlc2lkZW50LmNvbSIsImlhdCI6MTc3MDMxNzg4MywiZXhwIjoxNzcwMzUzODgzfQ.BumE-nFOLsTN8mKveQyGjiQd6ANyuXj6CXVKhmeqGCg
+
+{
+  "slot": { "id": 1 }, 
+  "startTime": "2026-06-01T08:00:00",
+  "endTime": "2026-06-01T10:00:00"
+}
+
+### B. Borrower (Gina) Cancels Request
+# Replace '1' with ID
+DELETE http://localhost:8080/api/parking/request/1
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJnaW5hQHJlc2lkZW50LmNvbSIsImlhdCI6MTc3MDMxNzg4MywiZXhwIjoxNzcwMzUzODgzfQ.BumE-nFOLsTN8mKveQyGjiQd6ANyuXj6CXVKhmeqGCg
+
+### C. Gina requests again (For Lender Test)
+POST http://localhost:8080/api/parking/request
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJnaW5hQHJlc2lkZW50LmNvbSIsImlhdCI6MTc3MDMxNzg4MywiZXhwIjoxNzcwMzUzODgzfQ.BumE-nFOLsTN8mKveQyGjiQd6ANyuXj6CXVKhmeqGCg
+
+{
+  "slot": { "id": 1 },
+  "startTime": "2026-06-02T08:00:00",
+  "endTime": "2026-06-02T10:00:00"
+}
+
+### D. Lender (Frank) Rejects/Deletes the PENDING request
+# Replace '2' with ID. Should work because status is PENDING.
+DELETE http://localhost:8080/api/parking/request/2
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJmcmFua0ByZXNpZGVudC5jb20iLCJpYXQiOjE3NzAzMTc0MjIsImV4cCI6MTc3MDM1MzQyMn0.WE9wjUZVz2c03eQ_-yvdO-qTsQaPqaMXJaMCTXHHTxA
+
+
+
+
+
+
+
+
+### 1. Frank sets his slot to "Available"
+# This makes Slot P-1-05 (ID 1) visible to borrowers
+PUT http://localhost:8080/api/parking/my-slot/availability?available=true
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJmcmFua0ByZXNpZGVudC5jb20iLCJpYXQiOjE3NzAzMTc0MjIsImV4cCI6MTc3MDM1MzQyMn0.WE9wjUZVz2c03eQ_-yvdO-qTsQaPqaMXJaMCTXHHTxA
+
+### 2. Gina requests Frank's slot
+# Assuming Frank's slot has ID 12. If not, check /api/parking/available to find the ID.
+POST http://localhost:8080/api/parking/request
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJnaW5hQHJlc2lkZW50LmNvbSIsImlhdCI6MTc3MDMxNzg4MywiZXhwIjoxNzcwMzUzODgzfQ.BumE-nFOLsTN8mKveQyGjiQd6ANyuXj6CXVKhmeqGCg
+
+{
+  "slot": { "id": 12 },
+  "startTime": "2026-07-01T10:00:00",
+  "endTime": "2026-07-01T12:00:00"
+}
+
+### 3. Frank Approves the Request
+# REPLACE '1' with the requestId returned from the step above
+PUT http://localhost:8080/api/parking/request/1?status=APPROVED
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJmcmFua0ByZXNpZGVudC5jb20iLCJpYXQiOjE3NzAzMTc0MjIsImV4cCI6MTc3MDM1MzQyMn0.WE9wjUZVz2c03eQ_-yvdO-qTsQaPqaMXJaMCTXHHTxA
+
+### 4. TEST: Frank tries to Cancel/Delete the APPROVED request
+# EXPECTED RESPONSE: 403 Forbidden
+# Message: "You cannot cancel a booking once you have approved it."
+DELETE http://localhost:8080/api/parking/request/1
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJmcmFua0ByZXNpZGVudC5jb20iLCJpYXQiOjE3NzAzMTc0MjIsImV4cCI6MTc3MDM1MzQyMn0.WE9wjUZVz2c03eQ_-yvdO-qTsQaPqaMXJaMCTXHHTxA
+
+
+
+### A. Frank triggers SOS
+POST http://localhost:8080/api/sos
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJmcmFua0ByZXNpZGVudC5jb20iLCJpYXQiOjE3NzAzMTc0MjIsImV4cCI6MTc3MDM1MzQyMn0.WE9wjUZVz2c03eQ_-yvdO-qTsQaPqaMXJaMCTXHHTxA
+
+### B. Frank deletes the SOS log entry
+# Replace '1' with ID
+DELETE http://localhost:8080/api/sos/5
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJmcmFua0ByZXNpZGVudC5jb20iLCJpYXQiOjE3NzAzMTc0MjIsImV4cCI6MTc3MDM1MzQyMn0.WE9wjUZVz2c03eQ_-yvdO-qTsQaPqaMXJaMCTXHHTxA
+
+
+
+### B. admin deletes the SOS log entry
+# Replace '1' with ID
+DELETE http://localhost:8080/api/sos/5
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJleGFtcGxlcmVzaWRlbmNlMUBnbWFpbC5jb20iLCJpYXQiOjE3NzAzMTg5NDcsImV4cCI6MTc3MDM1NDk0N30.kdopr0-C90qMB_A8WTK48Zl0urm_RT6iZb6yzPnNo8o
+
+### Resident (Frank) clears his own SOS
+# Replace '1' with the actual SOS Alert ID
+PUT http://localhost:8080/api/sos/3/clear
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJmcmFua0ByZXNpZGVudC5jb20iLCJpYXQiOjE3NzAzMTc0MjIsImV4cCI6MTc3MDM1MzQyMn0.WE9wjUZVz2c03eQ_-yvdO-qTsQaPqaMXJaMCTXHHTxA
+
+
+### Manager (Admin) clears a Resident's SOS
+# Replace '1' with the actual SOS Alert ID
+PUT http://localhost:8080/api/sos/2/clear
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJleGFtcGxlcmVzaWRlbmNlMUBnbWFpbC5jb20iLCJpYXQiOjE3NzAzMTg5NDcsImV4cCI6MTc3MDM1NDk0N30.kdopr0-C90qMB_A8WTK48Zl0urm_RT6iZb6yzPnNo8o
