@@ -28,3 +28,6 @@ Info - These features must be implemented!
 -SOS Alert
 
 -An alert will be sent to all residents of the requester's floor.
+
+
+WHEN DEVELOPING FRONTEND some requests might fail because Content-Type: application/json isn't stated specifically. Be carefull.

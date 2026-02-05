@@ -478,7 +478,7 @@ Content-Type: application/json
   "password": "password123"
 }
 
-//eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYW5hZ2VyQHRlc3QuY29tIiwiaWF0IjoxNzcwMjcxMTg3LCJleHAiOjE3NzAzMDcxODd9.9WnXEhBEuZQEex-tsgvMKP9_yUgXuauKgXdP4sb17Ts 
+//eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYW5hZ2VyQHRlc3QuY29tIiwiaWF0IjoxNzcwMjg4NTQ1LCJleHAiOjE3NzAzMjQ1NDV9.0IE-ruKKk4PbFDJnheOZaXMKgI17RsY-TZQboW7MygQ
 
 
 ### 1. Login Alice (Resident)
@@ -490,7 +490,7 @@ Content-Type: application/json
   "password": "password123"
 }
 
-//eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhbGljZUB0ZXN0LmNvbSIsImlhdCI6MTc3MDI3MTY4MCwiZXhwIjoxNzcwMzA3NjgwfQ.At7aszeUA-N__060Nm1iWiGO-d-Pv95jm2qw6ErWGKQ
+//eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhbGljZUB0ZXN0LmNvbSIsImlhdCI6MTc3MDI4ODU5OSwiZXhwIjoxNzcwMzI0NTk5fQ.1UedC4oBI9Rq6EjIp2BX1R4kt0bE6tRyqzuO2UnB9h4
 
 ### 1. Login Bob (Resident)
 POST http://localhost:8080/api/auth/login
@@ -571,7 +571,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJib2JAdGVzdC5jb20iLCJpYXQiO
 ### 4. MANAGER: Clear/Resolve the SOS
 # After the manager helps Alice, they clear the alert.
 # Replace "1" with the Alert ID from request #2
-PUT http://localhost:8080/api/sos/3/clear
+PUT http://localhost:8080/api/sos/6/clear
 Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYW5hZ2VyQHRlc3QuY29tIiwiaWF0IjoxNzcwMjcxMTg3LCJleHAiOjE3NzAzMDcxODd9.9WnXEhBEuZQEex-tsgvMKP9_yUgXuauKgXdP4sb17Ts
 
 ### 5. VERIFY: Check active alerts again
@@ -581,4 +581,46 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYW5hZ2VyQHRlc3QuY29tIiwia
 
 ### 6. ALICE: View her own SOS history
 GET http://localhost:8080/api/sos/my-history
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhbGljZUB0ZXN0LmNvbSIsImlhdCI6MTc3MDI3MTY4MCwiZXhwIjoxNzcwMzA3NjgwfQ.At7aszeUA-N__060Nm1iWiGO-d-Pv95jm2qw6ErWGKQ
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhbGljZUB0ZXN0LmNvbSIsImlhdCI6MTc3MDI3MTY4MCwiZXhwIjoxNzcwMzA3NjgwfQ.At7aszeUA-N__060Nm1iWiGO-d-Pv95jm2qw6ErWGKQ 
+
+
+
+### 1. ALICE: Check Calendar for Rooftop (Should be empty initially)
+GET http://localhost:8080/api/common-area/calendar?area=Rooftop
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhbGljZUB0ZXN0LmNvbSIsImlhdCI6MTc3MDI5Mjg5NCwiZXhwIjoxNzcwMzI4ODk0fQ.Qi4Jwgz4S6cC9JyWtLyfLal3PaMRKbkTr8SAFCWbAcI
+Content-Type: application/json
+
+### 2. ALICE: Request the Rooftop for a Party
+POST http://localhost:8080/api/common-area/book
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhbGljZUB0ZXN0LmNvbSIsImlhdCI6MTc3MDI5Mjg5NCwiZXhwIjoxNzcwMzI4ODk0fQ.Qi4Jwgz4S6cC9JyWtLyfLal3PaMRKbkTr8SAFCWbAcI
+Content-Type: application/json
+
+{
+  "areaName": "Rooftop",
+  "startTime": "2026-03-10T18:00:00",
+  "endTime": "2026-03-10T22:00:00"
+}
+
+### 3. ALICE: Request the Gym (Should Fail - Invalid Area)
+POST http://localhost:8080/api/common-area/book
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhbGljZUB0ZXN0LmNvbSIsImlhdCI6MTc3MDI5Mjg5NCwiZXhwIjoxNzcwMzI4ODk0fQ.Qi4Jwgz4S6cC9JyWtLyfLal3PaMRKbkTr8SAFCWbAcI
+Content-Type: application/json
+
+{
+  "areaName": "Gym", 
+  "startTime": "2026-03-11T10:00:00",
+  "endTime": "2026-03-11T11:00:00"
+}
+
+### 4. MANAGER: View Pending Requests
+GET http://localhost:8080/api/common-area/pending
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYW5hZ2VyQHRlc3QuY29tIiwiaWF0IjoxNzcwMjg4NTQ1LCJleHAiOjE3NzAzMjQ1NDV9.0IE-ruKKk4PbFDJnheOZaXMKgI17RsY-TZQboW7MygQ
+
+### 5. MANAGER: Approve Alice's Request
+# Replace '1' with the actual ID from step 4
+PUT http://localhost:8080/api/common-area/request/1?status=APPROVED
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYW5hZ2VyQHRlc3QuY29tIiwiaWF0IjoxNzcwMjg4NTQ1LCJleHAiOjE3NzAzMjQ1NDV9.0IE-ruKKk4PbFDJnheOZaXMKgI17RsY-TZQboW7MygQ
+### 6. BOB: Check Calendar (Should now see Alice's booking)
+GET http://localhost:8080/api/common-area/calendar?area=Rooftop
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJib2JAdGVzdC5jb20iLCJpYXQiOjE3NzAyNzE3MjAsImV4cCI6MTc3MDMwNzcyMH0.VEDKnPJwd9a5aqz_kQPBHDHgUW40MHWbrfbh7NWo81s
+

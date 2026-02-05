@@ -55,4 +55,9 @@ public class User {
     @OneToOne(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private ParkingSlot parkingSlot;
+
+    // 7. If User is deleted, delete their Common Area Bookings
+    @OneToMany(mappedBy = "resident", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<CommonAreaBooking> commonAreaBookings;
 }
