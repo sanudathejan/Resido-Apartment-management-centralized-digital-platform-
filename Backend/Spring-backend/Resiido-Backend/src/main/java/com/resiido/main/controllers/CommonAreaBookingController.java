@@ -100,4 +100,22 @@ public class CommonAreaBookingController {
         return bookingRepository.findByResident(resident);
     }
 
+    // 6. DELETE (Cancel) Booking
+    @DeleteMapping("/{id}")
+    public void deleteBooking(@PathVariable Long id, Principal principal) {
+        User user = getAuthenticatedUser(principal);
+        CommonAreaBooking booking = bookingRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Booking not found"));
+
+        // Allow if User is MANAGER OR if User is the OWNER of the booking
+        boolean isOwner = booking.getResident().getId().equals(user.getId());
+        boolean isManager = "MANAGER".equalsIgnoreCase(user.getRole());
+
+        if (isManager || isOwner) {
+            bookingRepository.delete(booking);
+        } else {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not authorized to cancel this booking.");
+        }
+    }
+
 }

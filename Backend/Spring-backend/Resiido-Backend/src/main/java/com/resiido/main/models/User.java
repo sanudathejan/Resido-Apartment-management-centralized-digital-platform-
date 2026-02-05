@@ -37,8 +37,8 @@ public class User {
     @Column(name = "requested_house_number")
     private String requestedHouseNumber;
 
-    // The actual link once approved
-    @OneToOne(mappedBy = "resident", cascade = CascadeType.ALL)
+    // Changed ALL to PERSIST, MERGE. Deleting User will NOT delete House.
+    @OneToOne(mappedBy = "resident", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JsonIgnore
     private House house;
 
