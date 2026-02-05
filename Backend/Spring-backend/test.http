@@ -549,3 +549,36 @@ Content-Type: application/json
 # Alice checks her pending list, finds Request ID (likely 1)
 PUT http://localhost:8080/api/parking/request/2?status=APPROVED
 Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhbGljZUB0ZXN0LmNvbSIsImlhdCI6MTc3MDI3MTY4MCwiZXhwIjoxNzcwMzA3NjgwfQ.At7aszeUA-N__060Nm1iWiGO-d-Pv95jm2qw6ErWGKQ
+
+
+
+### 1. ALICE: Trigger SOS
+# Alice is in trouble and hits the button. 
+# Her identity is pulled automatically from the token.
+POST http://localhost:8080/api/sos
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhbGljZUB0ZXN0LmNvbSIsImlhdCI6MTc3MDI3MTY4MCwiZXhwIjoxNzcwMzA3NjgwfQ.At7aszeUA-N__060Nm1iWiGO-d-Pv95jm2qw6ErWGKQ
+
+### 2. MANAGER: View Active Emergencies
+# The security desk sees the active alert.
+GET http://localhost:8080/api/sos/active
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYW5hZ2VyQHRlc3QuY29tIiwiaWF0IjoxNzcwMjcxMTg3LCJleHAiOjE3NzAzMDcxODd9.9WnXEhBEuZQEex-tsgvMKP9_yUgXuauKgXdP4sb17Ts
+
+### 3. BOB: Attempt to Clear Alice's SOS (Should FAIL 403)
+# Bob tries to dismiss Alice's emergency. The system should block him.
+PUT http://localhost:8080/api/sos/1/clear
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJib2JAdGVzdC5jb20iLCJpYXQiOjE3NzAyNzE3MjAsImV4cCI6MTc3MDMwNzcyMH0.VEDKnPJwd9a5aqz_kQPBHDHgUW40MHWbrfbh7NWo81s
+
+### 4. MANAGER: Clear/Resolve the SOS
+# After the manager helps Alice, they clear the alert.
+# Replace "1" with the Alert ID from request #2
+PUT http://localhost:8080/api/sos/3/clear
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYW5hZ2VyQHRlc3QuY29tIiwiaWF0IjoxNzcwMjcxMTg3LCJleHAiOjE3NzAzMDcxODd9.9WnXEhBEuZQEex-tsgvMKP9_yUgXuauKgXdP4sb17Ts
+
+### 5. VERIFY: Check active alerts again
+# Should return an empty list []
+GET http://localhost:8080/api/sos/active
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYW5hZ2VyQHRlc3QuY29tIiwiaWF0IjoxNzcwMjcxMTg3LCJleHAiOjE3NzAzMDcxODd9.9WnXEhBEuZQEex-tsgvMKP9_yUgXuauKgXdP4sb17Ts
+
+### 6. ALICE: View her own SOS history
+GET http://localhost:8080/api/sos/my-history
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhbGljZUB0ZXN0LmNvbSIsImlhdCI6MTc3MDI3MTY4MCwiZXhwIjoxNzcwMzA3NjgwfQ.At7aszeUA-N__060Nm1iWiGO-d-Pv95jm2qw6ErWGKQ

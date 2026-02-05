@@ -68,4 +68,11 @@ public class SosController {
         alert.setActive(false);
         return sosRepository.save(alert);
     }
+
+    // 4. Resident: View my own SOS history
+    @GetMapping("/my-history")
+    public List<SosAlert> getMyHistory(Principal principal) {
+        User currentUser = getLoggedInUser(principal);
+        return sosRepository.findByResident(currentUser);
+    }
 }
