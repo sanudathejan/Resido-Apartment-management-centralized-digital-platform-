@@ -624,3 +624,73 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYW5hZ2VyQHRlc3QuY29tIiwia
 GET http://localhost:8080/api/common-area/calendar?area=Rooftop
 Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJib2JAdGVzdC5jb20iLCJpYXQiOjE3NzAyNzE3MjAsImV4cCI6MTc3MDMwNzcyMH0.VEDKnPJwd9a5aqz_kQPBHDHgUW40MHWbrfbh7NWo81s
 
+
+
+//After admin0 is created
+
+
+### 1. Login as Admin0 (Should work immediately)
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "exampleresidence1@gmail.com",
+  "password": "exampleadmin0"
+}
+
+//eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJleGFtcGxlcmVzaWRlbmNlMUBnbWFpbC5jb20iLCJpYXQiOjE3NzAzMDAwNjAsImV4cCI6MTc3MDMzNjA2MH0.HwYnxhK68F4y8PFWkn49S9-bEteduC828P5saGKrKhY
+
+
+### 2. Register a Normal Resident
+POST http://localhost:8080/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Charlie Resident",
+  "email": "charlie@test.com",
+  "password": "password123",
+  "role": "RESIDENT"
+}
+
+### 3. Login as Charlie (Should work immediately)
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "charlie@test.com",
+  "password": "password123"
+}
+
+//eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJjaGFybGllQHRlc3QuY29tIiwiaWF0IjoxNzcwMzAwMTUyLCJleHAiOjE3NzAzMzYxNTJ9.pxAKHIq9CVT2uWEtPD-44rHpiIRMJcFvEscLYxfiqj0
+
+### 4. Register New Manager (Dave)
+# ACTION: After running this, check exampleresidence1@gmail.com for the code!
+POST http://localhost:8080/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Dave Manager",
+  "email": "dave@manager.com",
+  "password": "managerpass",
+  "role": "MANAGER"
+}
+
+### 5. Attempt Login as Dave (Should FAIL with 403 Forbidden)
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "dave@manager.com",
+  "password": "managerpass"
+}
+
+//eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkYXZlQG1hbmFnZXIuY29tIiwiaWF0IjoxNzcwMzAwNDQwLCJleHAiOjE3NzAzMzY0NDB9.UVeQZqunePpIx66DzXAp8F0lm_tgEaHz3TnuCbN2iIs
+
+### 6. Verify Dave (Input Code from Email)
+POST http://localhost:8080/api/auth/verify-manager
+Content-Type: application/json
+
+{
+  "email": "dave@manager.com",
+  "code": "12426" 
+}
