@@ -692,5 +692,176 @@ Content-Type: application/json
 
 {
   "email": "dave@manager.com",
-  "code": "12426" 
+  "code": "81316" 
+}
+
+
+### 4. Register New Manager (Alvin)
+# ACTION: After running this, check exampleresidence1@gmail.com for the code!
+POST http://localhost:8080/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Alvin the Manager",
+  "email": "alvin@manager.com",
+  "password": "managerpass",
+  "role": "MANAGER"
+}
+
+### 5. Attempt Login as Dave (Should FAIL with 403 Forbidden)
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "alvin@manager.com",
+  "password": "managerpass"
+}
+
+//
+
+### 6. Verify Dave (Input Code from Email)
+POST http://localhost:8080/api/auth/verify-account
+Content-Type: application/json
+
+{
+  "email": "alvin@manager.com",
+  "code": "99975" 
+}
+
+
+
+
+
+//AFTER 2FA FOR ALL USERS
+
+
+
+
+
+
+
+### 1. Login as Admin0 (To check system is awake)
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "exampleresidence1@gmail.com",
+  "password": "exampleadmin0"
+}
+
+//eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJleGFtcGxlcmVzaWRlbmNlMUBnbWFpbC5jb20iLCJpYXQiOjE3NzAzMDI5MzQsImV4cCI6MTc3MDMzODkzNH0.e0xyDbNRNAV-_9ByaC0zwj6HGZIVu54JB2SrtbpyPmU
+
+### 2. Register Resident (Frank wants House 1-05)
+# ACTION: Check Admin's Email after sending this!
+POST http://localhost:8080/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Frank Resident",
+  "email": "frank@resident.com",
+  "password": "password123",
+  "role": "RESIDENT",
+  "requestedHouseNumber": "1-05"
+}
+
+### 3. Try Login as Frank (Should FAIL - 403 Forbidden)
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "frank@resident.com",
+  "password": "password123"
+}
+
+### 4. Verify Frank (Enter Code from Admin's Email)
+# REPLACE '12345' with the code you received in exampleresidence1@gmail.com
+POST http://localhost:8080/api/auth/verify-account
+Content-Type: application/json
+
+{
+  "email": "frank@resident.com",
+  "code": "69107"
+}
+
+### 5. Login as Frank (Should WORK now)
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "frank@resident.com",
+  "password": "password123"
+}
+
+### 6. (Optional) Fail Test: Try to register for the SAME house
+# This should fail because Frank already owns 1-05
+POST http://localhost:8080/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Greedy Gary",
+  "email": "gary@resident.com",
+  "password": "password123",
+  "role": "RESIDENT",
+  "requestedHouseNumber": "1-05"
+}
+
+### Verify Manager (Dave) - UPDATED ENDPOINT
+# Make sure to use the code sent to exampleresidence1@gmail.com
+POST http://localhost:8080/api/auth/verify-account
+Content-Type: application/json
+
+{
+  "email": "dave@manager.com",
+  "code": "81316" 
+}
+
+
+
+
+
+### 1. Register Resident (Gina -> House 1-06)
+# ACTION: Check Admin's Email (exampleresidence1@gmail.com) for the code
+POST http://localhost:8080/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Gina Resident",
+  "email": "gina@resident.com",
+  "password": "password123",
+  "role": "RESIDENT",
+  "requestedHouseNumber": "1-06"
+}
+
+### 2. Verify Gina (Enter Code)
+# REPLACE '12345' with the code from email
+# EXPECTED RESPONSE: "Verification successful! Housing and Parking assigned."
+POST http://localhost:8080/api/auth/verify-account
+Content-Type: application/json
+
+{
+  "email": "gina@resident.com",
+  "code": "39242"
+}
+
+### 3. Register Manager (Mike)
+# ACTION: Check Admin's Email again for a NEW code
+POST http://localhost:8080/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Mike Manager",
+  "email": "mike@manager.com",
+  "password": "managerpass",
+  "role": "MANAGER"
+}
+
+### 4. Verify Mike (Enter Code)
+# REPLACE '67890' with the new code from email
+# EXPECTED RESPONSE: "Verification successful! Manager account activated."
+POST http://localhost:8080/api/auth/verify-account
+Content-Type: application/json
+
+{
+  "email": "mike@manager.com",
+  "code": "52707"
 }

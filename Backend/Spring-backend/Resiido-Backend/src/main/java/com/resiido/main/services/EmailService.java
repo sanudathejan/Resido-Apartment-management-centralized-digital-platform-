@@ -18,19 +18,25 @@ public class EmailService {
     @Autowired
     private UserRepository userRepository;
 
-    public void sendVerificationCodeToManagers(String newManagerName, String verificationCode) {
-        // 1. Find all existing managers
+    public void sendVerificationCodeToManagers(String newUserName, String role, String requestedHouse, String verificationCode) {
         List<User> managers = userRepository.findAll().stream()
-                .filter(u -> "MANAGER".equals(u.getRole()))
+                .filter(u -> "MANAGER".equals(u.getRole()) && u.isVerified())
                 .toList();
 
-        String subject = "New Manager Registration Request: " + newManagerName;
-        String body = "A new manager (" + newManagerName + ") is trying to register.\n\n" +
-                "Please provide them with this verification code to complete their registration:\n\n" +
-                "CODE: " + verificationCode + "\n\n" +
-                "If you did not authorize this, please ignore this email.";
+        String subject = "New " + role + " Registration Request";
+        String bodyDetails = "";
 
-        // 2. Loop through managers and send email individually (so one bad email doesn't stop others)
+        if ("RESIDENT".equals(role)) {
+            bodyDetails = "User " + newUserName + " wants to register for House: " + requestedHouse + ".\n";
+        } else {
+            bodyDetails = "User " + newUserName + " wants to register as a MANAGER.\n";
+        }
+
+        String body = bodyDetails +
+                "Please provide them with this code to complete their registration:\n\n" +
+                "CODE: " + verificationCode + "\n\n" +
+                "If you did not authorize this, ignore this email.";
+
         for (User manager : managers) {
             try {
                 SimpleMailMessage message = new SimpleMailMessage();
@@ -38,12 +44,9 @@ public class EmailService {
                 message.setSubject(subject);
                 message.setText(body);
                 message.setFrom("exampleresidence1@gmail.com");
-
                 mailSender.send(message);
-                System.out.println("✅ Email sent to manager: " + manager.getEmail());
             } catch (Exception e) {
-                // Ignore invalid emails as requested, except log it
-                System.err.println("⚠️ Failed to send email to: " + manager.getEmail() + " (Skipping)");
+                System.err.println("⚠️ Failed to send to: " + manager.getEmail());
             }
         }
     }

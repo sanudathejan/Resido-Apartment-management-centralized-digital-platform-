@@ -1,7 +1,11 @@
 package com.resiido.main.controllers;
 
 import com.resiido.main.models.AuthRequest;
+import com.resiido.main.models.House;
+import com.resiido.main.models.ParkingSlot;
 import com.resiido.main.models.User;
+import com.resiido.main.repositories.HouseRepository;
+import com.resiido.main.repositories.ParkingSlotRepository;
 import com.resiido.main.repositories.UserRepository;
 import com.resiido.main.security.JwtUtil;
 import com.resiido.main.services.EmailService;
@@ -11,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -21,22 +26,14 @@ import java.util.Random;
 @RequestMapping("/api/auth")
 public class AuthController {
 
-    @Autowired
-    private AuthenticationManager authenticationManager;
+    @Autowired private AuthenticationManager authenticationManager;
+    @Autowired private UserRepository userRepository;
+    @Autowired private HouseRepository houseRepository;
+    @Autowired private ParkingSlotRepository parkingSlotRepository;
+    @Autowired private PasswordEncoder passwordEncoder;
+    @Autowired private JwtUtil jwtUtil;
+    @Autowired private EmailService emailService;
 
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    private JwtUtil jwtUtil;
-
-    @Autowired
-    private EmailService emailService;
-
-    // 1. REGISTER
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody User user) {
         if (userRepository.findByEmail(user.getEmail()).isPresent()) {
@@ -45,72 +42,114 @@ public class AuthController {
 
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
-        // Set Role
-        if (user.getRole() != null && !user.getRole().isEmpty()) {
-            user.setRole(user.getRole().toUpperCase());
-        } else {
-            user.setRole("RESIDENT");
+        // Normalize Role
+        String role = (user.getRole() != null && !user.getRole().isEmpty())
+                ? user.getRole().toUpperCase() : "RESIDENT";
+        user.setRole(role);
+        user.setVerified(false); // all users need to be verified
+
+        // Generate Code
+        String code = String.format("%05d", new Random().nextInt(100000));
+        user.setVerificationCode(code);
+
+        // --- RESIDENT LOGIC ---
+        if ("RESIDENT".equals(role)) {
+            String houseNum = user.getRequestedHouseNumber();
+            if (houseNum == null || houseNum.isEmpty()) {
+                return ResponseEntity.badRequest().body("Residents must select a house number (e.g., '1-05').");
+            }
+
+            // Check if House exists
+            House house = houseRepository.findByHouseNumber(houseNum)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "House " + houseNum + " does not exist."));
+
+            // Check if House is taken (by a verified user)
+            if (house.getResident() != null) {
+                return ResponseEntity.badRequest().body("House " + houseNum + " is already taken.");
+            }
+
+            // Doesn't assign the house yet. We wait for verification.
+            userRepository.save(user);
+            emailService.sendVerificationCodeToManagers(user.getName(), "RESIDENT", houseNum, code);
+
+            return ResponseEntity.ok("Request sent! Managers have been notified. Ask a manager for your code.");
         }
 
-        // --- NEW LOGIC START ---
-        if ("MANAGER".equals(user.getRole())) {
-            // Managers start as Unverified
-            user.setVerified(false);
-
-            // Generate 5-digit code
-            String code = String.format("%05d", new Random().nextInt(100000));
-            user.setVerificationCode(code);
-
+        // --- MANAGER LOGIC ---
+        else {
             userRepository.save(user);
-
-            // Send Email to existing managers
-            emailService.sendVerificationCodeToManagers(user.getName(), code);
-
-            return ResponseEntity.ok("Manager registered! Verification code sent to existing managers. Please verify.");
-        } else {
-            // Residents are automatically verified
-            user.setVerified(true);
-            userRepository.save(user);
-            return ResponseEntity.ok("Resident registered successfully!");
+            emailService.sendVerificationCodeToManagers(user.getName(), "MANAGER", "N/A", code);
+            return ResponseEntity.ok("Manager request sent! Ask an existing manager for your code.");
         }
     }
 
-    // 2. VERIFY MANAGER (New Endpoint)
-    @PostMapping("/verify-manager")
-    public ResponseEntity<String> verifyManager(@RequestBody Map<String, String> payload) {
+    @PostMapping("/verify-account")
+    @Transactional
+    public ResponseEntity<String> verifyAccount(@RequestBody Map<String, String> payload) {
         String email = payload.get("email");
         String code = payload.get("code");
 
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
-        if (!"MANAGER".equals(user.getRole())) {
-            return ResponseEntity.badRequest().body("Only managers need verification.");
-        }
-
         if (user.isVerified()) {
             return ResponseEntity.badRequest().body("User is already verified.");
         }
 
         if (code.equals(user.getVerificationCode())) {
+
+            String successMessage;
+
+            // --- RESIDENT LOGIC ---
+            if ("RESIDENT".equals(user.getRole())) {
+                String houseNum = user.getRequestedHouseNumber();
+
+                // 1. Assign House
+                House house = houseRepository.findByHouseNumber(houseNum)
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "House not found"));
+
+                if (house.getResident() != null) {
+                    return ResponseEntity.badRequest().body("House was taken while you were waiting.");
+                }
+
+                house.setResident(user);
+                houseRepository.save(house);
+
+                // 2. Assign Matching Parking Slot
+                String expectedSlot = "P-" + houseNum;
+                ParkingSlot slot = parkingSlotRepository.findBySlotNumber(expectedSlot);
+
+                if (slot != null) {
+                    slot.setOwner(user);
+                    parkingSlotRepository.save(slot);
+                }
+
+                successMessage = "Verification successful! Housing and Parking assigned.";
+            }
+            // --- MANAGER LOGIC ---
+            else {
+                successMessage = "Verification successful! Manager account activated.";
+            }
+
+            // Common Final Steps
             user.setVerified(true);
             user.setVerificationCode(null); // Clear code after use
             userRepository.save(user);
-            return ResponseEntity.ok("Manager verified successfully! You can now login.");
+
+            return ResponseEntity.ok(successMessage);
+
         } else {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Invalid Verification Code.");
         }
     }
 
-    // 3. LOGIN
     @PostMapping("/login")
     public String login(@RequestBody AuthRequest authRequest) {
-        // Check if user exists and is verified BEFORE authenticating
         User user = userRepository.findByEmail(authRequest.getEmail())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials"));
 
         if (!user.isVerified()) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Account not verified. Please contact an admin.");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Account not verified.");
         }
 
         authenticationManager.authenticate(

@@ -26,14 +26,25 @@ public class User {
     @Column(nullable = false)
     private String role;
 
-    // 2-STEP VERIFICATION
-
     @Column(name = "is_verified", nullable = false)
-    private boolean isVerified = false; // Default is false
+    private boolean isVerified = false;
 
-    @JsonIgnore // Hide code from API responses
+    @JsonIgnore
     @Column(name = "verification_code")
     private String verificationCode;
+
+    // Stores "1-05" temporarily until approved
+    @Column(name = "requested_house_number")
+    private String requestedHouseNumber;
+
+    // The actual link once approved
+    @OneToOne(mappedBy = "resident", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private House house;
+
+    @OneToOne(mappedBy = "owner", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JsonIgnore
+    private ParkingSlot parkingSlot;
 
     @OneToMany(mappedBy = "resident", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
@@ -54,10 +65,6 @@ public class User {
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private List<Notice> notices;
-
-    @OneToOne(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnore
-    private ParkingSlot parkingSlot;
 
     @OneToMany(mappedBy = "resident", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore

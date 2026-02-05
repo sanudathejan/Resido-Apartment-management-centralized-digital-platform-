@@ -11,4 +11,6 @@ public interface ParkingSlotRepository extends JpaRepository<ParkingSlot, Long> 
 
     // Changed to return Optional<ParkingSlot> and accept a User object
     Optional<ParkingSlot> findByOwner(User owner);
+
+    ParkingSlot findBySlotNumber(String slotNumber);
 }
