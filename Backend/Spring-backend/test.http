@@ -1027,7 +1027,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJmcmFua0ByZXNpZGVudC5jb20iL
 
 ### A. Frank triggers SOS
 POST http://localhost:8080/api/sos
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJmcmFua0ByZXNpZGVudC5jb20iLCJpYXQiOjE3NzAzMTc0MjIsImV4cCI6MTc3MDM1MzQyMn0.WE9wjUZVz2c03eQ_-yvdO-qTsQaPqaMXJaMCTXHHTxA
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJpbWV0aEB0ZXN0LmNvbSIsImlhdCI6MTc3MDM2NjU2OSwiZXhwIjoxNzcwNDAyNTY5fQ.wq65nHT7ocNaGozOvFVH0ZdI8ba-gvkeBTuZzZBdoG4
 
 ### B. Frank deletes the SOS log entry
 # Replace '1' with ID
@@ -1051,3 +1051,74 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJmcmFua0ByZXNpZGVudC5jb20iL
 # Replace '1' with the actual SOS Alert ID
 PUT http://localhost:8080/api/sos/2/clear
 Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJleGFtcGxlcmVzaWRlbmNlMUBnbWFpbC5jb20iLCJpYXQiOjE3NzAzMTg5NDcsImV4cCI6MTc3MDM1NDk0N30.kdopr0-C90qMB_A8WTK48Zl0urm_RT6iZb6yzPnNo8o
+
+
+### 1. Register Shenal Manager
+POST http://localhost:8080/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Shenal Arosha",
+  "email": "shenalarosha7@gmail.com",
+  "password": "shenal12345",
+  "role": "MANAGER"
+}
+
+
+### Verify Manager shenal - UPDATED ENDPOINT
+# Make sure to use the code sent to exampleresidence1@gmail.com
+POST http://localhost:8080/api/auth/verify-account
+Content-Type: application/json
+
+{
+  "email": "shenalarosha7@gmail.com",
+  "code": "15174" 
+}
+
+
+
+### 1. Login as Manager Shenal (To check system is awake)
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "shenalarosha7@gmail.com",
+  "password": "shenal12345"
+}
+
+### 2. Register Resident (Imeth wants House 4-05)
+# ACTION: Check Admin's Email after sending this!
+POST http://localhost:8080/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Imeth Rathnayake",
+  "email": "imeth@test.com",
+  "password": "password123",
+  "role": "RESIDENT",
+  "requestedHouseNumber": "4-05"
+}
+
+
+### 4. Verify Imeth (Enter Code from Admin's Email)
+# REPLACE '12345' with the code you received in exampleresidence1@gmail.com
+POST http://localhost:8080/api/auth/verify-account
+Content-Type: application/json
+
+{
+  "email": "imeth@test.com",
+  "code": "69890"
+}
+
+### 3. Try Login as Imeth
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "imeth@test.com",
+  "password": "password123"
+}
+
+### Get Resident Table (Manager Only)
+GET http://localhost:8080/api/manager/residents
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJleGFtcGxlcmVzaWRlbmNlMUBnbWFpbC5jb20iLCJpYXQiOjE3NzAzNjY0ODMsImV4cCI6MTc3MDQwMjQ4M30.Xs45-wklidJ7Y6sAB0SwQ4pVmqr876-z2TlK3Pj9P6I
