@@ -25,8 +25,7 @@ public class User {
 
     @Column(nullable = false)
     private String role;
-
-    @Lob
+    
     @Column(columnDefinition = "TEXT")
     private String profilePicture;
 
