@@ -26,6 +26,10 @@ public class User {
     @Column(nullable = false)
     private String role;
 
+    @Lob
+    @Column(columnDefinition = "TEXT")
+    private String profilePicture;
+
     @Column(name = "is_verified", nullable = false)
     private boolean isVerified = false;
 
