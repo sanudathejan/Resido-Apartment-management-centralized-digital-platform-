@@ -26,10 +26,6 @@ public class User {
     @Column(nullable = false)
     private String role;
 
-    @Lob
-    @Column(columnDefinition = "LONGTEXT") // Ensures it can hold a large Base64 string
-    private String profilePicture;
-
     @Column(name = "is_verified", nullable = false)
     private boolean isVerified = false;
 
