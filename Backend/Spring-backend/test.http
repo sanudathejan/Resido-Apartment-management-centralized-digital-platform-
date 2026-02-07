@@ -1122,3 +1122,58 @@ Content-Type: application/json
 ### Get Resident Table (Manager Only)
 GET http://localhost:8080/api/manager/residents
 Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJleGFtcGxlcmVzaWRlbmNlMUBnbWFpbC5jb20iLCJpYXQiOjE3NzAzNjY0ODMsImV4cCI6MTc3MDQwMjQ4M30.Xs45-wklidJ7Y6sAB0SwQ4pVmqr876-z2TlK3Pj9P6I
+
+
+### Deleting users
+DELETE http://localhost:8080/api/users/3
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJleGFtcGxlcmVzaWRlbmNlMUBnbWFpbC5jb20iLCJpYXQiOjE3NzA0NDc1MTMsImV4cCI6MTc3MDQ4MzUxM30.LAh1FZqj6TEOopEksX_Eady_plYbrnSmKQZiA7-YTYY
+
+
+
+
+
+### 1. HELPER: Get All Users (To find the IDs)
+# Use this to see who is ID 2, ID 3, etc.
+GET http://localhost:8080/api/manager/residents
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJleGFtcGxlcmVzaWRlbmNlMUBnbWFpbC5jb20iLCJpYXQiOjE3NzA0NDc1MTMsImV4cCI6MTc3MDQ4MzUxM30.LAh1FZqj6TEOopEksX_Eady_plYbrnSmKQZiA7-YTYY
+
+### ---------------------------------------------------
+
+### 2. TEST: Manager deletes a RESIDENT
+# Replace '2' with the actual ID of a resident (e.g., Frank)
+DELETE http://localhost:8080/api/auth/delete/3
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJleGFtcGxlcmVzaWRlbmNlMUBnbWFpbC5jb20iLCJpYXQiOjE3NzA0NDc1MTMsImV4cCI6MTc3MDQ4MzUxM30.LAh1FZqj6TEOopEksX_Eady_plYbrnSmKQZiA7-YTYY
+
+### ---------------------------------------------------
+
+### 3. TEST: Manager deletes another MANAGER
+# Replace '3' with the ID of another manager
+# (Do not delete yourself, or your token will stop working!)
+DELETE http://localhost:8080/api/auth/delete/9
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJleGFtcGxlcmVzaWRlbmNlMUBnbWFpbC5jb20iLCJpYXQiOjE3NzA0NDc1MTMsImV4cCI6MTc3MDQ4MzUxM30.LAh1FZqj6TEOopEksX_Eady_plYbrnSmKQZiA7-YTYY
+
+
+
+### 1. Upload Profile Picture (Gina)
+# We send a small Base64 string representing a Red Dot image.
+PUT http://localhost:8080/api/users/profile-picture
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJnaW5hQHJlc2lkZW50LmNvbSIsImlhdCI6MTc3MDQ1MDQ4MSwiZXhwIjoxNzcwNDg2NDgxfQ.m8fYSbt6muf_GeNS_VWH-XWjB4iF1MogET9FQJcYdbo
+
+{
+  "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg=="
+}
+
+### ---------------------------------------------------
+
+### 2. Verify: Get My Profile Picture
+# Should return the JSON object with the "image" key containing the string above.
+GET http://localhost:8080/api/users/profile-picture
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJnaW5hQHJlc2lkZW50LmNvbSIsImlhdCI6MTc3MDQ1MDQ4MSwiZXhwIjoxNzcwNDg2NDgxfQ.m8fYSbt6muf_GeNS_VWH-XWjB4iF1MogET9FQJcYdbo
+
+### ---------------------------------------------------
+
+### 3. Verify: Get Full Profile
+# Check the "profilePicture" field in the main User object.
+GET http://localhost:8080/api/users/me
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJnaW5hQHJlc2lkZW50LmNvbSIsImlhdCI6MTc3MDQ1MDQ4MSwiZXhwIjoxNzcwNDg2NDgxfQ.m8fYSbt6muf_GeNS_VWH-XWjB4iF1MogET9FQJcYdbo
