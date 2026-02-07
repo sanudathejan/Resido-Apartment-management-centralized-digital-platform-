@@ -1122,3 +1122,32 @@ Content-Type: application/json
 ### Get Resident Table (Manager Only)
 GET http://localhost:8080/api/manager/residents
 Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJleGFtcGxlcmVzaWRlbmNlMUBnbWFpbC5jb20iLCJpYXQiOjE3NzAzNjY0ODMsImV4cCI6MTc3MDQwMjQ4M30.Xs45-wklidJ7Y6sAB0SwQ4pVmqr876-z2TlK3Pj9P6I
+
+
+### Deleting users
+DELETE http://localhost:8080/api/users/3
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJleGFtcGxlcmVzaWRlbmNlMUBnbWFpbC5jb20iLCJpYXQiOjE3NzA0NDc1MTMsImV4cCI6MTc3MDQ4MzUxM30.LAh1FZqj6TEOopEksX_Eady_plYbrnSmKQZiA7-YTYY
+
+
+
+
+
+### 1. HELPER: Get All Users (To find the IDs)
+# Use this to see who is ID 2, ID 3, etc.
+GET http://localhost:8080/api/manager/residents
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJleGFtcGxlcmVzaWRlbmNlMUBnbWFpbC5jb20iLCJpYXQiOjE3NzA0NDc1MTMsImV4cCI6MTc3MDQ4MzUxM30.LAh1FZqj6TEOopEksX_Eady_plYbrnSmKQZiA7-YTYY
+
+### ---------------------------------------------------
+
+### 2. TEST: Manager deletes a RESIDENT
+# Replace '2' with the actual ID of a resident (e.g., Frank)
+DELETE http://localhost:8080/api/auth/delete/3
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJleGFtcGxlcmVzaWRlbmNlMUBnbWFpbC5jb20iLCJpYXQiOjE3NzA0NDc1MTMsImV4cCI6MTc3MDQ4MzUxM30.LAh1FZqj6TEOopEksX_Eady_plYbrnSmKQZiA7-YTYY
+
+### ---------------------------------------------------
+
+### 3. TEST: Manager deletes another MANAGER
+# Replace '3' with the ID of another manager
+# (Do not delete yourself, or your token will stop working!)
+DELETE http://localhost:8080/api/auth/delete/9
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJleGFtcGxlcmVzaWRlbmNlMUBnbWFpbC5jb20iLCJpYXQiOjE3NzA0NDc1MTMsImV4cCI6MTc3MDQ4MzUxM30.LAh1FZqj6TEOopEksX_Eady_plYbrnSmKQZiA7-YTYY
