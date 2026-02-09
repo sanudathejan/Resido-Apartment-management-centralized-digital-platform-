@@ -5,7 +5,18 @@
     "**/node_modules/**",
     "**/.metadata/**",
     "**/archetype-resources/**",
-    "**/META-INF/maven/**"
+    "**/META-INF/maven/**",
+    "**/android/**",
+    "**/ios/**",
+    "**/.expo/**",
+    "**/expo-prebuild/**"
   ],
-  "java.configuration.updateBuildConfiguration": "automatic"
+  "java.configuration.updateBuildConfiguration": "automatic",
+  "java.import.gradle.enabled": false,
+  "java.project.resourceFilters": [
+    "node_modules",
+    "\\.git",
+    "android",
+    "ios"
+  ]
 }
