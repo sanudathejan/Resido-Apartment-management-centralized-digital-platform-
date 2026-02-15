@@ -153,6 +153,29 @@ export default function RegisterScreen() {
               </TouchableOpacity>
             </View>
 
+            {/* Confirm Password Input */}
+            <Text style={styles.inputLabel}>Confirm Password</Text>
+            <View style={styles.inputContainer}>
+              <TextInput
+                style={styles.input}
+                placeholder="Re-enter password"
+                placeholderTextColor={Colors.gray[400]}
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+                secureTextEntry={!showConfirmPassword}
+              />
+              <TouchableOpacity 
+                style={styles.eyeIcon}
+                onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+              >
+                <Ionicons 
+                  name={showConfirmPassword ? "eye-off-outline" : "eye-outline"} 
+                  size={22} 
+                  color={Colors.gray[400]} 
+                />
+              </TouchableOpacity>
+            </View>
+
             {/* Role Toggle - Resident/Manager */}
             <View style={styles.roleToggleContainer}>
               <Text style={[styles.roleLabel, !isManager && styles.roleLabelActive]}>
