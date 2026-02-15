@@ -29,8 +29,8 @@ const { width } = Dimensions.get('window');
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { user, logout, updateUser } = useAuth();
-  
+  const { user, logout } = useAuth();
+
   // Toggle between Resident and Manager view
   const [viewMode, setViewMode] = useState<'RESIDENT' | 'MANAGER'>(
     user?.role === 'MANAGER' ? 'MANAGER' : 'RESIDENT'
@@ -48,21 +48,36 @@ export default function HomeScreen() {
   const numberOfResidences = user?.managedApartment?.numberOfUnits || 64;
 
   const handleSOS = () => {
-    Vibration.vibrate([0, 500, 200, 500]);
     Alert.alert(
-      '🚨 SOS Alert',
-      'Emergency alert has been sent to building management, security, and your emergency contacts.',
-      [{ text: 'OK', style: 'default' }]
+      '⚠️ Emergency Alert',
+      'This will immediately alert security, neighbors, and building management. Continue?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'ACTIVATE SOS',
+          style: 'destructive',
+          onPress: () => {
+            Vibration.vibrate([0, 500, 200, 500]);
+            Alert.alert(
+              '🚨 SOS Alert Sent',
+              'Emergency alert has been sent to building management, security, and your emergency contacts.',
+              [{ text: 'OK', style: 'default' }]
+            );
+          },
+        },
+      ]
     );
   };
 
   const handleLogout = () => {
     Alert.alert('Log out', 'Are you sure you want to log out?', [
       { text: 'Cancel', style: 'cancel' },
-      { text: 'Log out', style: 'destructive', onPress: () => {
-        logout();
-        router.replace('/welcome');
-      }},
+      {
+        text: 'Log out', style: 'destructive', onPress: () => {
+          logout();
+          router.replace('/welcome');
+        }
+      },
     ]);
   };
 
@@ -88,7 +103,7 @@ export default function HomeScreen() {
         <View style={styles.userInfoSection}>
           <Text style={styles.greeting}>Hello</Text>
           <Text style={styles.userName}>{userName}!</Text>
-          
+
           <View style={styles.userDetails}>
             <View style={styles.detailRow}>
               <Text style={styles.detailLabel}>Resident no</Text>
@@ -104,7 +119,7 @@ export default function HomeScreen() {
             </View>
           </View>
 
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.editButton}
             onPress={() => router.push('/(tabs)/profile')}
           >
@@ -114,7 +129,7 @@ export default function HomeScreen() {
       </View>
 
       {/* Logout Button */}
-      <TouchableOpacity 
+      <TouchableOpacity
         style={styles.logoutButton}
         onPress={handleLogout}
       >
@@ -122,7 +137,7 @@ export default function HomeScreen() {
       </TouchableOpacity>
 
       {/* SOS Button */}
-      <TouchableOpacity 
+      <TouchableOpacity
         style={styles.sosButton}
         onPress={handleSOS}
         activeOpacity={0.8}
@@ -139,7 +154,7 @@ export default function HomeScreen() {
       <View style={styles.featureGrid}>
         {/* Row 1 */}
         <View style={styles.featureRow}>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.featureCard}
             onPress={() => router.push('/(tabs)/parking')}
             activeOpacity={0.8}
@@ -154,7 +169,7 @@ export default function HomeScreen() {
             </LinearGradient>
           </TouchableOpacity>
 
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.featureCard}
             onPress={() => router.push('/common-area' as any)}
             activeOpacity={0.8}
@@ -172,7 +187,7 @@ export default function HomeScreen() {
 
         {/* Row 2 */}
         <View style={styles.featureRow}>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.featureCard}
             onPress={() => router.push('/(tabs)/rent')}
             activeOpacity={0.8}
@@ -187,9 +202,9 @@ export default function HomeScreen() {
             </LinearGradient>
           </TouchableOpacity>
 
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.featureCard}
-            onPress={() => router.push('/maintenance')}
+            onPress={() => router.push('/maintenance' as any)}
             activeOpacity={0.8}
           >
             <LinearGradient
@@ -199,6 +214,39 @@ export default function HomeScreen() {
               <MaterialCommunityIcons name="tools" size={36} color={Colors.white} />
               <Text style={styles.featureTitle}>Maintenance</Text>
               <Text style={styles.featureSubtitle}>Requests</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+        </View>
+
+        {/* Row 3 - Visitor Management */}
+        <View style={styles.featureRow}>
+          <TouchableOpacity
+            style={styles.featureCard}
+            onPress={() => router.push('/visitor-management' as any)}
+            activeOpacity={0.8}
+          >
+            <LinearGradient
+              colors={['#1E5F8A', '#1A4B6E']}
+              style={styles.featureCardGradient}
+            >
+              <Ionicons name="people" size={36} color={Colors.white} />
+              <Text style={styles.featureTitle}>Visitor</Text>
+              <Text style={styles.featureSubtitle}>Management</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.featureCard}
+            onPress={() => router.push('/(tabs)/announcements')}
+            activeOpacity={0.8}
+          >
+            <LinearGradient
+              colors={['#1E5F8A', '#1A4B6E']}
+              style={styles.featureCardGradient}
+            >
+              <Ionicons name="megaphone" size={36} color={Colors.white} />
+              <Text style={styles.featureTitle}>Announcements</Text>
+              <Text style={styles.featureSubtitle}>& News</Text>
             </LinearGradient>
           </TouchableOpacity>
         </View>
@@ -237,7 +285,7 @@ export default function HomeScreen() {
             </View>
           </View>
 
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.moreButton}
             onPress={() => router.push('/(tabs)/profile')}
           >
@@ -247,8 +295,16 @@ export default function HomeScreen() {
         </View>
       </View>
 
+      {/* Logout Button */}
+      <TouchableOpacity
+        style={styles.logoutButton}
+        onPress={handleLogout}
+      >
+        <Text style={styles.logoutButtonText}>Log out</Text>
+      </TouchableOpacity>
+
       {/* Announcements Card */}
-      <TouchableOpacity 
+      <TouchableOpacity
         style={styles.announcementCard}
         onPress={() => router.push('/(tabs)/announcements')}
         activeOpacity={0.8}
@@ -265,7 +321,7 @@ export default function HomeScreen() {
       </TouchableOpacity>
 
       {/* Dashboard Card */}
-      <TouchableOpacity 
+      <TouchableOpacity
         style={styles.dashboardCard}
         onPress={() => router.push('/manager-dashboard' as any)}
         activeOpacity={0.8}
@@ -279,26 +335,85 @@ export default function HomeScreen() {
         </LinearGradient>
       </TouchableOpacity>
 
-      {/* Logout Button */}
-      <TouchableOpacity 
-        style={styles.managerLogoutButton}
-        onPress={handleLogout}
-      >
-        <Text style={styles.logoutButtonText}>Log out</Text>
-      </TouchableOpacity>
+      {/* Manager Feature Grid */}
+      <View style={styles.featureGrid}>
+        <View style={styles.featureRow}>
+          <TouchableOpacity
+            style={styles.featureCard}
+            onPress={() => router.push('/maintenance' as any)}
+            activeOpacity={0.8}
+          >
+            <LinearGradient
+              colors={['#1E5F8A', '#1A4B6E']}
+              style={styles.featureCardGradient}
+            >
+              <MaterialCommunityIcons name="tools" size={36} color={Colors.white} />
+              <Text style={styles.featureTitle}>Maintenance</Text>
+              <Text style={styles.featureSubtitle}>Requests</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.featureCard}
+            onPress={() => router.push('/visitor-management' as any)}
+            activeOpacity={0.8}
+          >
+            <LinearGradient
+              colors={['#1E5F8A', '#1A4B6E']}
+              style={styles.featureCardGradient}
+            >
+              <Ionicons name="people" size={36} color={Colors.white} />
+              <Text style={styles.featureTitle}>Visitor</Text>
+              <Text style={styles.featureSubtitle}>Management</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.featureRow}>
+          <TouchableOpacity
+            style={styles.featureCard}
+            onPress={() => router.push('/(tabs)/parking')}
+            activeOpacity={0.8}
+          >
+            <LinearGradient
+              colors={['#1E5F8A', '#1A4B6E']}
+              style={styles.featureCardGradient}
+            >
+              <MaterialCommunityIcons name="parking" size={36} color={Colors.white} />
+              <Text style={styles.featureTitle}>Parking</Text>
+              <Text style={styles.featureSubtitle}>Management</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.featureCard}
+            onPress={() => router.push('/common-area' as any)}
+            activeOpacity={0.8}
+          >
+            <LinearGradient
+              colors={['#1E5F8A', '#1A4B6E']}
+              style={styles.featureCardGradient}
+            >
+              <MaterialCommunityIcons name="calendar-clock" size={36} color={Colors.white} />
+              <Text style={styles.featureTitle}>Common Area</Text>
+              <Text style={styles.featureSubtitle}>Booking</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+        </View>
+      </View>
     </>
   );
 
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
-      
+
       <LinearGradient
         colors={['#1A4B6E', '#0D2137']}
         style={styles.background}
       >
         <SafeAreaView style={styles.safeArea}>
-          <ScrollView 
+          <ScrollView
             showsVerticalScrollIndicator={false}
             contentContainerStyle={styles.scrollContent}
           >
@@ -469,14 +584,6 @@ const styles = StyleSheet.create({
     color: Colors.white,
     fontSize: 14,
     fontWeight: '600',
-  },
-  managerLogoutButton: {
-    backgroundColor: '#E74C3C',
-    paddingVertical: 12,
-    paddingHorizontal: 30,
-    borderRadius: 25,
-    alignSelf: 'center',
-    marginTop: 30,
   },
   sosButton: {
     width: 100,
