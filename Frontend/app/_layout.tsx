@@ -13,7 +13,7 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 import { AuthProvider } from '@/context/AuthContext';
 
 export const unstable_settings = {
-  initialRouteName: 'welcome',
+  initialRouteName: 'index',
 };
 
 export default function RootLayout() {
@@ -24,53 +24,56 @@ export default function RootLayout() {
       <AuthProvider>
         <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
           <Stack screenOptions={{ headerShown: false }}>
-          {/* Public Screens */}
-          <Stack.Screen name="welcome" />
-          <Stack.Screen name="login" />
-          <Stack.Screen name="register" />
-          
-          {/* Authenticated Screens */}
-          <Stack.Screen name="(tabs)" />
-          
-          {/* Modal Screens */}
-          <Stack.Screen 
-            name="modal" 
-            options={{ 
-              presentation: 'modal', 
-              title: 'Modal' 
-            }} 
-          />
-          <Stack.Screen 
-            name="maintenance" 
-            options={{ 
-              presentation: 'modal',
-              headerShown: false,
-              title: 'Maintenance Request'
-            }} 
-          />
-          <Stack.Screen 
-            name="common-area" 
-            options={{ 
-              headerShown: false,
-              title: 'Common Area Booking'
-            }} 
-          />
-          <Stack.Screen 
-            name="manager-dashboard" 
-            options={{ 
-              headerShown: false,
-              title: 'Manager Dashboard'
-            }} 
-          />
-          <Stack.Screen 
-            name="visitor-management" 
-            options={{ 
-              headerShown: false,
-              title: 'Visitor Management'
-            }} 
-          />
-        </Stack>
-        <StatusBar style="auto" />
+            {/* Entry Point */}
+            <Stack.Screen name="index" />
+
+            {/* Public Screens */}
+            <Stack.Screen name="welcome" />
+            <Stack.Screen name="login" />
+            <Stack.Screen name="register" />
+
+            {/* Authenticated Screens */}
+            <Stack.Screen name="(tabs)" />
+
+            {/* Modal Screens */}
+            <Stack.Screen
+              name="modal"
+              options={{
+                presentation: 'modal',
+                title: 'Modal'
+              }}
+            />
+            <Stack.Screen
+              name="maintenance"
+              options={{
+                presentation: 'modal',
+                headerShown: false,
+                title: 'Maintenance Request'
+              }}
+            />
+            <Stack.Screen
+              name="common-area"
+              options={{
+                headerShown: false,
+                title: 'Common Area Booking'
+              }}
+            />
+            <Stack.Screen
+              name="manager-dashboard"
+              options={{
+                headerShown: false,
+                title: 'Manager Dashboard'
+              }}
+            />
+            <Stack.Screen
+              name="visitor-management"
+              options={{
+                headerShown: false,
+                title: 'Visitor Management'
+              }}
+            />
+          </Stack>
+          <StatusBar style="auto" />
         </ThemeProvider>
       </AuthProvider>
     </SafeAreaProvider>
