@@ -235,3 +235,17 @@ const styles = StyleSheet.create({
   plusIcon: { width: 22, height: 22, borderRadius: 11, borderColor: 'white', borderWidth: 2, justifyContent: 'center', alignItems: 'center', marginRight: 10 },
   plusText: { color: 'white', fontSize: 16, fontWeight: 'bold', lineHeight: 18 },
   requestButtonText: { color: 'white', fontWeight: 'bold', fontSize: 16 },
+
+// Bottom Navigation Styles
+  bottomNav: {
+    flexDirection: 'row',
+    backgroundColor: '#0f172a',
+    paddingVertical: 12,
+    paddingBottom: 28, // Extra padding for iPhone notches
+    position: 'absolute',
+    bottom: 0,
+    width: '100%',
+    justifyContent: 'space-around',
+    borderTopLeftRadius: 15,
+    borderTopRightRadius: 15
+  },
