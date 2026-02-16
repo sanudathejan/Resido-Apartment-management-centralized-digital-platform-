@@ -1,7 +1,7 @@
 /**
  * Home Dashboard Screen
+ * Modern 2026 light theme - premium minimal UI
  * Supports both Resident and Manager views
- * Matching High Fidelity Prototype - Dark blue theme
  */
 
 import React, { useState } from 'react';
@@ -13,43 +13,122 @@ import {
   TouchableOpacity,
   StatusBar,
   Dimensions,
-  Image,
   Vibration,
   Alert,
   Switch,
+  Platform,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { Colors } from '@/constants/colors';
+import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@/context/AuthContext';
 
 const { width } = Dimensions.get('window');
+const CARD_GAP = 14;
+const CARD_WIDTH = (width - 40 - CARD_GAP) / 2;
+
+// Design tokens
+const COLORS = {
+  background: '#F4F7FB',
+  primary: '#2563EB',
+  primaryLight: '#EFF6FF',
+  sosRed: '#EF4444',
+  sosRedDark: '#DC2626',
+  textDark: '#1E293B',
+  textLight: '#64748B',
+  textMuted: '#94A3B8',
+  white: '#FFFFFF',
+  cardShadow: '#94A3B8',
+  border: '#E2E8F0',
+  green: '#10B981',
+  avatarBg: '#DBEAFE',
+};
+
+type FeatureCard = {
+  icon: keyof typeof Ionicons.glyphMap;
+  title: string;
+  subtitle: string;
+  route: string;
+  iconColor: string;
+  iconBg: string;
+};
+
+const FEATURE_CARDS: FeatureCard[] = [
+  {
+    icon: 'car-sport',
+    title: 'Parking',
+    subtitle: 'Manage slots',
+    route: '/(tabs)/parking',
+    iconColor: '#2563EB',
+    iconBg: '#EFF6FF',
+  },
+  {
+    icon: 'fitness',
+    title: 'Facilities',
+    subtitle: 'Book amenities',
+    route: '/common-area',
+    iconColor: '#7C3AED',
+    iconBg: '#F5F3FF',
+  },
+  {
+    icon: 'wallet',
+    title: 'Payments',
+    subtitle: 'Rent & bills',
+    route: '/(tabs)/rent',
+    iconColor: '#059669',
+    iconBg: '#ECFDF5',
+  },
+  {
+    icon: 'construct',
+    title: 'Maintenance',
+    subtitle: 'Request repairs',
+    route: '/maintenance',
+    iconColor: '#EA580C',
+    iconBg: '#FFF7ED',
+  },
+  {
+    icon: 'people',
+    title: 'Visitors',
+    subtitle: 'Manage guests',
+    route: '/visitor-management',
+    iconColor: '#0891B2',
+    iconBg: '#ECFEFF',
+  },
+  {
+    icon: 'megaphone',
+    title: 'Announcements',
+    subtitle: 'Latest updates',
+    route: '/(tabs)/announcements',
+    iconColor: '#DC2626',
+    iconBg: '#FEF2F2',
+  },
+];
+
+function getGreeting(): string {
+  const hour = new Date().getHours();
+  if (hour < 12) return 'Good Morning';
+  if (hour < 17) return 'Good Afternoon';
+  return 'Good Evening';
+}
 
 export default function HomeScreen() {
   const router = useRouter();
   const { user, logout } = useAuth();
 
-  // Toggle between Resident and Manager view
   const [viewMode, setViewMode] = useState<'RESIDENT' | 'MANAGER'>(
     user?.role === 'MANAGER' ? 'MANAGER' : 'RESIDENT'
   );
 
-  // User info
-  const userName = user?.name || 'User';
-  const residentNo = user?.apartmentNumber || 'B-4';
-  const mobileNo = user?.phone || '+94 XXXX XXXX';
-  const email = user?.email || 'user@email.com';
+  const userName = user?.name || 'John Resident';
+  const apartmentNo = user?.apartmentNumber || 'A-101';
 
-  // Manager/Apartment info
-  const apartmentName = user?.managedApartment?.name || 'PrimeLux Residence Colombo';
+  const apartmentName = user?.managedApartment?.name || 'PrimeLux Residence';
   const apartmentLocation = user?.managedApartment?.location || '23/A, Bakers street, Colombo 7';
   const numberOfResidences = user?.managedApartment?.numberOfUnits || 64;
 
   const handleSOS = () => {
     Alert.alert(
-      '⚠️ Emergency Alert',
+      'Emergency Alert',
       'This will immediately alert security, neighbors, and building management. Continue?',
       [
         { text: 'Cancel', style: 'cancel' },
@@ -59,7 +138,7 @@ export default function HomeScreen() {
           onPress: () => {
             Vibration.vibrate([0, 500, 200, 500]);
             Alert.alert(
-              '🚨 SOS Alert Sent',
+              'SOS Alert Sent',
               'Emergency alert has been sent to building management, security, and your emergency contacts.',
               [{ text: 'OK', style: 'default' }]
             );
@@ -73,10 +152,12 @@ export default function HomeScreen() {
     Alert.alert('Log out', 'Are you sure you want to log out?', [
       { text: 'Cancel', style: 'cancel' },
       {
-        text: 'Log out', style: 'destructive', onPress: () => {
+        text: 'Log out',
+        style: 'destructive',
+        onPress: () => {
           logout();
           router.replace('/welcome');
-        }
+        },
       },
     ]);
   };
@@ -85,363 +166,147 @@ export default function HomeScreen() {
     setViewMode(viewMode === 'RESIDENT' ? 'MANAGER' : 'RESIDENT');
   };
 
-  // Resident Dashboard View
-  const ResidentDashboard = () => (
-    <>
-      {/* Header with Logo and User Info */}
-      <View style={styles.header}>
-        {/* Logo Section */}
-        <View style={styles.logoSection}>
-          <Image
-            source={require('../../assets/images/ResiiDo_logo_nobg.png')}
-            style={styles.logo}
-            resizeMode="contain"
-          />
-        </View>
-
-        {/* User Info Section */}
-        <View style={styles.userInfoSection}>
-          <Text style={styles.greeting}>Hello</Text>
-          <Text style={styles.userName}>{userName}!</Text>
-
-          <View style={styles.userDetails}>
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Resident no</Text>
-              <Text style={styles.detailValue}>{residentNo}</Text>
-            </View>
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Mobile no</Text>
-              <Text style={styles.detailValue}>{mobileNo}</Text>
-            </View>
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Email</Text>
-              <Text style={styles.detailValue}>{email}</Text>
-            </View>
-          </View>
-
-          <TouchableOpacity
-            style={styles.editButton}
-            onPress={() => router.push('/(tabs)/profile')}
-          >
-            <Text style={styles.editButtonText}>Edit personal Details</Text>
-          </TouchableOpacity>
-        </View>
+  const renderFeatureCard = (card: FeatureCard, index: number) => (
+    <TouchableOpacity
+      key={card.title}
+      style={[
+        styles.featureCard,
+        index % 2 === 0 ? { marginRight: CARD_GAP / 2 } : { marginLeft: CARD_GAP / 2 },
+      ]}
+      onPress={() => router.push(card.route as any)}
+      activeOpacity={0.7}
+    >
+      <View style={[styles.featureIconContainer, { backgroundColor: card.iconBg }]}>
+        <Ionicons name={card.icon} size={26} color={card.iconColor} />
       </View>
-
-      {/* Logout Button */}
-      <TouchableOpacity
-        style={styles.logoutButton}
-        onPress={handleLogout}
-      >
-        <Text style={styles.logoutButtonText}>Log out</Text>
-      </TouchableOpacity>
-
-      {/* SOS Button */}
-      <TouchableOpacity
-        style={styles.sosButton}
-        onPress={handleSOS}
-        activeOpacity={0.8}
-      >
-        <LinearGradient
-          colors={['#E74C3C', '#C0392B']}
-          style={styles.sosGradient}
-        >
-          <Text style={styles.sosText}>SOS!</Text>
-        </LinearGradient>
-      </TouchableOpacity>
-
-      {/* Feature Grid */}
-      <View style={styles.featureGrid}>
-        {/* Row 1 */}
-        <View style={styles.featureRow}>
-          <TouchableOpacity
-            style={styles.featureCard}
-            onPress={() => router.push('/(tabs)/parking')}
-            activeOpacity={0.8}
-          >
-            <LinearGradient
-              colors={['#1E5F8A', '#1A4B6E']}
-              style={styles.featureCardGradient}
-            >
-              <MaterialCommunityIcons name="parking" size={36} color={Colors.white} />
-              <Text style={styles.featureTitle}>Parking</Text>
-              <Text style={styles.featureSubtitle}>Management</Text>
-            </LinearGradient>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.featureCard}
-            onPress={() => router.push('/common-area' as any)}
-            activeOpacity={0.8}
-          >
-            <LinearGradient
-              colors={['#1E5F8A', '#1A4B6E']}
-              style={styles.featureCardGradient}
-            >
-              <MaterialCommunityIcons name="calendar-clock" size={36} color={Colors.white} />
-              <Text style={styles.featureTitle}>Common Area</Text>
-              <Text style={styles.featureSubtitle}>Booking</Text>
-            </LinearGradient>
-          </TouchableOpacity>
-        </View>
-
-        {/* Row 2 */}
-        <View style={styles.featureRow}>
-          <TouchableOpacity
-            style={styles.featureCard}
-            onPress={() => router.push('/(tabs)/rent')}
-            activeOpacity={0.8}
-          >
-            <LinearGradient
-              colors={['#1E5F8A', '#1A4B6E']}
-              style={styles.featureCardGradient}
-            >
-              <MaterialCommunityIcons name="account-cash" size={36} color={Colors.white} />
-              <Text style={styles.featureTitle}>Account Info</Text>
-              <Text style={styles.featureSubtitle}>& Payment</Text>
-            </LinearGradient>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.featureCard}
-            onPress={() => router.push('/maintenance' as any)}
-            activeOpacity={0.8}
-          >
-            <LinearGradient
-              colors={['#1E5F8A', '#1A4B6E']}
-              style={styles.featureCardGradient}
-            >
-              <MaterialCommunityIcons name="tools" size={36} color={Colors.white} />
-              <Text style={styles.featureTitle}>Maintenance</Text>
-              <Text style={styles.featureSubtitle}>Requests</Text>
-            </LinearGradient>
-          </TouchableOpacity>
-        </View>
-
-        {/* Row 3 - Visitor Management */}
-        <View style={styles.featureRow}>
-          <TouchableOpacity
-            style={styles.featureCard}
-            onPress={() => router.push('/visitor-management' as any)}
-            activeOpacity={0.8}
-          >
-            <LinearGradient
-              colors={['#1E5F8A', '#1A4B6E']}
-              style={styles.featureCardGradient}
-            >
-              <Ionicons name="people" size={36} color={Colors.white} />
-              <Text style={styles.featureTitle}>Visitor</Text>
-              <Text style={styles.featureSubtitle}>Management</Text>
-            </LinearGradient>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.featureCard}
-            onPress={() => router.push('/(tabs)/announcements')}
-            activeOpacity={0.8}
-          >
-            <LinearGradient
-              colors={['#1E5F8A', '#1A4B6E']}
-              style={styles.featureCardGradient}
-            >
-              <Ionicons name="megaphone" size={36} color={Colors.white} />
-              <Text style={styles.featureTitle}>Announcements</Text>
-              <Text style={styles.featureSubtitle}>& News</Text>
-            </LinearGradient>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </>
+      <Text style={styles.featureTitle}>{card.title}</Text>
+      <Text style={styles.featureSubtitle}>{card.subtitle}</Text>
+    </TouchableOpacity>
   );
 
   // Manager Dashboard View
   const ManagerDashboard = () => (
     <>
-      {/* Header with Logo and Apartment Info */}
-      <View style={styles.header}>
-        {/* Logo Section */}
-        <View style={styles.logoSection}>
-          <Image
-            source={require('../../assets/images/ResiiDo_logo_nobg.png')}
-            style={styles.logo}
-            resizeMode="contain"
-          />
+      {/* Manager Info Card */}
+      <View style={styles.managerCard}>
+        <View style={styles.managerCardHeader}>
+          <Ionicons name="business" size={22} color={COLORS.primary} />
+          <Text style={styles.managerCardTitle}>Building Overview</Text>
         </View>
-
-        {/* Apartment Info Section */}
-        <View style={styles.userInfoSection}>
-          <View style={styles.managerInfoCard}>
-            <View style={styles.managerInfoRow}>
-              <Text style={styles.managerInfoLabel}>Apartment Name</Text>
-              <Text style={styles.managerInfoValue}>{apartmentName}</Text>
-            </View>
-            <View style={styles.managerInfoRow}>
-              <Text style={styles.managerInfoLabel}>Apartment Location</Text>
-              <Text style={styles.managerInfoValue}>{apartmentLocation}</Text>
-            </View>
-            <View style={styles.managerInfoRow}>
-              <Text style={styles.managerInfoLabel}>Number of Residences</Text>
-              <Text style={styles.managerInfoValue}>{numberOfResidences}</Text>
-            </View>
+        <View style={styles.managerStatRow}>
+          <View style={styles.managerStat}>
+            <Text style={styles.managerStatValue}>{numberOfResidences}</Text>
+            <Text style={styles.managerStatLabel}>Units</Text>
           </View>
-
-          <TouchableOpacity
-            style={styles.moreButton}
-            onPress={() => router.push('/(tabs)/profile')}
-          >
-            <Text style={styles.moreButtonText}>more</Text>
-            <Ionicons name="chevron-forward" size={14} color={Colors.white} />
-          </TouchableOpacity>
+          <View style={styles.managerStatDivider} />
+          <View style={styles.managerStat}>
+            <Text style={styles.managerStatValue}>{apartmentName}</Text>
+            <Text style={styles.managerStatLabel}>Property</Text>
+          </View>
         </View>
+        <Text style={styles.managerLocation}>
+          <Ionicons name="location-outline" size={13} color={COLORS.textLight} /> {apartmentLocation}
+        </Text>
+        <TouchableOpacity
+          style={styles.dashboardLink}
+          onPress={() => router.push('/manager-dashboard' as any)}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.dashboardLinkText}>Open Dashboard</Text>
+          <Ionicons name="arrow-forward" size={16} color={COLORS.primary} />
+        </TouchableOpacity>
       </View>
 
-      {/* Logout Button */}
-      <TouchableOpacity
-        style={styles.logoutButton}
-        onPress={handleLogout}
-      >
-        <Text style={styles.logoutButtonText}>Log out</Text>
-      </TouchableOpacity>
-
-      {/* Announcements Card */}
-      <TouchableOpacity
-        style={styles.announcementCard}
-        onPress={() => router.push('/(tabs)/announcements')}
-        activeOpacity={0.8}
-      >
-        <LinearGradient
-          colors={['#1E5F8A', '#1A4B6E']}
-          style={styles.announcementGradient}
-        >
-          <Text style={styles.announcementTitle}>Announcements</Text>
-          <TouchableOpacity style={styles.showDetailsButton}>
-            <Text style={styles.showDetailsText}>Show More Details</Text>
-          </TouchableOpacity>
-        </LinearGradient>
-      </TouchableOpacity>
-
-      {/* Dashboard Card */}
-      <TouchableOpacity
-        style={styles.dashboardCard}
-        onPress={() => router.push('/manager-dashboard' as any)}
-        activeOpacity={0.8}
-      >
-        <LinearGradient
-          colors={['#1E5F8A', '#1A4B6E']}
-          style={styles.dashboardGradient}
-        >
-          <Text style={styles.dashboardTitle}>Dashboard</Text>
-          <Text style={styles.dashboardSubtitle}>Tap to show info</Text>
-        </LinearGradient>
-      </TouchableOpacity>
-
-      {/* Manager Feature Grid */}
+      {/* Feature Grid */}
+      <Text style={styles.sectionTitle}>Quick Actions</Text>
       <View style={styles.featureGrid}>
-        <View style={styles.featureRow}>
-          <TouchableOpacity
-            style={styles.featureCard}
-            onPress={() => router.push('/maintenance' as any)}
-            activeOpacity={0.8}
-          >
-            <LinearGradient
-              colors={['#1E5F8A', '#1A4B6E']}
-              style={styles.featureCardGradient}
-            >
-              <MaterialCommunityIcons name="tools" size={36} color={Colors.white} />
-              <Text style={styles.featureTitle}>Maintenance</Text>
-              <Text style={styles.featureSubtitle}>Requests</Text>
-            </LinearGradient>
-          </TouchableOpacity>
+        {FEATURE_CARDS.map((card, index) => renderFeatureCard(card, index))}
+      </View>
+    </>
+  );
 
-          <TouchableOpacity
-            style={styles.featureCard}
-            onPress={() => router.push('/visitor-management' as any)}
-            activeOpacity={0.8}
-          >
-            <LinearGradient
-              colors={['#1E5F8A', '#1A4B6E']}
-              style={styles.featureCardGradient}
-            >
-              <Ionicons name="people" size={36} color={Colors.white} />
-              <Text style={styles.featureTitle}>Visitor</Text>
-              <Text style={styles.featureSubtitle}>Management</Text>
-            </LinearGradient>
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.featureRow}>
-          <TouchableOpacity
-            style={styles.featureCard}
-            onPress={() => router.push('/(tabs)/parking')}
-            activeOpacity={0.8}
-          >
-            <LinearGradient
-              colors={['#1E5F8A', '#1A4B6E']}
-              style={styles.featureCardGradient}
-            >
-              <MaterialCommunityIcons name="parking" size={36} color={Colors.white} />
-              <Text style={styles.featureTitle}>Parking</Text>
-              <Text style={styles.featureSubtitle}>Management</Text>
-            </LinearGradient>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.featureCard}
-            onPress={() => router.push('/common-area' as any)}
-            activeOpacity={0.8}
-          >
-            <LinearGradient
-              colors={['#1E5F8A', '#1A4B6E']}
-              style={styles.featureCardGradient}
-            >
-              <MaterialCommunityIcons name="calendar-clock" size={36} color={Colors.white} />
-              <Text style={styles.featureTitle}>Common Area</Text>
-              <Text style={styles.featureSubtitle}>Booking</Text>
-            </LinearGradient>
-          </TouchableOpacity>
-        </View>
+  // Resident Dashboard View
+  const ResidentDashboard = () => (
+    <>
+      {/* Feature Grid */}
+      <Text style={styles.sectionTitle}>Quick Actions</Text>
+      <View style={styles.featureGrid}>
+        {FEATURE_CARDS.map((card, index) => renderFeatureCard(card, index))}
       </View>
     </>
   );
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" />
+      <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
 
-      <LinearGradient
-        colors={['#1A4B6E', '#0D2137']}
-        style={styles.background}
-      >
-        <SafeAreaView style={styles.safeArea}>
-          <ScrollView
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.scrollContent}
-          >
-            {/* View Mode Toggle (only show if user can be both) */}
-            {(user?.role === 'MANAGER' || user?.role === 'ADMIN') && (
-              <View style={styles.viewModeToggle}>
-                <Text style={[styles.viewModeLabel, viewMode === 'RESIDENT' && styles.viewModeLabelActive]}>
-                  Resident
-                </Text>
-                <Switch
-                  value={viewMode === 'MANAGER'}
-                  onValueChange={toggleViewMode}
-                  trackColor={{ false: '#2ECC71', true: '#2ECC71' }}
-                  thumbColor={Colors.white}
-                  ios_backgroundColor="#2ECC71"
-                  style={styles.viewModeSwitch}
-                />
-                <Text style={[styles.viewModeLabel, viewMode === 'MANAGER' && styles.viewModeLabelActive]}>
-                  Manager
-                </Text>
+      <SafeAreaView style={styles.safeArea}>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
+        >
+          {/* Header */}
+          <View style={styles.header}>
+            <View style={styles.headerLeft}>
+              <Text style={styles.greeting}>{getGreeting()} 👋</Text>
+              <Text style={styles.userName}>{userName}</Text>
+              <View style={styles.apartmentBadge}>
+                <Ionicons name="home-outline" size={13} color={COLORS.primary} />
+                <Text style={styles.apartmentText}>{apartmentNo}</Text>
               </View>
-            )}
+            </View>
+            <TouchableOpacity
+              style={styles.avatar}
+              onPress={() => router.push('/(tabs)/profile')}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.avatarText}>
+                {userName.charAt(0).toUpperCase()}
+              </Text>
+            </TouchableOpacity>
+          </View>
 
-            {/* Render appropriate dashboard based on view mode */}
-            {viewMode === 'RESIDENT' ? <ResidentDashboard /> : <ManagerDashboard />}
-          </ScrollView>
-        </SafeAreaView>
-      </LinearGradient>
+          {/* View Mode Toggle */}
+          {(user?.role === 'MANAGER' || user?.role === 'ADMIN') && (
+            <View style={styles.viewModeToggle}>
+              <Text style={[styles.viewModeLabel, viewMode === 'RESIDENT' && styles.viewModeLabelActive]}>
+                Resident
+              </Text>
+              <Switch
+                value={viewMode === 'MANAGER'}
+                onValueChange={toggleViewMode}
+                trackColor={{ false: COLORS.border, true: COLORS.primary }}
+                thumbColor={COLORS.white}
+                style={styles.viewModeSwitch}
+              />
+              <Text style={[styles.viewModeLabel, viewMode === 'MANAGER' && styles.viewModeLabelActive]}>
+                Manager
+              </Text>
+            </View>
+          )}
+
+          {/* Dashboard Content */}
+          {viewMode === 'RESIDENT' ? <ResidentDashboard /> : <ManagerDashboard />}
+
+          {/* Logout */}
+          <TouchableOpacity style={styles.logoutButton} onPress={handleLogout} activeOpacity={0.7}>
+            <Ionicons name="log-out-outline" size={18} color={COLORS.textLight} />
+            <Text style={styles.logoutText}>Log out</Text>
+          </TouchableOpacity>
+        </ScrollView>
+
+        {/* SOS Floating Button */}
+        <TouchableOpacity
+          style={styles.sosButton}
+          onPress={handleSOS}
+          activeOpacity={0.85}
+        >
+          <View style={styles.sosInner}>
+            <Ionicons name="alert" size={22} color={COLORS.white} />
+            <Text style={styles.sosLabel}>SOS</Text>
+          </View>
+        </TouchableOpacity>
+      </SafeAreaView>
     </View>
   );
 }
@@ -449,247 +314,284 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  background: {
-    flex: 1,
+    backgroundColor: COLORS.background,
   },
   safeArea: {
     flex: 1,
   },
   scrollContent: {
     paddingHorizontal: 20,
-    paddingBottom: 100,
+    paddingTop: 8,
+    paddingBottom: 120,
   },
+
+  // Header
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginTop: 12,
+    marginBottom: 24,
+  },
+  headerLeft: {
+    flex: 1,
+  },
+  greeting: {
+    fontSize: 15,
+    color: COLORS.textLight,
+    fontWeight: '500',
+    marginBottom: 4,
+  },
+  userName: {
+    fontSize: 26,
+    fontWeight: '800',
+    color: COLORS.textDark,
+    letterSpacing: -0.5,
+    marginBottom: 8,
+  },
+  apartmentBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.primaryLight,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    borderRadius: 20,
+    alignSelf: 'flex-start',
+    gap: 5,
+  },
+  apartmentText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: COLORS.primary,
+  },
+  avatar: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: COLORS.avatarBg,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: COLORS.primary,
+  },
+  avatarText: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: COLORS.primary,
+  },
+
+  // View Mode Toggle
   viewModeToggle: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginVertical: 15,
-    paddingVertical: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: 25,
-    alignSelf: 'center',
+    marginBottom: 20,
+    paddingVertical: 10,
     paddingHorizontal: 20,
+    backgroundColor: COLORS.white,
+    borderRadius: 24,
+    alignSelf: 'center',
+    ...Platform.select({
+      ios: {
+        shadowColor: COLORS.cardShadow,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.08,
+        shadowRadius: 8,
+      },
+      android: { elevation: 2 },
+    }),
   },
   viewModeLabel: {
     fontSize: 14,
     fontWeight: '500',
-    color: 'rgba(255, 255, 255, 0.5)',
+    color: COLORS.textMuted,
     marginHorizontal: 10,
   },
   viewModeLabelActive: {
-    color: Colors.white,
+    color: COLORS.textDark,
     fontWeight: '700',
   },
   viewModeSwitch: {
-    transform: [{ scaleX: 0.9 }, { scaleY: 0.9 }],
+    transform: [{ scaleX: 0.85 }, { scaleY: 0.85 }],
   },
-  header: {
-    flexDirection: 'row',
-    marginTop: 10,
-  },
-  logoSection: {
-    width: 80,
-    alignItems: 'center',
-  },
-  logo: {
-    width: 70,
-    height: 70,
-  },
-  userInfoSection: {
-    flex: 1,
-    marginLeft: 10,
-  },
-  greeting: {
-    fontSize: 16,
-    color: Colors.white,
-    opacity: 0.9,
-  },
-  userName: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: Colors.white,
-    marginBottom: 12,
-  },
-  userDetails: {
-    marginBottom: 12,
-  },
-  detailRow: {
-    flexDirection: 'row',
-    marginBottom: 4,
-  },
-  detailLabel: {
-    fontSize: 12,
-    color: 'rgba(255, 255, 255, 0.7)',
-    width: 80,
-  },
-  detailValue: {
-    fontSize: 12,
-    color: Colors.white,
-    fontWeight: '500',
-    flex: 1,
-  },
-  editButton: {
-    backgroundColor: 'rgba(46, 204, 113, 0.8)',
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 20,
-    alignSelf: 'flex-start',
-  },
-  editButtonText: {
-    color: Colors.white,
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  // Manager Info Styles
-  managerInfoCard: {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: 15,
-    padding: 15,
-    marginBottom: 10,
-  },
-  managerInfoRow: {
-    marginBottom: 10,
-  },
-  managerInfoLabel: {
-    fontSize: 11,
-    color: 'rgba(255, 255, 255, 0.7)',
-    marginBottom: 2,
-  },
-  managerInfoValue: {
-    fontSize: 14,
-    color: Colors.white,
-    fontWeight: '600',
-  },
-  moreButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    alignSelf: 'flex-end',
-  },
-  moreButtonText: {
-    color: Colors.white,
-    fontSize: 12,
-    fontWeight: '500',
-  },
-  logoutButton: {
-    backgroundColor: '#E74C3C',
-    paddingVertical: 12,
-    paddingHorizontal: 30,
-    borderRadius: 25,
-    alignSelf: 'flex-start',
-    marginTop: 20,
-    marginLeft: 5,
-  },
-  logoutButtonText: {
-    color: Colors.white,
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  sosButton: {
-    width: 100,
-    height: 100,
-    borderRadius: 20,
-    marginTop: 20,
-    marginLeft: 5,
-    overflow: 'hidden',
-    shadowColor: '#E74C3C',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  sosGradient: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  sosText: {
-    color: Colors.white,
-    fontSize: 28,
-    fontWeight: '900',
-    letterSpacing: 2,
-  },
-  featureGrid: {
-    marginTop: 25,
-    gap: 15,
-  },
-  featureRow: {
-    flexDirection: 'row',
-    gap: 15,
-  },
-  featureCard: {
-    flex: 1,
-    height: 130,
-    borderRadius: 20,
-    overflow: 'hidden',
-  },
-  featureCardGradient: {
-    flex: 1,
-    padding: 16,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  featureTitle: {
-    color: Colors.white,
-    fontSize: 14,
-    fontWeight: '700',
-    marginTop: 10,
-    textAlign: 'center',
-  },
-  featureSubtitle: {
-    color: 'rgba(255, 255, 255, 0.8)',
-    fontSize: 12,
-    textAlign: 'center',
-  },
-  // Manager Dashboard Cards
-  announcementCard: {
-    borderRadius: 20,
-    overflow: 'hidden',
-    marginTop: 20,
-    height: 120,
-  },
-  announcementGradient: {
-    flex: 1,
-    padding: 20,
-    justifyContent: 'space-between',
-  },
-  announcementTitle: {
-    color: Colors.white,
+
+  // Section Title
+  sectionTitle: {
     fontSize: 18,
     fontWeight: '700',
+    color: COLORS.textDark,
+    marginBottom: 16,
+    letterSpacing: -0.3,
   },
-  showDetailsButton: {
-    backgroundColor: 'rgba(46, 204, 113, 0.8)',
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 20,
-    alignSelf: 'flex-start',
+
+  // Feature Grid
+  featureGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
   },
-  showDetailsText: {
-    color: Colors.white,
-    fontSize: 12,
-    fontWeight: '600',
+  featureCard: {
+    width: CARD_WIDTH,
+    backgroundColor: COLORS.white,
+    borderRadius: 22,
+    padding: 18,
+    marginBottom: CARD_GAP,
+    ...Platform.select({
+      ios: {
+        shadowColor: COLORS.cardShadow,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 12,
+      },
+      android: { elevation: 3 },
+    }),
   },
-  dashboardCard: {
-    borderRadius: 20,
-    overflow: 'hidden',
-    marginTop: 20,
-    height: 180,
-  },
-  dashboardGradient: {
-    flex: 1,
-    padding: 20,
+  featureIconContainer: {
+    width: 50,
+    height: 50,
+    borderRadius: 16,
+    alignItems: 'center',
     justifyContent: 'center',
+    marginBottom: 14,
+  },
+  featureTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: COLORS.textDark,
+    marginBottom: 3,
+  },
+  featureSubtitle: {
+    fontSize: 12,
+    color: COLORS.textLight,
+    fontWeight: '400',
+  },
+
+  // Manager Card
+  managerCard: {
+    backgroundColor: COLORS.white,
+    borderRadius: 22,
+    padding: 20,
+    marginBottom: 24,
+    ...Platform.select({
+      ios: {
+        shadowColor: COLORS.cardShadow,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 12,
+      },
+      android: { elevation: 3 },
+    }),
+  },
+  managerCardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 16,
+  },
+  managerCardTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: COLORS.textDark,
+  },
+  managerStatRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  managerStat: {
+    flex: 1,
     alignItems: 'center',
   },
-  dashboardTitle: {
-    color: Colors.white,
-    fontSize: 24,
+  managerStatValue: {
+    fontSize: 16,
     fontWeight: '700',
-    marginBottom: 8,
+    color: COLORS.textDark,
+    marginBottom: 2,
   },
-  dashboardSubtitle: {
-    color: 'rgba(255, 255, 255, 0.7)',
+  managerStatLabel: {
+    fontSize: 12,
+    color: COLORS.textLight,
+  },
+  managerStatDivider: {
+    width: 1,
+    height: 32,
+    backgroundColor: COLORS.border,
+    marginHorizontal: 12,
+  },
+  managerLocation: {
+    fontSize: 13,
+    color: COLORS.textLight,
+    marginBottom: 14,
+  },
+  dashboardLink: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 10,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.border,
+  },
+  dashboardLinkText: {
     fontSize: 14,
+    fontWeight: '600',
+    color: COLORS.primary,
+  },
+
+  // Logout
+  logoutButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    marginTop: 24,
+    paddingVertical: 14,
+    borderRadius: 16,
+    backgroundColor: COLORS.white,
+    ...Platform.select({
+      ios: {
+        shadowColor: COLORS.cardShadow,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.06,
+        shadowRadius: 6,
+      },
+      android: { elevation: 1 },
+    }),
+  },
+  logoutText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: COLORS.textLight,
+  },
+
+  // SOS Button
+  sosButton: {
+    position: 'absolute',
+    bottom: Platform.OS === 'ios' ? 100 : 80,
+    right: 20,
+    zIndex: 100,
+  },
+  sosInner: {
+    width: 62,
+    height: 62,
+    borderRadius: 31,
+    backgroundColor: COLORS.sosRed,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...Platform.select({
+      ios: {
+        shadowColor: COLORS.sosRed,
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.4,
+        shadowRadius: 14,
+      },
+      android: { elevation: 10 },
+    }),
+  },
+  sosLabel: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: COLORS.white,
+    letterSpacing: 1,
+    marginTop: 1,
   },
 });

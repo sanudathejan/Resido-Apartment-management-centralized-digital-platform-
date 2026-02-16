@@ -1,6 +1,6 @@
 /**
  * Parking Screen
- * Parking slots and visitor management
+ * Parking slots and visitor management — 2026 light theme
  */
 
 import React, { useState, useEffect } from 'react';
@@ -13,15 +13,185 @@ import {
   TouchableOpacity,
   Modal,
   Alert,
+  Platform,
+  TextInput,
+  KeyboardAvoidingView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { Card, Button, InputField, StatusBadge, EmptyState } from '@/components/ui';
-import { Colors } from '@/constants/colors';
 import { useAuth } from '@/context/AuthContext';
 import { parkingService } from '@/services';
 import { ParkingSlot, VisitorEntry } from '@/types';
+
+/* ─── Design Tokens ─── */
+const C = {
+  bg: '#F4F7FB',
+  primary: '#2563EB',
+  primaryLight: '#EFF6FF',
+  white: '#FFFFFF',
+  textDark: '#1E293B',
+  textLight: '#64748B',
+  textMuted: '#94A3B8',
+  border: '#E2E8F0',
+  success: '#10B981',
+  warning: '#F59E0B',
+  error: '#EF4444',
+  secondary: '#7C3AED',
+  secondaryBg: '#F5F3FF',
+} as const;
+
+/* ─── Helpers ─── */
+const shadow = (elevation: number) =>
+  Platform.select({
+    ios: {
+      shadowColor: '#0F172A',
+      shadowOffset: { width: 0, height: elevation / 2 },
+      shadowOpacity: 0.08 + elevation * 0.01,
+      shadowRadius: elevation * 1.2,
+    },
+    android: {
+      elevation,
+    },
+    default: {},
+  }) as object;
+
+const getInitials = (name: string) =>
+  name
+    .split(' ')
+    .slice(0, 2)
+    .map((w) => w[0])
+    .join('')
+    .toUpperCase();
+
+const statusColor = (status: string) => {
+  switch (status) {
+    case 'CHECKED_IN':
+    case 'Available':
+      return { bg: '#ECFDF5', text: C.success };
+    case 'CHECKED_OUT':
+    case 'Occupied':
+      return { bg: '#FEF2F2', text: C.error };
+    case 'PENDING':
+      return { bg: '#FFFBEB', text: C.warning };
+    default:
+      return { bg: C.primaryLight, text: C.primary };
+  }
+};
+
+const statusLabel = (status: string) => {
+  switch (status) {
+    case 'CHECKED_IN':
+      return 'Checked In';
+    case 'CHECKED_OUT':
+      return 'Checked Out';
+    case 'PENDING':
+      return 'Pending';
+    default:
+      return status;
+  }
+};
+
+/* ─── Inline StatusBadge ─── */
+function StatusBadge({ status }: { status: string }) {
+  const c = statusColor(status);
+  return (
+    <View style={[badgeStyles.root, { backgroundColor: c.bg }]}>
+      <View style={[badgeStyles.dot, { backgroundColor: c.text }]} />
+      <Text style={[badgeStyles.label, { color: c.text }]}>{statusLabel(status)}</Text>
+    </View>
+  );
+}
+
+const badgeStyles = StyleSheet.create({
+  root: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 20,
+    gap: 5,
+  },
+  dot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+  },
+  label: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+});
+
+/* ─── Inline Input ─── */
+function FormInput({
+  label,
+  placeholder,
+  value,
+  onChangeText,
+  icon,
+  keyboardType,
+  autoCapitalize,
+}: {
+  label: string;
+  placeholder: string;
+  value: string;
+  onChangeText: (v: string) => void;
+  icon: keyof typeof Ionicons.glyphMap;
+  keyboardType?: 'default' | 'phone-pad';
+  autoCapitalize?: 'none' | 'sentences' | 'words' | 'characters';
+}) {
+  return (
+    <View style={inputStyles.wrapper}>
+      <Text style={inputStyles.label}>{label}</Text>
+      <View style={inputStyles.row}>
+        <Ionicons name={icon} size={18} color={C.textMuted} style={inputStyles.icon} />
+        <TextInput
+          style={inputStyles.input}
+          placeholder={placeholder}
+          placeholderTextColor={C.textMuted}
+          value={value}
+          onChangeText={onChangeText}
+          keyboardType={keyboardType ?? 'default'}
+          autoCapitalize={autoCapitalize ?? 'sentences'}
+        />
+      </View>
+    </View>
+  );
+}
+
+const inputStyles = StyleSheet.create({
+  wrapper: {
+    marginBottom: 16,
+  },
+  label: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: C.textDark,
+    marginBottom: 6,
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: C.bg,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: C.border,
+    paddingHorizontal: 14,
+  },
+  icon: {
+    marginRight: 10,
+  },
+  input: {
+    flex: 1,
+    fontSize: 15,
+    color: C.textDark,
+    paddingVertical: Platform.OS === 'ios' ? 14 : 10,
+  },
+});
+
+/* ════════════════════════════════════════════════════════
+   Main Screen
+   ════════════════════════════════════════════════════════ */
 
 export default function ParkingScreen() {
   const { user } = useAuth();
@@ -31,7 +201,7 @@ export default function ParkingScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [showVisitorModal, setShowVisitorModal] = useState(false);
-  
+
   // Visitor form state
   const [visitorForm, setVisitorForm] = useState({
     name: '',
@@ -97,14 +267,14 @@ export default function ParkingScreen() {
       try {
         const updated = await parkingService.toggleSlotAvailability(
           parkingSlot.id,
-          !parkingSlot.isAvailableForLending
+          !parkingSlot.isAvailableForLending,
         );
         setParkingSlot(updated);
         Alert.alert(
           'Success',
           updated.isAvailableForLending
             ? 'Your slot is now available for lending'
-            : 'Your slot is no longer available for lending'
+            : 'Your slot is no longer available for lending',
         );
       } catch (error) {
         Alert.alert('Error', 'Failed to update slot availability');
@@ -147,40 +317,41 @@ export default function ParkingScreen() {
   const displaySlot = parkingSlot || mockParkingSlot;
   const displayVisitors = visitors.length > 0 ? visitors : mockVisitors;
 
+  /* ─── Render ─── */
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      {/* Header */}
-      <LinearGradient
-        colors={Colors.gradients.secondary as [string, string, ...string[]]}
-        style={styles.header}
-      >
+      {/* ── Flat Header ── */}
+      <View style={styles.header}>
         <Text style={styles.headerTitle}>Parking & Visitors</Text>
         <Text style={styles.headerSubtitle}>Manage parking and visitor entries</Text>
-      </LinearGradient>
+      </View>
 
-      {/* Tab Selector */}
-      <View style={styles.tabContainer}>
+      {/* ── Tab Selector ── */}
+      <View style={[styles.tabContainer, shadow(2)]}>
         <TouchableOpacity
+          activeOpacity={0.7}
           onPress={() => setActiveTab('parking')}
           style={[styles.tab, activeTab === 'parking' && styles.tabActive]}
         >
           <Ionicons
             name="car"
             size={20}
-            color={activeTab === 'parking' ? Colors.primary : Colors.text.secondary}
+            color={activeTab === 'parking' ? C.primary : C.textMuted}
           />
           <Text style={[styles.tabText, activeTab === 'parking' && styles.tabTextActive]}>
             My Parking
           </Text>
         </TouchableOpacity>
+
         <TouchableOpacity
+          activeOpacity={0.7}
           onPress={() => setActiveTab('visitors')}
           style={[styles.tab, activeTab === 'visitors' && styles.tabActive]}
         >
           <Ionicons
             name="people"
             size={20}
-            color={activeTab === 'visitors' ? Colors.primary : Colors.text.secondary}
+            color={activeTab === 'visitors' ? C.primary : C.textMuted}
           />
           <Text style={[styles.tabText, activeTab === 'visitors' && styles.tabTextActive]}>
             Visitors
@@ -188,102 +359,134 @@ export default function ParkingScreen() {
         </TouchableOpacity>
       </View>
 
+      {/* ── Scrollable Content ── */}
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={C.primary}
+            colors={[C.primary]}
+          />
         }
       >
         {activeTab === 'parking' ? (
-          // Parking Section
+          /* ── Parking Section ── */
           <>
-            <Card variant="elevated" style={styles.slotCard}>
+            {/* Slot Card */}
+            <View style={[styles.card, shadow(3)]}>
               <View style={styles.slotHeader}>
                 <View style={styles.slotIconContainer}>
-                  <Ionicons name="car" size={32} color={Colors.secondary} />
+                  <Ionicons name="car" size={28} color={C.secondary} />
                 </View>
                 <View style={styles.slotInfo}>
                   <Text style={styles.slotLabel}>Your Parking Slot</Text>
                   <Text style={styles.slotNumber}>{displaySlot.slotNumber}</Text>
                 </View>
-                <StatusBadge 
-                  status={displaySlot.isAvailableForLending ? 'Available' : 'Occupied'} 
+                <StatusBadge
+                  status={displaySlot.isAvailableForLending ? 'Available' : 'Occupied'}
                 />
               </View>
 
-              <View style={styles.vehicleInfo}>
+              <View style={styles.vehicleInfoBox}>
                 <View style={styles.infoRow}>
-                  <Ionicons name="speedometer-outline" size={18} color={Colors.text.secondary} />
+                  <Ionicons name="speedometer-outline" size={18} color={C.textLight} />
                   <Text style={styles.infoText}>
                     Vehicle: {displaySlot.vehicleNumber || 'Not registered'}
                   </Text>
                 </View>
                 <View style={styles.infoRow}>
-                  <Ionicons name="car-sport-outline" size={18} color={Colors.text.secondary} />
+                  <Ionicons name="car-sport-outline" size={18} color={C.textLight} />
                   <Text style={styles.infoText}>
                     Type: {displaySlot.vehicleType || 'Car'}
                   </Text>
                 </View>
               </View>
 
-              <Button
-                title={displaySlot.isAvailableForLending ? 'Mark as Unavailable' : 'Lend My Slot'}
+              <TouchableOpacity
+                activeOpacity={0.8}
                 onPress={toggleSlotAvailability}
-                variant={displaySlot.isAvailableForLending ? 'outline' : 'primary'}
-                icon={
-                  <Ionicons
-                    name={displaySlot.isAvailableForLending ? 'close-circle-outline' : 'share-outline'}
-                    size={20}
-                    color={displaySlot.isAvailableForLending ? Colors.primary : Colors.white}
-                  />
-                }
-              />
-            </Card>
+                style={[
+                  styles.actionButton,
+                  displaySlot.isAvailableForLending
+                    ? styles.actionButtonOutline
+                    : styles.actionButtonPrimary,
+                ]}
+              >
+                <Ionicons
+                  name={
+                    displaySlot.isAvailableForLending
+                      ? 'close-circle-outline'
+                      : 'share-outline'
+                  }
+                  size={20}
+                  color={displaySlot.isAvailableForLending ? C.primary : C.white}
+                />
+                <Text
+                  style={[
+                    styles.actionButtonText,
+                    displaySlot.isAvailableForLending
+                      ? styles.actionButtonTextOutline
+                      : styles.actionButtonTextPrimary,
+                  ]}
+                >
+                  {displaySlot.isAvailableForLending ? 'Mark as Unavailable' : 'Lend My Slot'}
+                </Text>
+              </TouchableOpacity>
+            </View>
 
-            {/* Parking Rules */}
-            <Card style={styles.rulesCard}>
+            {/* Parking Guidelines */}
+            <View style={[styles.card, shadow(2)]}>
               <Text style={styles.cardTitle}>Parking Guidelines</Text>
-              <View style={styles.ruleItem}>
-                <Ionicons name="checkmark-circle" size={18} color={Colors.success} />
-                <Text style={styles.ruleText}>Park only in your assigned slot</Text>
-              </View>
-              <View style={styles.ruleItem}>
-                <Ionicons name="checkmark-circle" size={18} color={Colors.success} />
-                <Text style={styles.ruleText}>Register visitors before entry</Text>
-              </View>
-              <View style={styles.ruleItem}>
-                <Ionicons name="checkmark-circle" size={18} color={Colors.success} />
-                <Text style={styles.ruleText}>Speed limit: 10 km/h in premises</Text>
-              </View>
-            </Card>
+              {[
+                'Park only in your assigned slot',
+                'Register visitors before entry',
+                'Speed limit: 10 km/h in premises',
+              ].map((rule, i) => (
+                <View key={i} style={styles.ruleItem}>
+                  <Ionicons name="checkmark-circle" size={18} color={C.success} />
+                  <Text style={styles.ruleText}>{rule}</Text>
+                </View>
+              ))}
+            </View>
           </>
         ) : (
-          // Visitors Section
+          /* ── Visitors Section ── */
           <>
-            <Button
-              title="Register New Visitor"
+            {/* Register Button */}
+            <TouchableOpacity
+              activeOpacity={0.8}
               onPress={() => setShowVisitorModal(true)}
-              gradient
-              icon={<Ionicons name="person-add" size={20} color={Colors.white} />}
-              style={styles.addVisitorButton}
-            />
+              style={[styles.registerButton, shadow(4)]}
+            >
+              <Ionicons name="person-add" size={20} color={C.white} />
+              <Text style={styles.registerButtonText}>Register New Visitor</Text>
+            </TouchableOpacity>
 
             <Text style={styles.sectionTitle}>Visitor History</Text>
-            
+
             {displayVisitors.length === 0 ? (
-              <EmptyState
-                icon="people-outline"
-                title="No Visitors"
-                message="You haven't registered any visitors yet."
-              />
+              /* Empty State */
+              <View style={styles.emptyContainer}>
+                <View style={[styles.emptyCircle, shadow(4)]}>
+                  <Ionicons name="people-outline" size={40} color={C.textMuted} />
+                </View>
+                <Text style={styles.emptyTitle}>No Visitors</Text>
+                <Text style={styles.emptyMessage}>
+                  You haven't registered any visitors yet.
+                </Text>
+              </View>
             ) : (
               displayVisitors.map((visitor) => (
-                <Card key={visitor.id} style={styles.visitorCard}>
+                <View key={visitor.id} style={[styles.card, shadow(2), { marginBottom: 12 }]}>
                   <View style={styles.visitorHeader}>
-                    <View style={styles.visitorAvatar}>
-                      <Ionicons name="person" size={24} color={Colors.white} />
+                    <View style={styles.avatarCircle}>
+                      <Text style={styles.avatarText}>
+                        {getInitials(visitor.visitorName)}
+                      </Text>
                     </View>
                     <View style={styles.visitorInfo}>
                       <Text style={styles.visitorName}>{visitor.visitorName}</Text>
@@ -291,125 +494,169 @@ export default function ParkingScreen() {
                     </View>
                     <StatusBadge status={visitor.status} />
                   </View>
-                  
-                  <View style={styles.visitorDetails}>
-                    {visitor.visitorPhone && (
+
+                  <View style={styles.visitorDetailsBox}>
+                    {visitor.visitorPhone ? (
                       <View style={styles.detailRow}>
-                        <Ionicons name="call-outline" size={16} color={Colors.text.secondary} />
+                        <Ionicons name="call-outline" size={15} color={C.textLight} />
                         <Text style={styles.detailText}>{visitor.visitorPhone}</Text>
                       </View>
-                    )}
-                    {visitor.vehicleNumber && (
+                    ) : null}
+                    {visitor.vehicleNumber ? (
                       <View style={styles.detailRow}>
-                        <Ionicons name="car-outline" size={16} color={Colors.text.secondary} />
+                        <Ionicons name="car-outline" size={15} color={C.textLight} />
                         <Text style={styles.detailText}>{visitor.vehicleNumber}</Text>
                       </View>
-                    )}
+                    ) : null}
                     <View style={styles.detailRow}>
-                      <Ionicons name="time-outline" size={16} color={Colors.text.secondary} />
+                      <Ionicons name="time-outline" size={15} color={C.textLight} />
                       <Text style={styles.detailText}>
                         {new Date(visitor.entryTime).toLocaleString()}
                       </Text>
                     </View>
                   </View>
-                </Card>
+                </View>
               ))
             )}
           </>
         )}
       </ScrollView>
 
-      {/* Visitor Registration Modal */}
+      {/* ════════ Visitor Registration Modal ════════ */}
       <Modal
         visible={showVisitorModal}
         animationType="slide"
-        presentationStyle="pageSheet"
+        transparent
         onRequestClose={() => setShowVisitorModal(false)}
       >
-        <SafeAreaView style={styles.modalContainer}>
-          <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Register Visitor</Text>
-            <TouchableOpacity onPress={() => setShowVisitorModal(false)}>
-              <Ionicons name="close" size={24} color={Colors.text.primary} />
-            </TouchableOpacity>
+        <KeyboardAvoidingView
+          style={styles.modalOverlay}
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        >
+          {/* backdrop */}
+          <TouchableOpacity
+            style={styles.modalBackdrop}
+            activeOpacity={1}
+            onPress={() => setShowVisitorModal(false)}
+          />
+
+          {/* bottom sheet */}
+          <View style={[styles.modalSheet, shadow(8)]}>
+            {/* handle bar */}
+            <View style={styles.handleBarRow}>
+              <View style={styles.handleBar} />
+            </View>
+
+            {/* header */}
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Register Visitor</Text>
+              <TouchableOpacity
+                onPress={() => setShowVisitorModal(false)}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              >
+                <View style={styles.modalCloseBtn}>
+                  <Ionicons name="close" size={18} color={C.textLight} />
+                </View>
+              </TouchableOpacity>
+            </View>
+
+            {/* form */}
+            <ScrollView
+              style={styles.modalContent}
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+            >
+              <FormInput
+                label="Visitor Name *"
+                placeholder="Enter visitor's name"
+                value={visitorForm.name}
+                onChangeText={(v) => setVisitorForm((p) => ({ ...p, name: v }))}
+                icon="person-outline"
+              />
+
+              <FormInput
+                label="Phone Number"
+                placeholder="Enter phone number"
+                value={visitorForm.phone}
+                onChangeText={(v) => setVisitorForm((p) => ({ ...p, phone: v }))}
+                icon="call-outline"
+                keyboardType="phone-pad"
+              />
+
+              <FormInput
+                label="Vehicle Number"
+                placeholder="Enter vehicle number (optional)"
+                value={visitorForm.vehicleNumber}
+                onChangeText={(v) => setVisitorForm((p) => ({ ...p, vehicleNumber: v }))}
+                icon="car-outline"
+                autoCapitalize="characters"
+              />
+
+              <FormInput
+                label="Purpose of Visit *"
+                placeholder="e.g., Family visit, Delivery"
+                value={visitorForm.purpose}
+                onChangeText={(v) => setVisitorForm((p) => ({ ...p, purpose: v }))}
+                icon="document-text-outline"
+              />
+
+              {/* submit */}
+              <TouchableOpacity
+                activeOpacity={0.85}
+                onPress={handleRegisterVisitor}
+                style={[styles.submitButton, shadow(4)]}
+              >
+                <Ionicons name="checkmark-circle-outline" size={20} color={C.white} />
+                <Text style={styles.submitButtonText}>Register Visitor</Text>
+              </TouchableOpacity>
+
+              {/* bottom spacer so content is not hidden by keyboard */}
+              <View style={{ height: 40 }} />
+            </ScrollView>
           </View>
-
-          <ScrollView style={styles.modalContent}>
-            <InputField
-              label="Visitor Name *"
-              placeholder="Enter visitor's name"
-              value={visitorForm.name}
-              onChangeText={(value) => setVisitorForm((prev) => ({ ...prev, name: value }))}
-              icon="person-outline"
-            />
-
-            <InputField
-              label="Phone Number"
-              placeholder="Enter phone number"
-              value={visitorForm.phone}
-              onChangeText={(value) => setVisitorForm((prev) => ({ ...prev, phone: value }))}
-              keyboardType="phone-pad"
-              icon="call-outline"
-            />
-
-            <InputField
-              label="Vehicle Number"
-              placeholder="Enter vehicle number (optional)"
-              value={visitorForm.vehicleNumber}
-              onChangeText={(value) => setVisitorForm((prev) => ({ ...prev, vehicleNumber: value }))}
-              icon="car-outline"
-              autoCapitalize="characters"
-            />
-
-            <InputField
-              label="Purpose of Visit *"
-              placeholder="e.g., Family visit, Delivery"
-              value={visitorForm.purpose}
-              onChangeText={(value) => setVisitorForm((prev) => ({ ...prev, purpose: value }))}
-              icon="document-text-outline"
-            />
-
-            <Button
-              title="Register Visitor"
-              onPress={handleRegisterVisitor}
-              gradient
-              size="large"
-              style={styles.submitButton}
-            />
-          </ScrollView>
-        </SafeAreaView>
+        </KeyboardAvoidingView>
       </Modal>
     </SafeAreaView>
   );
 }
 
+/* ════════════════════════════════════════════════════════
+   Styles
+   ════════════════════════════════════════════════════════ */
+
 const styles = StyleSheet.create({
+  /* ── Layout ── */
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: C.bg,
   },
+
+  /* ── Header ── */
   header: {
     paddingHorizontal: 20,
-    paddingTop: 10,
-    paddingBottom: 20,
+    paddingTop: 12,
+    paddingBottom: 16,
+    backgroundColor: C.bg,
   },
   headerTitle: {
-    fontSize: 28,
+    fontSize: 26,
     fontWeight: '700',
-    color: Colors.white,
-    marginBottom: 4,
+    color: C.textDark,
+    marginBottom: 2,
   },
   headerSubtitle: {
     fontSize: 14,
-    color: 'rgba(255, 255, 255, 0.8)',
+    color: C.textLight,
   },
+
+  /* ── Tabs ── */
   tabContainer: {
     flexDirection: 'row',
-    backgroundColor: Colors.white,
-    padding: 8,
-    gap: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.gray[100],
+    backgroundColor: C.white,
+    marginHorizontal: 16,
+    borderRadius: 16,
+    padding: 4,
+    gap: 4,
   },
   tab: {
     flex: 1,
@@ -421,16 +668,18 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   tabActive: {
-    backgroundColor: `${Colors.primary}10`,
+    backgroundColor: C.primaryLight,
   },
   tabText: {
     fontSize: 14,
     fontWeight: '600',
-    color: Colors.text.secondary,
+    color: C.textMuted,
   },
   tabTextActive: {
-    color: Colors.primary,
+    color: C.primary,
   },
+
+  /* ── Scroll ── */
   scrollView: {
     flex: 1,
   },
@@ -438,96 +687,153 @@ const styles = StyleSheet.create({
     padding: 16,
     paddingBottom: 100,
   },
-  slotCard: {
+
+  /* ── Generic Card ── */
+  card: {
+    backgroundColor: C.white,
+    borderRadius: 20,
+    padding: 18,
     marginBottom: 16,
   },
+
+  /* ── Parking Slot ── */
   slotHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 16,
   },
   slotIconContainer: {
-    width: 60,
-    height: 60,
+    width: 56,
+    height: 56,
     borderRadius: 16,
-    backgroundColor: `${Colors.secondary}15`,
+    backgroundColor: C.secondaryBg,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 16,
+    marginRight: 14,
   },
   slotInfo: {
     flex: 1,
   },
   slotLabel: {
     fontSize: 12,
-    color: Colors.text.secondary,
-    marginBottom: 4,
+    fontWeight: '500',
+    color: C.textLight,
+    marginBottom: 3,
+    textTransform: 'uppercase',
+    letterSpacing: 0.4,
   },
   slotNumber: {
     fontSize: 24,
     fontWeight: '700',
-    color: Colors.text.primary,
+    color: C.textDark,
   },
-  vehicleInfo: {
-    backgroundColor: Colors.gray[50],
-    borderRadius: 12,
-    padding: 12,
+  vehicleInfoBox: {
+    backgroundColor: C.bg,
+    borderRadius: 14,
+    padding: 14,
     marginBottom: 16,
-    gap: 8,
+    gap: 10,
   },
   infoRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 10,
   },
   infoText: {
     fontSize: 14,
-    color: Colors.text.secondary,
+    color: C.textLight,
   },
-  rulesCard: {
-    marginBottom: 16,
+
+  /* ── Action Buttons (slot toggle) ── */
+  actionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 14,
+    borderRadius: 14,
   },
+  actionButtonPrimary: {
+    backgroundColor: C.primary,
+  },
+  actionButtonOutline: {
+    backgroundColor: C.white,
+    borderWidth: 1.5,
+    borderColor: C.primary,
+  },
+  actionButtonText: {
+    fontSize: 15,
+    fontWeight: '600',
+  },
+  actionButtonTextPrimary: {
+    color: C.white,
+  },
+  actionButtonTextOutline: {
+    color: C.primary,
+  },
+
+  /* ── Guidelines ── */
   cardTitle: {
     fontSize: 16,
-    fontWeight: '600',
-    color: Colors.text.primary,
-    marginBottom: 12,
+    fontWeight: '700',
+    color: C.textDark,
+    marginBottom: 14,
   },
   ruleItem: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
-    marginBottom: 8,
+    marginBottom: 10,
   },
   ruleText: {
     fontSize: 14,
-    color: Colors.text.secondary,
+    color: C.textLight,
   },
-  addVisitorButton: {
-    marginBottom: 20,
+
+  /* ── Register Visitor Button ── */
+  registerButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: C.primary,
+    paddingVertical: 16,
+    borderRadius: 16,
+    marginBottom: 24,
   },
+  registerButtonText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: C.white,
+  },
+
+  /* ── Section Title ── */
   sectionTitle: {
     fontSize: 18,
-    fontWeight: '600',
-    color: Colors.text.primary,
-    marginBottom: 12,
+    fontWeight: '700',
+    color: C.textDark,
+    marginBottom: 14,
   },
-  visitorCard: {
-    marginBottom: 12,
-  },
+
+  /* ── Visitor Card ── */
   visitorHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 14,
   },
-  visitorAvatar: {
-    width: 48,
-    height: 48,
-    borderRadius: 14,
-    backgroundColor: Colors.secondary,
+  avatarCircle: {
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    backgroundColor: C.secondaryBg,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 12,
+  },
+  avatarText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: C.secondary,
   },
   visitorInfo: {
     flex: 1,
@@ -535,18 +841,18 @@ const styles = StyleSheet.create({
   visitorName: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.text.primary,
+    color: C.textDark,
   },
   visitorPurpose: {
     fontSize: 13,
-    color: Colors.text.secondary,
+    color: C.textLight,
     marginTop: 2,
   },
-  visitorDetails: {
-    backgroundColor: Colors.gray[50],
-    borderRadius: 10,
-    padding: 10,
-    gap: 6,
+  visitorDetailsBox: {
+    backgroundColor: C.bg,
+    borderRadius: 12,
+    padding: 12,
+    gap: 8,
   },
   detailRow: {
     flexDirection: 'row',
@@ -555,29 +861,104 @@ const styles = StyleSheet.create({
   },
   detailText: {
     fontSize: 13,
-    color: Colors.text.secondary,
+    color: C.textLight,
   },
-  modalContainer: {
+
+  /* ── Empty State ── */
+  emptyContainer: {
+    alignItems: 'center',
+    paddingVertical: 48,
+  },
+  emptyCircle: {
+    width: 88,
+    height: 88,
+    borderRadius: 44,
+    backgroundColor: C.white,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20,
+  },
+  emptyTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: C.textDark,
+    marginBottom: 6,
+  },
+  emptyMessage: {
+    fontSize: 14,
+    color: C.textMuted,
+    textAlign: 'center',
+    lineHeight: 20,
+  },
+
+  /* ── Modal ── */
+  modalOverlay: {
     flex: 1,
-    backgroundColor: Colors.background,
+    justifyContent: 'flex-end',
+  },
+  modalBackdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(15, 23, 42, 0.4)',
+  },
+  modalSheet: {
+    backgroundColor: C.white,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    maxHeight: '90%',
+  },
+  handleBarRow: {
+    alignItems: 'center',
+    paddingTop: 10,
+    paddingBottom: 2,
+  },
+  handleBar: {
+    width: 40,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: C.border,
   },
   modalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 20,
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    paddingBottom: 16,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.gray[100],
+    borderBottomColor: C.border,
   },
   modalTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: Colors.text.primary,
+    color: C.textDark,
+  },
+  modalCloseBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: C.bg,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   modalContent: {
-    padding: 20,
+    paddingHorizontal: 20,
+    paddingTop: 20,
   },
+
+  /* ── Submit ── */
   submitButton: {
-    marginTop: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: C.primary,
+    paddingVertical: 16,
+    borderRadius: 16,
+    marginTop: 8,
+  },
+  submitButtonText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: C.white,
   },
 });

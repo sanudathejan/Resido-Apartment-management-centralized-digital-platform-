@@ -13,16 +13,85 @@ import {
   TouchableOpacity,
   Alert,
   TextInput,
+  ActivityIndicator,
+  Platform,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { Card, Button, InputField, StatusBadge, EmptyState, LoadingSpinner } from '@/components/ui';
-import { Colors } from '@/constants/colors';
 import { useAuth } from '@/context/AuthContext';
 import { maintenanceService } from '@/services';
 import { MaintenanceRequest, MaintenanceStatus } from '@/types';
+
+const C = {
+  bg: '#F4F7FB',
+  primary: '#2563EB',
+  primaryLight: '#EFF6FF',
+  white: '#FFFFFF',
+  textDark: '#1E293B',
+  textLight: '#64748B',
+  textMuted: '#94A3B8',
+  border: '#E2E8F0',
+  success: '#10B981',
+  warning: '#F59E0B',
+  error: '#EF4444',
+  purple: '#7C3AED',
+  purpleBg: '#F5F3FF',
+};
+
+const shadow = Platform.select({
+  ios: {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+  },
+  android: {
+    elevation: 3,
+  },
+  default: {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+  },
+}) as object;
+
+const shadowSmall = Platform.select({
+  ios: {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
+  },
+  android: {
+    elevation: 2,
+  },
+  default: {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
+  },
+}) as object;
+
+const shadowLarge = Platform.select({
+  ios: {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 16,
+  },
+  android: {
+    elevation: 5,
+  },
+  default: {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 16,
+  },
+}) as object;
 
 export default function MaintenanceScreen() {
   const router = useRouter();
@@ -32,7 +101,7 @@ export default function MaintenanceScreen() {
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  
+
   // Form state
   const [form, setForm] = useState({
     title: '',
@@ -54,10 +123,10 @@ export default function MaintenanceScreen() {
   ];
 
   const priorities = [
-    { value: 'LOW', label: 'Low', color: Colors.info },
-    { value: 'MEDIUM', label: 'Medium', color: Colors.warning },
-    { value: 'HIGH', label: 'High', color: Colors.accent },
-    { value: 'URGENT', label: 'Urgent', color: Colors.error },
+    { value: 'LOW', label: 'Low', color: C.primary },
+    { value: 'MEDIUM', label: 'Medium', color: C.warning },
+    { value: 'HIGH', label: 'High', color: '#F97316' },
+    { value: 'URGENT', label: 'Urgent', color: C.error },
   ];
 
   // Mock data
@@ -127,12 +196,12 @@ export default function MaintenanceScreen() {
 
   const handleSubmit = async () => {
     if (!validateForm()) return;
-    
+
     setSubmitting(true);
     try {
       // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1000));
-      
+
       Alert.alert(
         'Request Submitted',
         'Your maintenance request has been submitted successfully. We will get back to you soon.',
@@ -157,15 +226,30 @@ export default function MaintenanceScreen() {
   const getStatusColor = (status: MaintenanceStatus): string => {
     switch (status) {
       case 'PENDING':
-        return Colors.warning;
+        return C.warning;
       case 'IN_PROGRESS':
-        return Colors.info;
+        return C.primary;
       case 'COMPLETED':
-        return Colors.success;
+        return C.success;
       case 'CANCELLED':
-        return Colors.error;
+        return C.error;
       default:
-        return Colors.gray[400];
+        return C.textMuted;
+    }
+  };
+
+  const getStatusLabel = (status: MaintenanceStatus): string => {
+    switch (status) {
+      case 'PENDING':
+        return 'Pending';
+      case 'IN_PROGRESS':
+        return 'In Progress';
+      case 'COMPLETED':
+        return 'Completed';
+      case 'CANCELLED':
+        return 'Cancelled';
+      default:
+        return status;
     }
   };
 
@@ -181,19 +265,15 @@ export default function MaintenanceScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       {/* Header */}
-      <LinearGradient
-        colors={['#8B5CF6', '#6366F1'] as [string, string, ...string[]]}
-        style={styles.header}
-      >
+      <View style={styles.header}>
         <View style={styles.headerTop}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-            <Ionicons name="arrow-back" size={24} color={Colors.white} />
+          <TouchableOpacity onPress={() => router.back()} style={[styles.backButton, shadowSmall]}>
+            <Ionicons name="arrow-back" size={20} color={C.textDark} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Maintenance</Text>
           <View style={styles.placeholder} />
         </View>
-        <Text style={styles.headerSubtitle}>Submit and track repair requests</Text>
-      </LinearGradient>
+      </View>
 
       {/* Tab Selector */}
       <View style={styles.tabContainer}>
@@ -204,7 +284,7 @@ export default function MaintenanceScreen() {
           <Ionicons
             name="add-circle-outline"
             size={20}
-            color={activeTab === 'new' ? '#8B5CF6' : Colors.text.secondary}
+            color={activeTab === 'new' ? C.purple : C.textLight}
           />
           <Text style={[styles.tabText, activeTab === 'new' && styles.tabTextActive]}>
             New Request
@@ -217,7 +297,7 @@ export default function MaintenanceScreen() {
           <Ionicons
             name="list-outline"
             size={20}
-            color={activeTab === 'history' ? '#8B5CF6' : Colors.text.secondary}
+            color={activeTab === 'history' ? C.purple : C.textLight}
           />
           <Text style={[styles.tabText, activeTab === 'history' && styles.tabTextActive]}>
             My Requests ({requests.length})
@@ -238,16 +318,35 @@ export default function MaintenanceScreen() {
         {activeTab === 'new' ? (
           // New Request Form
           <>
-            <Card style={styles.formCard}>
+            <View style={[styles.formCard, shadow]}>
+              {/* Title Input */}
               <Text style={styles.formLabel}>Issue Title *</Text>
-              <InputField
-                placeholder="Brief description of the issue"
-                value={form.title}
-                onChangeText={(value) => setForm((prev) => ({ ...prev, title: value }))}
-                icon="create-outline"
-                error={errors.title}
-              />
+              <View
+                style={[
+                  styles.inputContainer,
+                  errors.title ? styles.inputContainerError : null,
+                ]}
+              >
+                <Ionicons
+                  name="create-outline"
+                  size={18}
+                  color={C.textMuted}
+                  style={styles.inputIcon}
+                />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Brief description of the issue"
+                  value={form.title}
+                  onChangeText={(value) => {
+                    setForm((prev) => ({ ...prev, title: value }));
+                    if (errors.title) setErrors((prev) => ({ ...prev, title: '' }));
+                  }}
+                  placeholderTextColor={C.textMuted}
+                />
+              </View>
+              {errors.title ? <Text style={styles.errorText}>{errors.title}</Text> : null}
 
+              {/* Category Grid */}
               <Text style={styles.formLabel}>Category *</Text>
               <View style={styles.categoryGrid}>
                 {categories.map((cat) => (
@@ -259,13 +358,14 @@ export default function MaintenanceScreen() {
                     }}
                     style={[
                       styles.categoryItem,
+                      shadowSmall,
                       form.category === cat.value && styles.categoryItemActive,
                     ]}
                   >
                     <Ionicons
                       name={cat.icon as keyof typeof Ionicons.glyphMap}
                       size={24}
-                      color={form.category === cat.value ? Colors.white : '#8B5CF6'}
+                      color={form.category === cat.value ? C.white : C.purple}
                     />
                     <Text
                       style={[
@@ -278,8 +378,9 @@ export default function MaintenanceScreen() {
                   </TouchableOpacity>
                 ))}
               </View>
-              {errors.category && <Text style={styles.errorText}>{errors.category}</Text>}
+              {errors.category ? <Text style={styles.errorText}>{errors.category}</Text> : null}
 
+              {/* Priority Selector */}
               <Text style={styles.formLabel}>Priority</Text>
               <View style={styles.priorityContainer}>
                 {priorities.map((p) => (
@@ -288,7 +389,10 @@ export default function MaintenanceScreen() {
                     onPress={() => setForm((prev) => ({ ...prev, priority: p.value as any }))}
                     style={[
                       styles.priorityItem,
-                      form.priority === p.value && { backgroundColor: `${p.color}15`, borderColor: p.color },
+                      form.priority === p.value && {
+                        backgroundColor: `${p.color}12`,
+                        borderColor: p.color,
+                      },
                     ]}
                   >
                     <View style={[styles.priorityDot, { backgroundColor: p.color }]} />
@@ -304,85 +408,138 @@ export default function MaintenanceScreen() {
                 ))}
               </View>
 
+              {/* Description Textarea */}
               <Text style={styles.formLabel}>Description *</Text>
-              <View style={styles.textAreaContainer}>
+              <View
+                style={[
+                  styles.textAreaContainer,
+                  errors.description ? styles.textAreaContainerError : null,
+                ]}
+              >
                 <TextInput
                   style={styles.textArea}
                   placeholder="Provide detailed information about the issue..."
                   value={form.description}
-                  onChangeText={(value) => setForm((prev) => ({ ...prev, description: value }))}
+                  onChangeText={(value) => {
+                    setForm((prev) => ({ ...prev, description: value }));
+                    if (errors.description)
+                      setErrors((prev) => ({ ...prev, description: '' }));
+                  }}
                   multiline
                   numberOfLines={5}
                   textAlignVertical="top"
-                  placeholderTextColor={Colors.gray[400]}
+                  placeholderTextColor={C.textMuted}
                 />
               </View>
-              {errors.description && <Text style={styles.errorText}>{errors.description}</Text>}
+              {errors.description ? (
+                <Text style={styles.errorText}>{errors.description}</Text>
+              ) : null}
 
-              <Button
-                title="Submit Request"
+              {/* Submit Button */}
+              <TouchableOpacity
+                style={[styles.submitButton, submitting && styles.submitButtonDisabled]}
                 onPress={handleSubmit}
-                loading={submitting}
-                gradient
-                size="large"
-                style={styles.submitButton}
-                icon={<Ionicons name="send" size={20} color={Colors.white} />}
-              />
-            </Card>
+                disabled={submitting}
+                activeOpacity={0.8}
+              >
+                {submitting ? (
+                  <ActivityIndicator size="small" color={C.white} />
+                ) : (
+                  <>
+                    <Ionicons name="send" size={18} color={C.white} />
+                    <Text style={styles.submitButtonText}>Submit Request</Text>
+                  </>
+                )}
+              </TouchableOpacity>
+            </View>
           </>
         ) : (
           // Request History
           <>
             {loading ? (
-              <LoadingSpinner message="Loading requests..." />
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color={C.purple} />
+                <Text style={styles.loadingText}>Loading requests...</Text>
+              </View>
             ) : requests.length === 0 ? (
-              <EmptyState
-                icon="construct-outline"
-                title="No Requests"
-                message="You haven't submitted any maintenance requests yet."
-                actionLabel="Submit a Request"
-                onAction={() => setActiveTab('new')}
-              />
+              <View style={styles.emptyContainer}>
+                <View style={[styles.emptyCircle, shadowLarge]}>
+                  <Ionicons name="construct-outline" size={40} color={C.purple} />
+                </View>
+                <Text style={styles.emptyTitle}>No Requests</Text>
+                <Text style={styles.emptyMessage}>
+                  You haven't submitted any maintenance requests yet.
+                </Text>
+                <TouchableOpacity
+                  style={styles.emptyAction}
+                  onPress={() => setActiveTab('new')}
+                  activeOpacity={0.8}
+                >
+                  <Text style={styles.emptyActionText}>Submit a Request</Text>
+                </TouchableOpacity>
+              </View>
             ) : (
               requests.map((request) => (
-                <Card key={request.id} style={styles.requestCard} variant="elevated">
-                  <View style={styles.requestHeader}>
-                    <View
-                      style={[
-                        styles.statusIndicator,
-                        { backgroundColor: getStatusColor(request.status) },
-                      ]}
-                    />
-                    <View style={styles.requestInfo}>
-                      <Text style={styles.requestTitle}>{request.title}</Text>
-                      <Text style={styles.requestDate}>
-                        Submitted: {formatDate(request.createdAt || new Date().toISOString())}
-                      </Text>
+                <View key={request.id} style={[styles.requestCard, shadow]}>
+                  <View
+                    style={[
+                      styles.statusBar,
+                      { backgroundColor: getStatusColor(request.status) },
+                    ]}
+                  />
+                  <View style={styles.requestContent}>
+                    <View style={styles.requestHeader}>
+                      <View style={styles.requestInfo}>
+                        <Text style={styles.requestTitle}>{request.title}</Text>
+                        <Text style={styles.requestDate}>
+                          Submitted: {formatDate(request.createdAt || new Date().toISOString())}
+                        </Text>
+                      </View>
+                      <View
+                        style={[
+                          styles.statusBadge,
+                          { backgroundColor: `${getStatusColor(request.status)}14` },
+                        ]}
+                      >
+                        <View
+                          style={[
+                            styles.statusDot,
+                            { backgroundColor: getStatusColor(request.status) },
+                          ]}
+                        />
+                        <Text
+                          style={[
+                            styles.statusText,
+                            { color: getStatusColor(request.status) },
+                          ]}
+                        >
+                          {getStatusLabel(request.status)}
+                        </Text>
+                      </View>
                     </View>
-                    <StatusBadge status={request.status} />
+
+                    <Text style={styles.requestDescription} numberOfLines={2}>
+                      {request.description}
+                    </Text>
+
+                    <View style={styles.requestMeta}>
+                      <View style={styles.metaItem}>
+                        <Ionicons name="folder-outline" size={14} color={C.textLight} />
+                        <Text style={styles.metaText}>{request.category}</Text>
+                      </View>
+                      <View style={styles.metaItem}>
+                        <Ionicons name="flag-outline" size={14} color={C.textLight} />
+                        <Text style={styles.metaText}>{request.priority}</Text>
+                      </View>
+                    </View>
+
+                    {request.status === 'PENDING' && (
+                      <TouchableOpacity style={styles.cancelButton} activeOpacity={0.6}>
+                        <Text style={styles.cancelText}>Cancel Request</Text>
+                      </TouchableOpacity>
+                    )}
                   </View>
-
-                  <Text style={styles.requestDescription} numberOfLines={2}>
-                    {request.description}
-                  </Text>
-
-                  <View style={styles.requestMeta}>
-                    <View style={styles.metaItem}>
-                      <Ionicons name="folder-outline" size={14} color={Colors.text.secondary} />
-                      <Text style={styles.metaText}>{request.category}</Text>
-                    </View>
-                    <View style={styles.metaItem}>
-                      <Ionicons name="flag-outline" size={14} color={Colors.text.secondary} />
-                      <Text style={styles.metaText}>{request.priority}</Text>
-                    </View>
-                  </View>
-
-                  {request.status === 'PENDING' && (
-                    <TouchableOpacity style={styles.cancelButton}>
-                      <Text style={styles.cancelText}>Cancel Request</Text>
-                    </TouchableOpacity>
-                  )}
-                </Card>
+                </View>
               ))
             )}
           </>
@@ -395,47 +552,47 @@ export default function MaintenanceScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: C.bg,
   },
+
+  /* ---- Header ---- */
   header: {
+    backgroundColor: C.bg,
     paddingHorizontal: 20,
     paddingTop: 10,
-    paddingBottom: 20,
+    paddingBottom: 16,
   },
   headerTop: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 8,
   },
   backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    width: 42,
+    height: 42,
+    borderRadius: 14,
+    backgroundColor: C.white,
     alignItems: 'center',
     justifyContent: 'center',
   },
   headerTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: Colors.white,
+    color: C.textDark,
   },
   placeholder: {
-    width: 40,
+    width: 42,
   },
-  headerSubtitle: {
-    fontSize: 14,
-    color: 'rgba(255, 255, 255, 0.8)',
-    textAlign: 'center',
-  },
+
+  /* ---- Tabs ---- */
   tabContainer: {
     flexDirection: 'row',
-    backgroundColor: Colors.white,
-    padding: 8,
+    backgroundColor: C.white,
+    paddingHorizontal: 8,
+    paddingVertical: 8,
     gap: 8,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.gray[100],
+    borderBottomColor: C.border,
   },
   tab: {
     flex: 1,
@@ -447,16 +604,18 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   tabActive: {
-    backgroundColor: '#8B5CF615',
+    backgroundColor: C.purpleBg,
   },
   tabText: {
     fontSize: 14,
     fontWeight: '600',
-    color: Colors.text.secondary,
+    color: C.textLight,
   },
   tabTextActive: {
-    color: '#8B5CF6',
+    color: C.purple,
   },
+
+  /* ---- Scroll ---- */
   scrollView: {
     flex: 1,
   },
@@ -464,15 +623,46 @@ const styles = StyleSheet.create({
     padding: 16,
     paddingBottom: 100,
   },
+
+  /* ---- Form Card ---- */
   formCard: {
+    backgroundColor: C.white,
+    borderRadius: 20,
     padding: 20,
   },
   formLabel: {
     fontSize: 14,
     fontWeight: '600',
-    color: Colors.text.primary,
+    color: C.textDark,
     marginBottom: 10,
+    marginTop: 4,
   },
+
+  /* ---- Input ---- */
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: C.bg,
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: C.border,
+    paddingHorizontal: 14,
+    marginBottom: 6,
+  },
+  inputContainerError: {
+    borderColor: C.error,
+  },
+  inputIcon: {
+    marginRight: 10,
+  },
+  input: {
+    flex: 1,
+    fontSize: 15,
+    color: C.textDark,
+    paddingVertical: 14,
+  },
+
+  /* ---- Category Grid ---- */
   categoryGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -480,26 +670,29 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   categoryItem: {
-    width: '23%',
+    width: '22%' as any,
     aspectRatio: 1,
-    backgroundColor: '#8B5CF615',
-    borderRadius: 12,
+    backgroundColor: C.purpleBg,
+    borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
     padding: 8,
   },
   categoryItemActive: {
-    backgroundColor: '#8B5CF6',
+    backgroundColor: C.purple,
   },
   categoryText: {
     fontSize: 10,
-    color: Colors.text.secondary,
+    color: C.textLight,
     marginTop: 4,
     textAlign: 'center',
+    fontWeight: '500',
   },
   categoryTextActive: {
-    color: Colors.white,
+    color: C.white,
   },
+
+  /* ---- Priority ---- */
   priorityContainer: {
     flexDirection: 'row',
     gap: 8,
@@ -513,9 +706,9 @@ const styles = StyleSheet.create({
     gap: 6,
     paddingVertical: 10,
     borderRadius: 10,
-    borderWidth: 1,
-    borderColor: Colors.gray[200],
-    backgroundColor: Colors.gray[50],
+    borderWidth: 1.5,
+    borderColor: C.border,
+    backgroundColor: C.white,
   },
   priorityDot: {
     width: 8,
@@ -524,44 +717,131 @@ const styles = StyleSheet.create({
   },
   priorityText: {
     fontSize: 12,
-    color: Colors.text.secondary,
+    color: C.textLight,
   },
+
+  /* ---- Textarea ---- */
   textAreaContainer: {
-    backgroundColor: Colors.gray[50],
+    backgroundColor: C.bg,
     borderRadius: 12,
     borderWidth: 1.5,
-    borderColor: Colors.gray[200],
-    marginBottom: 10,
+    borderColor: C.border,
+    marginBottom: 6,
+  },
+  textAreaContainerError: {
+    borderColor: C.error,
   },
   textArea: {
     padding: 14,
     fontSize: 15,
-    color: Colors.text.primary,
+    color: C.textDark,
     minHeight: 120,
   },
+
+  /* ---- Errors ---- */
   errorText: {
     fontSize: 12,
-    color: Colors.error,
-    marginTop: -8,
+    color: C.error,
     marginBottom: 12,
     marginLeft: 4,
   },
+
+  /* ---- Submit Button ---- */
   submitButton: {
-    marginTop: 10,
+    backgroundColor: C.purple,
+    borderRadius: 14,
+    paddingVertical: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    marginTop: 14,
   },
+  submitButtonDisabled: {
+    opacity: 0.7,
+  },
+  submitButtonText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: C.white,
+  },
+
+  /* ---- Loading ---- */
+  loadingContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingTop: 80,
+    gap: 16,
+  },
+  loadingText: {
+    fontSize: 14,
+    color: C.textLight,
+  },
+
+  /* ---- Empty State ---- */
+  emptyContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingTop: 60,
+    paddingHorizontal: 32,
+  },
+  emptyCircle: {
+    width: 96,
+    height: 96,
+    borderRadius: 48,
+    backgroundColor: C.white,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 24,
+  },
+  emptyTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: C.textDark,
+    marginBottom: 8,
+  },
+  emptyMessage: {
+    fontSize: 14,
+    color: C.textLight,
+    textAlign: 'center',
+    lineHeight: 20,
+    marginBottom: 24,
+  },
+  emptyAction: {
+    backgroundColor: C.purple,
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+  },
+  emptyActionText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: C.white,
+  },
+
+  /* ---- Request Cards ---- */
   requestCard: {
-    marginBottom: 12,
+    backgroundColor: C.white,
+    borderRadius: 20,
+    marginBottom: 14,
+    flexDirection: 'row',
+    overflow: 'hidden',
+  },
+  statusBar: {
+    width: 4,
+    borderTopLeftRadius: 20,
+    borderBottomLeftRadius: 20,
+  },
+  requestContent: {
+    flex: 1,
+    padding: 16,
   },
   requestHeader: {
     flexDirection: 'row',
     alignItems: 'flex-start',
+    justifyContent: 'space-between',
     marginBottom: 10,
-  },
-  statusIndicator: {
-    width: 4,
-    height: 40,
-    borderRadius: 2,
-    marginRight: 12,
+    gap: 10,
   },
   requestInfo: {
     flex: 1,
@@ -569,16 +849,37 @@ const styles = StyleSheet.create({
   requestTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.text.primary,
+    color: C.textDark,
     marginBottom: 4,
   },
   requestDate: {
     fontSize: 12,
-    color: Colors.text.secondary,
+    color: C.textLight,
   },
+
+  /* ---- Status Badge ---- */
+  statusBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 8,
+  },
+  statusDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+  },
+  statusText: {
+    fontSize: 11,
+    fontWeight: '600',
+  },
+
+  /* ---- Request Body ---- */
   requestDescription: {
     fontSize: 14,
-    color: Colors.text.secondary,
+    color: C.textLight,
     lineHeight: 20,
     marginBottom: 12,
   },
@@ -587,7 +888,7 @@ const styles = StyleSheet.create({
     gap: 16,
     paddingTop: 12,
     borderTopWidth: 1,
-    borderTopColor: Colors.gray[100],
+    borderTopColor: C.border,
   },
   metaItem: {
     flexDirection: 'row',
@@ -596,15 +897,17 @@ const styles = StyleSheet.create({
   },
   metaText: {
     fontSize: 12,
-    color: Colors.text.secondary,
+    color: C.textLight,
   },
+
+  /* ---- Cancel ---- */
   cancelButton: {
     marginTop: 12,
     alignSelf: 'flex-start',
   },
   cancelText: {
     fontSize: 13,
-    color: Colors.error,
+    color: C.error,
     fontWeight: '600',
   },
 });

@@ -1,20 +1,26 @@
 /**
  * Tab Layout for Resiido
- * Main navigation with bottom tabs - Dark blue theme
+ * Modern 2026 light theme bottom tabs
  */
 
 import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { Platform, StyleSheet, View } from "react-native";
-import { Colors } from "@/constants/colors";
+
+const TAB_COLORS = {
+  active: '#2563EB',
+  inactive: '#94A3B8',
+  background: '#FFFFFF',
+  activeBg: '#EFF6FF',
+};
 
 export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: '#2ECC71',
-        tabBarInactiveTintColor: 'rgba(255, 255, 255, 0.5)',
+        tabBarActiveTintColor: TAB_COLORS.active,
+        tabBarInactiveTintColor: TAB_COLORS.inactive,
         tabBarStyle: styles.tabBar,
         tabBarLabelStyle: styles.tabBarLabel,
         tabBarItemStyle: styles.tabBarItem,
@@ -28,7 +34,7 @@ export default function TabLayout() {
             <View style={focused ? styles.activeIconContainer : undefined}>
               <Ionicons
                 name={focused ? "home" : "home-outline"}
-                size={24}
+                size={22}
                 color={color}
               />
             </View>
@@ -39,12 +45,12 @@ export default function TabLayout() {
       <Tabs.Screen
         name="announcements/index"
         options={{
-          title: "News",
+          title: "Notifications",
           tabBarIcon: ({ color, focused }) => (
             <View style={focused ? styles.activeIconContainer : undefined}>
               <Ionicons
-                name={focused ? "megaphone" : "megaphone-outline"}
-                size={24}
+                name={focused ? "notifications" : "notifications-outline"}
+                size={22}
                 color={color}
               />
             </View>
@@ -59,8 +65,8 @@ export default function TabLayout() {
           tabBarIcon: ({ color, focused }) => (
             <View style={focused ? styles.activeIconContainer : undefined}>
               <Ionicons
-                name={focused ? "car" : "car-outline"}
-                size={24}
+                name={focused ? "car-sport" : "car-sport-outline"}
+                size={22}
                 color={color}
               />
             </View>
@@ -71,12 +77,12 @@ export default function TabLayout() {
       <Tabs.Screen
         name="rent/index"
         options={{
-          title: "Rent",
+          title: "Payments",
           tabBarIcon: ({ color, focused }) => (
             <View style={focused ? styles.activeIconContainer : undefined}>
               <Ionicons
-                name={focused ? "card" : "card-outline"}
-                size={24}
+                name={focused ? "wallet" : "wallet-outline"}
+                size={22}
                 color={color}
               />
             </View>
@@ -92,7 +98,7 @@ export default function TabLayout() {
             <View style={focused ? styles.activeIconContainer : undefined}>
               <Ionicons
                 name={focused ? "person" : "person-outline"}
-                size={24}
+                size={22}
                 color={color}
               />
             </View>
@@ -105,34 +111,37 @@ export default function TabLayout() {
 
 const styles = StyleSheet.create({
   tabBar: {
-    backgroundColor: '#1A4B6E',
+    backgroundColor: TAB_COLORS.background,
     borderTopWidth: 0,
-    elevation: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 12,
-    height: Platform.OS === "ios" ? 85 : 65,
+    height: Platform.OS === "ios" ? 88 : 68,
     paddingTop: 8,
-    paddingBottom: Platform.OS === "ios" ? 25 : 10,
+    paddingBottom: Platform.OS === "ios" ? 28 : 12,
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#94A3B8',
+        shadowOffset: { width: 0, height: -4 },
+        shadowOpacity: 0.08,
+        shadowRadius: 16,
+      },
+      android: { elevation: 12 },
+    }),
   },
   tabBarLabel: {
     fontSize: 11,
     fontWeight: "600",
-    marginTop: 4,
+    marginTop: 2,
   },
   tabBarItem: {
-    paddingTop: 4,
+    paddingTop: 2,
   },
   activeIconContainer: {
-    backgroundColor: `${Colors.primary}15`,
-    borderRadius: 12,
-    padding: 8,
-    marginBottom: -4,
+    backgroundColor: TAB_COLORS.activeBg,
+    borderRadius: 14,
+    paddingHorizontal: 14,
+    paddingVertical: 6,
   },
 });
- 
