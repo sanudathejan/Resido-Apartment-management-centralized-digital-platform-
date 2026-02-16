@@ -188,3 +188,13 @@ const styles = StyleSheet.create({
   backArrow: { fontSize: 36, color: 'white', fontWeight: '300', marginTop: -5 },
   headerTitle: { color: 'white', fontSize: 20, fontWeight: 'bold' },
   headerSubtitle: { color: 'rgba(255,255,255,0.85)', fontSize: 13, marginTop: 8, textAlign: 'left' },
+
+  // Overlapping Content Body
+    content: {
+      flex: 1,
+      marginTop: -25, // This creates the overlap effect
+      borderTopLeftRadius: 25,
+      borderTopRightRadius: 25,
+      backgroundColor: '#f8fafc',
+      paddingHorizontal: 16
+    },
