@@ -97,3 +97,8 @@ const ParkingCard = ({ item }) => (
             </TouchableOpacity>
           </View>
         );
+
+export default function ParkingApp() {
+  return (
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor="#3498db" />
