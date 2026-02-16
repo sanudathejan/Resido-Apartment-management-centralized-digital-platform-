@@ -94,4 +94,25 @@ public class PaymentController {
 
         return paymentRepository.save(payment);
     }
+
+    // 5. Manager: Get all payments waiting for approval (Status = "REVIEW")
+    @GetMapping("/pending-review")
+    public List<Payment> getPendingReviews(Principal principal) {
+        User currentUser = getLoggedInUser(principal);
+
+        // Security Check: Only Managers can see the review queue
+        if (!"MANAGER".equalsIgnoreCase(currentUser.getRole())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access Denied: Managers only.");
+        }
+
+        // Returns only the payments where residents have uploaded proof
+        return paymentRepository.findByStatus("REVIEW");
+    }
+
+    // 6. Get My Unpaid Bills (For "Pay Now" screen)
+    @GetMapping("/unpaid")
+    public List<Payment> getMyUnpaidBills(Principal principal) {
+        User currentUser = getLoggedInUser(principal);
+        return paymentRepository.findByResidentAndIsPaidFalse(currentUser);
+    }
 }

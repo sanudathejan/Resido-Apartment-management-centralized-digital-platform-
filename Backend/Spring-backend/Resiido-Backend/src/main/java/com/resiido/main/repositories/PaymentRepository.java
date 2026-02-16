@@ -13,7 +13,7 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
     List<Payment> findByResidentId(Long residentId);
 
     // 2. Find only unpaid bills for a resident (What they owe right now)
-    List<Payment> findByResidentIdAndPaidFalse(Long residentId);
+    List<Payment> findByResidentIdAndIsPaidFalse(Long residentId);
 
     // 3. Find all payments of a certain type (e.g., all "LATE_FEE" records)
     List<Payment> findByType(String type);
@@ -22,5 +22,8 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
     List<Payment> findByResident(User resident);
 
     // 5. Find only UNPAID bills for a specific user (To Do List)
-    List<Payment> findByResidentAndPaidFalse(User resident);
+    List<Payment> findByResidentAndIsPaidFalse(User resident);
+
+    // 6. Find all payments waiting for manager review
+    List<Payment> findByStatus(String status);
 }

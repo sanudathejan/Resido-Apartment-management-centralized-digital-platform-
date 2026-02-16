@@ -1110,12 +1110,12 @@ Content-Type: application/json
   "code": "69890"
 }
 
-### 3. Try Login as Imeth
+### 3. Try Login as Harry
 POST http://localhost:8080/api/auth/login
 Content-Type: application/json
 
 {
-  "email": "imeth@test.com",
+  "email": "harry@resident.com",
   "password": "password123"
 }
 
@@ -1177,3 +1177,63 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJnaW5hQHJlc2lkZW50LmNvbSIsI
 # Check the "profilePicture" field in the main User object.
 GET http://localhost:8080/api/users/me
 Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJnaW5hQHJlc2lkZW50LmNvbSIsImlhdCI6MTc3MDQ1MDQ4MSwiZXhwIjoxNzcwNDg2NDgxfQ.m8fYSbt6muf_GeNS_VWH-XWjB4iF1MogET9FQJcYdbo
+
+
+
+
+
+
+### ==========================================
+### STEP 1: MANAGER CREATES A BILL
+### ==========================================
+POST http://localhost:8080/api/payments
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkYXZlQG1hbmFnZXIuY29tIiwiaWF0IjoxNzcxMjIzNTY1LCJleHAiOjE3NzEyNTk1NjV9.fz3od75tMi0LDpsb6IYnJJFmZCWhiZJrRR2t5idFldg
+
+{
+  "amount": 150.00,
+  "type": "UTILITY",
+  "dueDate": "2026-03-01",
+  "resident": { "id": 7 }
+}
+
+### ==========================================
+### STEP 2: RESIDENT CHECKS UNPAID BILLS
+### ==========================================
+# Harry should see the new bill here with status "PENDING"
+GET http://localhost:8080/api/payments/unpaid
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJoYXJyeUByZXNpZGVudC5jb20iLCJpYXQiOjE3NzEyMjYwODcsImV4cCI6MTc3MTI2MjA4N30.i6GV_XdpcHzmk6sIk7N46_6tUeGgxCe_yx8OEHq-Gwo
+
+### ==========================================
+### STEP 3: RESIDENT UPLOADS PROOF (PAY)
+### ==========================================
+# Replace '1' with the actual Payment ID from Step 2
+PUT http://localhost:8080/api/payments/3/submit-proof
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJoYXJyeUByZXNpZGVudC5jb20iLCJpYXQiOjE3NzEyMjYwODcsImV4cCI6MTc3MTI2MjA4N30.i6GV_XdpcHzmk6sIk7N46_6tUeGgxCe_yx8OEHq-Gwo
+
+{
+  "receiptImage": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg=="
+}
+
+### ==========================================
+### STEP 4: MANAGER CHECKS REVIEW QUEUE
+### ==========================================
+# Manager should see the bill here now (Status: REVIEW)
+GET http://localhost:8080/api/payments/pending-review
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkYXZlQG1hbmFnZXIuY29tIiwiaWF0IjoxNzcxMjIzNTY1LCJleHAiOjE3NzEyNTk1NjV9.fz3od75tMi0LDpsb6IYnJJFmZCWhiZJrRR2t5idFldg
+
+### ==========================================
+### STEP 5: MANAGER APPROVES PAYMENT
+### ==========================================
+# Replace '1' with the Payment ID
+# approved=true marks it PAID. approved=false rejects it.
+PUT http://localhost:8080/api/payments/3/verify?approved=true
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkYXZlQG1hbmFnZXIuY29tIiwiaWF0IjoxNzcxMjIzNTY1LCJleHAiOjE3NzEyNTk1NjV9.fz3od75tMi0LDpsb6IYnJJFmZCWhiZJrRR2t5idFldg
+
+### ==========================================
+### STEP 6: VERIFY FINAL STATUS
+### ==========================================
+# Harry checks his history. The bill should now be marked isPaid=true.
+GET http://localhost:8080/api/payments
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJoYXJyeUByZXNpZGVudC5jb20iLCJpYXQiOjE3NzEyMjYwODcsImV4cCI6MTc3MTI2MjA4N30.i6GV_XdpcHzmk6sIk7N46_6tUeGgxCe_yx8OEHq-Gwo
