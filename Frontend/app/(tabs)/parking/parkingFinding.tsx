@@ -249,3 +249,9 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 15,
     borderTopRightRadius: 15
   },
+
+navItem: { alignItems: 'center', opacity: 0.6 },
+  activeNavIcon: { alignItems: 'center', marginTop: -5 },
+  navLabel: { color: '#94a3b8', fontSize: 11, marginTop: 5, fontWeight: '500' },
+  activeIndicator: { height: 3, width: 22, backgroundColor: '#2ecc71', marginTop: 6, borderRadius: 2 }
+});
