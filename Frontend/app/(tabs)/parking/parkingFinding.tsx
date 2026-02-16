@@ -115,3 +115,11 @@ export default function ParkingApp() {
 
             {/* Main Content Area: Uses negative margin to overlap the blue header */}
             <View style={styles.content}>
+
+            {/* Toggle Tabs: Available Slots vs My Requests */}
+                    <View style={styles.tabContainer}>
+                      <TouchableOpacity style={[styles.tab, styles.activeTab]}>
+                        <View style={styles.tabContent}>
+                          <SquareP size={16} color="#27ae60" fill="#27ae60" />
+                          <Text style={[styles.tabText, styles.activeTabText]}>Available Slots</Text>
+                        </View>
