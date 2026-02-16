@@ -51,7 +51,7 @@ export default function ParkingManagement() {
 
   // State to track if the parking slot is "Lendable" (available for others)
   const [isLendable, setIsLendable] = useState(false);
-
+  const [activeTab, setActiveTab] = useState('manage');
   /**
    * 2. HANDLER FUNCTION:
    * This manages the button clicks. In a real app, this is where you would
@@ -62,20 +62,50 @@ export default function ParkingManagement() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false}>
+<ScrollView showsVerticalScrollIndicator={false}>
+  {activeTab === 'manage' ? (
+    <>
+      {/* ALL YOUR EXISTING CODE GOES HERE (Main Card, Pending Requests title, and the .map loop) */}
+      <View style={styles.mainCard}>...</View>
+      <View style={styles.sectionHeader}>...</View>
+      {REQUESTS.map((item) => (...))}
+    </>
+  ) : (
+    /* SHOW YOUR NEW COMPONENT HERE */
+    <ParkingFinding />
+  )}
+  <View style={{ height: 40 }} />
+</ScrollView>
 
         {/* BLUE HEADER: The top part of the app with the title */}
-        <View style={styles.blueHeader}>
-          <View style={styles.topNav}>
-            <TouchableOpacity onPress={() => router.back()}>
-               <Ionicons name="arrow-back" size={24} color="#fff" />
-            </TouchableOpacity>
-            <Text style={styles.headerTitle}>Manage My Parking</Text>
-            <View style={{ width: 24 }} />
-          </View>
-          <Text style={styles.headerSub}>Control slot availability and requests</Text>
+      <View style={styles.blueHeader}>
+        <View style={styles.topNav}>
+          <TouchableOpacity onPress={() => router.back()}>
+             <Ionicons name="arrow-back" size={24} color="#fff" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Parking</Text>
+          <View style={{ width: 24 }} />
         </View>
+
+        {/* TAB SWITCHER TOGGLE */}
+        <View style={styles.tabContainer}>
+          <TouchableOpacity
+
+                style={[styles.tabButton, activeTab === 'manage' && styles.activeTabStyle]}
+                 onPress={() => setActiveTab('manage')}
+               >
+                 <Text style={[styles.tabText, activeTab === 'manage' && styles.activeTabText]}>Manage</Text>
+               </TouchableOpacity>
+
+               <TouchableOpacity
+                 style={[styles.tabButton, activeTab === 'find' && styles.activeTabStyle]}
+                 onPress={() => setActiveTab('find')}
+               >
+                 <Text style={[styles.tabText, activeTab === 'find' && styles.activeTabText]}>Find Slot</Text>
+               </TouchableOpacity>
+             </View>
+             {/* ---------------------------------- */}
+           </View>
 
         {/* MAIN SLOT CARD: Shows your specific parking slot (P-A12) */}
         <View style={styles.mainCard}>
@@ -213,3 +243,27 @@ const styles = StyleSheet.create({
   acceptBtn: { flex: 0.48, backgroundColor: '#2ECC71', paddingVertical: 10, borderRadius: 8, alignItems: 'center' },
   acceptBtnText: { color: '#fff', fontWeight: '600' }
 });
+
+tabContainer: {
+  flexDirection: 'row',
+  backgroundColor: 'rgba(255, 255, 255, 0.2)', // Semi-transparent white
+  borderRadius: 10,
+  marginTop: 15,
+  padding: 4,
+},
+tabButton: {
+  flex: 1,
+  paddingVertical: 8,
+  alignItems: 'center',
+  borderRadius: 8,
+},
+activeTabStyle: {
+  backgroundColor: '#fff', // Solid white for active tab
+},
+tabText: {
+  color: '#E0E0E0',
+  fontWeight: '600',
+},
+activeTabText: {
+  color: '#3498DB', // Blue text for active tab
+},
