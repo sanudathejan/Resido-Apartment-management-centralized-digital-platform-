@@ -23,4 +23,7 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
     // 5. Find only UNPAID bills for a specific user (To Do List)
     List<Payment> findByResidentAndIsPaidFalse(User resident);
+
+    // 6. Find all payments waiting for manager review
+    List<Payment> findByStatus(String status);
 }
