@@ -73,3 +73,15 @@ const ParkingCard = ({ item }) => (
         <Text style={styles.rateValue}>{item.rate}</Text>
       </View>
     </View>
+
+    {/* Details Box: Slot number and Contact info */}
+        <View style={styles.detailsContainer}>
+          <View style={styles.detailRow}>
+            <Grid size={18} color="#94a3b8" />
+            <Text style={styles.detailText}>Slot Number: <Text style={styles.boldText}>{item.slot}</Text></Text>
+          </View>
+          <View style={styles.detailRow}>
+            <Phone size={18} color="#94a3b8" />
+            <Text style={styles.detailText}>Contact: <Text style={styles.boldText}>{item.contact}</Text></Text>
+          </View>
+        </View>
