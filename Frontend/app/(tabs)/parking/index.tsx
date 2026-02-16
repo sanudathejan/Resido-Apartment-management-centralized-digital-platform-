@@ -95,3 +95,42 @@ export default function ParkingManagement() {
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+    container: { flex: 1, backgroundColor: '#F8F9FA' },
+    blueHeader: { backgroundColor: '#3498DB', padding: 20, paddingBottom: 50 },
+    topNav: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+    headerTitle: { color: '#fff', fontSize: 20, fontWeight: 'bold' },
+    headerSub: { color: '#E0E0E0', fontSize: 13, marginTop: 5, textAlign: 'center' },
+    mainCard: {
+      backgroundColor: '#fff', marginHorizontal: 20, marginTop: -30,
+      borderRadius: 15, padding: 20, elevation: 4, shadowColor: '#000',
+      shadowOpacity: 0.1, shadowRadius: 8, marginBottom: 10
+    },
+    slotRow: { flexDirection: 'row', alignItems: 'center' },
+    iconBox: { width: 45, height: 45, backgroundColor: '#EBF5FB', borderRadius: 10, justifyContent: 'center', alignItems: 'center' },
+    slotId: { fontSize: 17, fontWeight: 'bold', color: '#2C3E50' },
+    statusText: { fontSize: 11, color: '#95A5A6', marginTop: 2 },
+    infoBox: { flexDirection: 'row', backgroundColor: '#F0F7FD', padding: 12, borderRadius: 10, marginTop: 15 },
+    infoText: { flex: 1, fontSize: 12, color: '#34495E', marginLeft: 10, lineHeight: 18 },
+    sectionHeader: { flexDirection: 'row', alignItems: 'center', margin: 20 },
+    sectionTitle: { fontSize: 18, fontWeight: 'bold', color: '#2C3E50' },
+    countBadge: { backgroundColor: '#E74C3C', marginLeft: 8, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 10 },
+    countText: { color: '#fff', fontSize: 12, fontWeight: 'bold' },
+    requestCard: { backgroundColor: '#fff', marginHorizontal: 20, borderRadius: 15, padding: 15, marginBottom: 15, elevation: 2 },
+    userRow: { flexDirection: 'row', alignItems: 'center' },
+    avatarPlaceholder: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#BDC3C7', justifyContent: 'center', alignItems: 'center' },
+    userName: { fontWeight: 'bold', fontSize: 15, color: '#2C3E50' },
+    userSub: { fontSize: 11, color: '#95A5A6' },
+    typeBadge: { backgroundColor: '#EBF5FB', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 },
+    typeText: { fontSize: 10, color: '#3498DB', fontWeight: 'bold' },
+    urgentBadge: { backgroundColor: '#FDEDEC' },
+    urgentText: { color: '#E74C3C' },
+    carDetails: { backgroundColor: '#F8F9FA', padding: 10, borderRadius: 8, marginVertical: 12 },
+    carText: { fontSize: 12, color: '#34495E', marginBottom: 4 },
+    actionRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 5 },
+    declineBtn: { flex: 0.48, paddingVertical: 10, borderRadius: 8, alignItems: 'center', borderWidth: 1, borderColor: '#DCDDE1' },
+    declineBtnText: { color: '#7F8C8D', fontWeight: '600' },
+    acceptBtn: { flex: 0.48, backgroundColor: '#2ECC71', paddingVertical: 10, borderRadius: 8, alignItems: 'center' },
+    acceptBtnText: { color: '#fff', fontWeight: '600' }
+  });
