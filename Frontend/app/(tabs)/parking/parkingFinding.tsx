@@ -141,3 +141,13 @@ export default function ParkingApp() {
                                     placeholderTextColor="#94a3b8"
                                   />
                                 </View>
+
+                        {/* List of Parking Slots */}
+                                <FlatList
+                                  data={PARKING_DATA}
+                                  renderItem={({ item }) => <ParkingCard item={item} />}
+                                  keyExtractor={item => item.id}
+                                  contentContainerStyle={{ paddingBottom: 100 }} // Space for bottom nav
+                                  showsVerticalScrollIndicator={false}
+                                />
+                              </View>
