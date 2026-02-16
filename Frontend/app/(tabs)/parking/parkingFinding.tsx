@@ -48,3 +48,28 @@ const PARKING_DATA = [
     rate: '$3.00',
   },
 ];
+
+/**
+ * Individual Card Component for each Parking Slot
+ */
+const ParkingCard = ({ item }) => (
+  <View style={styles.card}>
+    {/* Profile and Rate Header Section */}
+    <View style={styles.cardHeader}>
+      <View style={styles.userInfo}>
+        <View style={styles.avatarPlaceholder}>
+          <UserCircle size={40} color="#3498db" strokeWidth={1.5} />
+        </View>
+        <View style={{ marginLeft: 12 }}>
+          <Text style={styles.userName}>{item.name}</Text>
+          {/* Dynamic status badge based on availability */}
+          <View style={[styles.statusBadge, { backgroundColor: item.statusColor }]}>
+            <Text style={[styles.statusText, { color: item.statusTextColor }]}>{item.status}</Text>
+          </View>
+        </View>
+      </View>
+      <View style={styles.rateContainer}>
+        <Text style={styles.rateLabel}>DAILY RATE</Text>
+        <Text style={styles.rateValue}>{item.rate}</Text>
+      </View>
+    </View>
