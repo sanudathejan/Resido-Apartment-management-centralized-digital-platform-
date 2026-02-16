@@ -169,7 +169,7 @@ export default function RentScreen() {
         style={styles.header}
       >
         <Text style={styles.headerTitle}>Rent & Payments</Text>
-        
+
         {/* Summary Cards */}
         <View style={styles.summaryContainer}>
           <View style={styles.summaryCard}>
@@ -249,7 +249,7 @@ export default function RentScreen() {
                         <Text style={styles.paymentAmount}>{formatCurrency(payment.amount)}</Text>
                       </View>
                     </View>
-                    
+
                     <Button
                       title="Pay Now"
                       onPress={() => {}}
