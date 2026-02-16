@@ -222,3 +222,9 @@ const styles = StyleSheet.create({
   rateContainer: { alignItems: 'flex-end' },
   rateLabel: { fontSize: 10, color: '#94a3b8', fontWeight: '800', letterSpacing: 0.5 },
   rateValue: { fontSize: 20, fontWeight: '900', color: '#1e293b' },
+
+// Detail Box Styles
+  detailsContainer: { backgroundColor: '#f8fafc', borderRadius: 14, padding: 14, marginTop: 18, borderWidth: 1, borderColor: '#f1f5f9' },
+  detailRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 10 },
+  detailText: { marginLeft: 12, color: '#64748b', fontSize: 14 },
+  boldText: { fontWeight: '700', color: '#334155' },
