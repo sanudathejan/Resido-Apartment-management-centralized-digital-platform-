@@ -151,3 +151,20 @@ export default function ParkingApp() {
                                   showsVerticalScrollIndicator={false}
                                 />
                               </View>
+
+                        {/* Bottom Navigation Bar */}
+                              <View style={styles.bottomNav}>
+                                <NavIcon icon={<Home size={24} color="#64748b" />} label="Home" />
+                                <NavIcon icon={<Megaphone size={24} color="#64748b" />} label="News" />
+                                {/* Active Parking Tab */}
+                                <View style={styles.activeNavIcon}>
+                                  <SquareP size={28} color="#2ecc71" />
+                                  <Text style={[styles.navLabel, { color: '#2ecc71' }]}>Parking</Text>
+                                  <View style={styles.activeIndicator} />
+                                </View>
+                                <NavIcon icon={<Banknote size={24} color="#64748b" />} label="Rent" />
+                                <NavIcon icon={<UserCircle size={24} color="#64748b" />} label="Profile" />
+                              </View>
+                            </SafeAreaView>
+                          );
+                        }
