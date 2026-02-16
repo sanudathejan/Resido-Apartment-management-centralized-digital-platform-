@@ -85,3 +85,15 @@ const ParkingCard = ({ item }) => (
             <Text style={styles.detailText}>Contact: <Text style={styles.boldText}>{item.contact}</Text></Text>
           </View>
         </View>
+
+        {/* Request Button with Plus Icon */}
+            <TouchableOpacity style={styles.requestButton} activeOpacity={0.8}>
+              <View style={styles.buttonContent}>
+                <View style={styles.plusIcon}>
+                  <Text style={styles.plusText}>+</Text>
+                </View>
+                <Text style={styles.requestButtonText}>Request Slot</Text>
+              </View>
+            </TouchableOpacity>
+          </View>
+        );
