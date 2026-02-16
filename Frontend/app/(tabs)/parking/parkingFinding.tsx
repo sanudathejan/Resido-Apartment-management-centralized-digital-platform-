@@ -123,3 +123,11 @@ export default function ParkingApp() {
                           <SquareP size={16} color="#27ae60" fill="#27ae60" />
                           <Text style={[styles.tabText, styles.activeTabText]}>Available Slots</Text>
                         </View>
+                       </TouchableOpacity>
+                         <TouchableOpacity style={styles.tab}>
+                          <View style={styles.tabContent}>
+                              <Megaphone size={16} color="#64748b" />
+                              <Text style={styles.tabText}>My Requests</Text>
+                            </View>
+                          </TouchableOpacity>
+                        </View>
