@@ -131,3 +131,13 @@ export default function ParkingApp() {
                             </View>
                           </TouchableOpacity>
                         </View>
+
+                        {/* Search Bar Input */}
+                                <View style={styles.searchContainer}>
+                                  <Search size={20} color="#94a3b8" />
+                                  <TextInput
+                                    style={styles.searchInput}
+                                    placeholder="Search by block (e.g. Block B)"
+                                    placeholderTextColor="#94a3b8"
+                                  />
+                                </View>
