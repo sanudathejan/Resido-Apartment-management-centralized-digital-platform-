@@ -198,3 +198,11 @@ const styles = StyleSheet.create({
       backgroundColor: '#f8fafc',
       paddingHorizontal: 16
     },
+
+// Tab Switcher Styles
+  tabContainer: { flexDirection: 'row', backgroundColor: '#f1f5f9', borderRadius: 12, padding: 4, marginTop: 20 },
+  tab: { flex: 1, paddingVertical: 12, alignItems: 'center', borderRadius: 10 },
+  activeTab: { backgroundColor: 'white', shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.1, shadowRadius: 2, elevation: 2 },
+  tabContent: { flexDirection: 'row', alignItems: 'center' },
+  tabText: { marginLeft: 8, color: '#64748b', fontSize: 14, fontWeight: '600' },
+  activeTabText: { color: '#27ae60' },
