@@ -112,3 +112,6 @@ export default function ParkingApp() {
               </View>
               <Text style={styles.headerSubtitle}>Rent a temporary slot from other residents</Text>
             </View>
+
+            {/* Main Content Area: Uses negative margin to overlap the blue header */}
+            <View style={styles.content}>
