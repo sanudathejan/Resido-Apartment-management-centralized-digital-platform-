@@ -168,3 +168,13 @@ export default function ParkingApp() {
                             </SafeAreaView>
                           );
                         }
+
+/**
+ * Reusable component for Bottom Navigation Items
+ */
+const NavIcon = ({ icon, label }) => (
+  <TouchableOpacity style={styles.navItem} activeOpacity={0.6}>
+    {icon}
+    <Text style={styles.navLabel}>{label}</Text>
+  </TouchableOpacity>
+);
