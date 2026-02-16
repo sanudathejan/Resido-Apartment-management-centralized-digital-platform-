@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, Switch, TouchableOpacity, ScrollView, SafeAreaView, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-
+import ParkingFinding from './parkingFinding'; // Import your search interface
 /** * 1. DATA ARRAY:
  * This is where you manage your requests.
  * To add more "Slots" or requests to the screen, just add more objects to this list.
