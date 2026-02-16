@@ -102,3 +102,13 @@ export default function ParkingApp() {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#3498db" />
+
+      {/* Header: Blue section with title and subtitle */}
+            <View style={styles.header}>
+              <View style={styles.headerTop}>
+                <TouchableOpacity><Text style={styles.backArrow}>‹</Text></TouchableOpacity>
+                <Text style={styles.headerTitle}>Find Available Parking</Text>
+                <View style={{ width: 24 }} /> {/* Empty view for centering title */}
+              </View>
+              <Text style={styles.headerSubtitle}>Rent a temporary slot from other residents</Text>
+            </View>
