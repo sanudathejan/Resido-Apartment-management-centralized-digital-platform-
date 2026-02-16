@@ -228,3 +228,10 @@ const styles = StyleSheet.create({
   detailRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 10 },
   detailText: { marginLeft: 12, color: '#64748b', fontSize: 14 },
   boldText: { fontWeight: '700', color: '#334155' },
+
+// Request Button Styles
+  requestButton: { backgroundColor: '#2ecc71', borderRadius: 14, paddingVertical: 14, marginTop: 18, alignItems: 'center' },
+  buttonContent: { flexDirection: 'row', alignItems: 'center' },
+  plusIcon: { width: 22, height: 22, borderRadius: 11, borderColor: 'white', borderWidth: 2, justifyContent: 'center', alignItems: 'center', marginRight: 10 },
+  plusText: { color: 'white', fontSize: 16, fontWeight: 'bold', lineHeight: 18 },
+  requestButtonText: { color: 'white', fontWeight: 'bold', fontSize: 16 },
