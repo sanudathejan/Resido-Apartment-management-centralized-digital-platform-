@@ -210,3 +210,15 @@ const styles = StyleSheet.create({
 // Search Bar Styles
   searchContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'white', borderRadius: 14, paddingHorizontal: 15, marginTop: 15, borderWidth: 1, borderColor: '#e2e8f0', height: 55 },
   searchInput: { flex: 1, marginLeft: 10, fontSize: 15, color: '#334155' },
+
+// Card Component Styles
+  card: { backgroundColor: 'white', borderRadius: 20, padding: 18, marginTop: 15, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.05, shadowRadius: 10, elevation: 4 },
+  cardHeader: { flexDirection: 'row', justifyContent: 'space-between' },
+  userInfo: { flexDirection: 'row', alignItems: 'center' },
+  avatarPlaceholder: { width: 48, height: 48, borderRadius: 24, backgroundColor: '#eff6ff', justifyContent: 'center', alignItems: 'center' },
+  userName: { fontSize: 17, fontWeight: '700', color: '#1e293b' },
+  statusBadge: { alignSelf: 'flex-start', paddingHorizontal: 10, paddingVertical: 3, borderRadius: 6, marginTop: 5 },
+  statusText: { fontSize: 11, fontWeight: 'bold' },
+  rateContainer: { alignItems: 'flex-end' },
+  rateLabel: { fontSize: 10, color: '#94a3b8', fontWeight: '800', letterSpacing: 0.5 },
+  rateValue: { fontSize: 20, fontWeight: '900', color: '#1e293b' },
