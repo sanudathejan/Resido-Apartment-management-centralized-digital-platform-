@@ -1,6 +1,6 @@
 /**
  * Visitor Management Screen
- * Register and track visitors to the apartment complex
+ * Register and track visitors - Modern 2026 light theme
  */
 
 import React, { useState, useEffect } from 'react';
@@ -14,19 +14,34 @@ import {
   Modal,
   Alert,
   TextInput,
-  Dimensions,
+  Platform,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors } from '@/constants/colors';
 import { useAuth } from '@/context/AuthContext';
 import { VisitorEntry } from '@/types';
 
-const { width } = Dimensions.get('window');
+const C = {
+  bg: '#F4F7FB',
+  primary: '#2563EB',
+  primaryLight: '#EFF6FF',
+  white: '#FFFFFF',
+  textDark: '#1E293B',
+  textLight: '#64748B',
+  textMuted: '#94A3B8',
+  border: '#E2E8F0',
+  success: '#10B981',
+  successBg: '#ECFDF5',
+  warning: '#F59E0B',
+  warningBg: '#FEF3C7',
+  error: '#EF4444',
+  errorBg: '#FEF2F2',
+  cyan: '#0891B2',
+  cyanBg: '#ECFEFF',
+  gray50: '#F8FAFC',
+};
 
-// Mock visitor data
 const mockVisitors: VisitorEntry[] = [
   {
     id: 1,
@@ -78,8 +93,8 @@ export default function VisitorManagementScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
-  
-  // Add visitor form state
+  const [focusedField, setFocusedField] = useState<string | null>(null);
+
   const [visitorForm, setVisitorForm] = useState({
     name: '',
     phone: '',
@@ -132,21 +147,16 @@ export default function VisitorManagementScreen() {
     Alert.alert('Success', 'Visitor pre-registered successfully! Security will be notified.');
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusStyle = (status: string) => {
     switch (status) {
-      case 'CHECKED_IN': return Colors.success;
-      case 'CHECKED_OUT': return Colors.gray[400];
-      case 'PENDING': return Colors.warning;
-      default: return Colors.gray[400];
-    }
-  };
-
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'CHECKED_IN': return 'Currently In';
-      case 'CHECKED_OUT': return 'Left';
-      case 'PENDING': return 'Expected';
-      default: return status;
+      case 'CHECKED_IN':
+        return { color: C.success, bg: C.successBg, text: 'Currently In' };
+      case 'CHECKED_OUT':
+        return { color: C.textMuted, bg: C.gray50, text: 'Left' };
+      case 'PENDING':
+        return { color: C.warning, bg: C.warningBg, text: 'Expected' };
+      default:
+        return { color: C.textMuted, bg: C.gray50, text: status };
     }
   };
 
@@ -165,507 +175,306 @@ export default function VisitorManagementScreen() {
   const expectedVisitors = visitors.filter(v => v.status === 'PENDING' || v.status === 'CHECKED_IN');
   const historyVisitors = visitors.filter(v => v.status === 'CHECKED_OUT');
 
-  const VisitorCard = ({ visitor }: { visitor: VisitorEntry }) => (
-    <View style={styles.visitorCard}>
-      <View style={styles.visitorHeader}>
-        <View style={styles.visitorAvatar}>
-          <Text style={styles.visitorInitial}>
-            {visitor.visitorName.charAt(0).toUpperCase()}
-          </Text>
-        </View>
-        <View style={styles.visitorInfo}>
-          <Text style={styles.visitorName}>{visitor.visitorName}</Text>
-          <Text style={styles.visitorPurpose}>{visitor.purpose}</Text>
-        </View>
-        <View style={[styles.statusBadge, { backgroundColor: getStatusColor(visitor.status) }]}>
-          <Text style={styles.statusText}>{getStatusText(visitor.status)}</Text>
-        </View>
-      </View>
-
-      <View style={styles.visitorDetails}>
-        {visitor.visitorPhone && (
-          <View style={styles.detailRow}>
-            <Ionicons name="call-outline" size={16} color={Colors.gray[400]} />
-            <Text style={styles.detailText}>{visitor.visitorPhone}</Text>
-          </View>
-        )}
-        {visitor.vehicleNumber && (
-          <View style={styles.detailRow}>
-            <Ionicons name="car-outline" size={16} color={Colors.gray[400]} />
-            <Text style={styles.detailText}>{visitor.vehicleNumber}</Text>
-          </View>
-        )}
-        {visitor.entryTime && (
-          <View style={styles.detailRow}>
-            <Ionicons name="enter-outline" size={16} color={Colors.gray[400]} />
-            <Text style={styles.detailText}>
-              Entry: {formatDate(visitor.entryTime)} at {formatTime(visitor.entryTime)}
+  const VisitorCard = ({ visitor }: { visitor: VisitorEntry }) => {
+    const statusStyle = getStatusStyle(visitor.status);
+    return (
+      <View style={styles.visitorCard}>
+        <View style={styles.visitorHeader}>
+          <View style={[styles.visitorAvatar, { backgroundColor: C.cyanBg }]}>
+            <Text style={[styles.visitorInitial, { color: C.cyan }]}>
+              {visitor.visitorName.charAt(0).toUpperCase()}
             </Text>
           </View>
-        )}
-        {visitor.exitTime && (
-          <View style={styles.detailRow}>
-            <Ionicons name="exit-outline" size={16} color={Colors.gray[400]} />
-            <Text style={styles.detailText}>
-              Exit: {formatDate(visitor.exitTime)} at {formatTime(visitor.exitTime)}
-            </Text>
+          <View style={styles.visitorInfo}>
+            <Text style={styles.visitorName}>{visitor.visitorName}</Text>
+            <Text style={styles.visitorPurpose}>{visitor.purpose}</Text>
+          </View>
+          <View style={[styles.statusBadge, { backgroundColor: statusStyle.bg }]}>
+            <View style={[styles.statusDot, { backgroundColor: statusStyle.color }]} />
+            <Text style={[styles.statusText, { color: statusStyle.color }]}>{statusStyle.text}</Text>
+          </View>
+        </View>
+
+        <View style={styles.visitorDetails}>
+          {visitor.visitorPhone && (
+            <View style={styles.detailRow}>
+              <Ionicons name="call-outline" size={15} color={C.textMuted} />
+              <Text style={styles.detailText}>{visitor.visitorPhone}</Text>
+            </View>
+          )}
+          {visitor.vehicleNumber ? (
+            <View style={styles.detailRow}>
+              <Ionicons name="car-outline" size={15} color={C.textMuted} />
+              <Text style={styles.detailText}>{visitor.vehicleNumber}</Text>
+            </View>
+          ) : null}
+          {visitor.entryTime ? (
+            <View style={styles.detailRow}>
+              <Ionicons name="enter-outline" size={15} color={C.textMuted} />
+              <Text style={styles.detailText}>
+                Entry: {formatDate(visitor.entryTime)} at {formatTime(visitor.entryTime)}
+              </Text>
+            </View>
+          ) : null}
+          {visitor.exitTime ? (
+            <View style={styles.detailRow}>
+              <Ionicons name="exit-outline" size={15} color={C.textMuted} />
+              <Text style={styles.detailText}>
+                Exit: {formatDate(visitor.exitTime)} at {formatTime(visitor.exitTime)}
+              </Text>
+            </View>
+          ) : null}
+        </View>
+
+        {visitor.status === 'PENDING' && (
+          <View style={styles.actionButtons}>
+            <TouchableOpacity style={styles.editButton} activeOpacity={0.7}>
+              <Ionicons name="create-outline" size={16} color={C.primary} />
+              <Text style={[styles.actionBtnText, { color: C.primary }]}>Edit</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.cancelVisitorButton} activeOpacity={0.7}>
+              <Ionicons name="close-circle-outline" size={16} color={C.error} />
+              <Text style={[styles.actionBtnText, { color: C.error }]}>Cancel</Text>
+            </TouchableOpacity>
           </View>
         )}
       </View>
-
-      {visitor.status === 'PENDING' && (
-        <View style={styles.actionButtons}>
-          <TouchableOpacity style={styles.editButton}>
-            <Ionicons name="create-outline" size={18} color={Colors.primary} />
-            <Text style={styles.editButtonText}>Edit</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.cancelVisitorButton}>
-            <Ionicons name="close-circle-outline" size={18} color={Colors.error} />
-            <Text style={styles.cancelVisitorButtonText}>Cancel</Text>
-          </TouchableOpacity>
-        </View>
-      )}
-    </View>
-  );
+    );
+  };
 
   return (
     <View style={styles.container}>
-      <LinearGradient
-        colors={['#1A4B6E', '#0D2137']}
-        style={styles.background}
-      >
-        <SafeAreaView style={styles.safeArea}>
-          {/* Header */}
-          <View style={styles.header}>
-            <TouchableOpacity 
-              style={styles.backButton}
-              onPress={() => router.back()}
-            >
-              <Ionicons name="arrow-back" size={24} color={Colors.white} />
-            </TouchableOpacity>
-            <Text style={styles.headerTitle}>Visitor Management</Text>
-            <TouchableOpacity 
-              style={styles.addButton}
-              onPress={() => setShowAddModal(true)}
-            >
-              <Ionicons name="add" size={28} color={Colors.white} />
-            </TouchableOpacity>
-          </View>
-
-          {/* Tab Switcher */}
-          <View style={styles.tabContainer}>
-            <TouchableOpacity
-              style={[styles.tab, activeTab === 'expected' && styles.activeTab]}
-              onPress={() => setActiveTab('expected')}
-            >
-              <Text style={[styles.tabText, activeTab === 'expected' && styles.activeTabText]}>
-                Expected ({expectedVisitors.length})
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.tab, activeTab === 'history' && styles.activeTab]}
-              onPress={() => setActiveTab('history')}
-            >
-              <Text style={[styles.tabText, activeTab === 'history' && styles.activeTabText]}>
-                History ({historyVisitors.length})
-              </Text>
-            </TouchableOpacity>
-          </View>
-
-          <ScrollView
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.scrollContent}
-            refreshControl={
-              <RefreshControl
-                refreshing={refreshing}
-                onRefresh={onRefresh}
-                tintColor={Colors.white}
-              />
-            }
+      <SafeAreaView style={styles.safeArea}>
+        {/* Header */}
+        <View style={styles.header}>
+          <TouchableOpacity style={styles.backButton} onPress={() => router.back()} activeOpacity={0.7}>
+            <Ionicons name="arrow-back" size={22} color={C.textDark} />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Visitor Management</Text>
+          <TouchableOpacity
+            style={styles.addButton}
+            onPress={() => setShowAddModal(true)}
+            activeOpacity={0.7}
           >
-            {activeTab === 'expected' ? (
-              expectedVisitors.length === 0 ? (
-                <View style={styles.emptyState}>
-                  <Ionicons name="person-add-outline" size={60} color={Colors.gray[400]} />
-                  <Text style={styles.emptyTitle}>No Expected Visitors</Text>
-                  <Text style={styles.emptySubtitle}>
-                    Pre-register visitors to notify security
-                  </Text>
-                </View>
-              ) : (
-                expectedVisitors.map((visitor) => (
-                  <VisitorCard key={visitor.id} visitor={visitor} />
-                ))
-              )
-            ) : (
-              historyVisitors.length === 0 ? (
-                <View style={styles.emptyState}>
-                  <Ionicons name="time-outline" size={60} color={Colors.gray[400]} />
-                  <Text style={styles.emptyTitle}>No Visitor History</Text>
-                  <Text style={styles.emptySubtitle}>
-                    Past visitor records will appear here
-                  </Text>
-                </View>
-              ) : (
-                historyVisitors.map((visitor) => (
-                  <VisitorCard key={visitor.id} visitor={visitor} />
-                ))
-              )
-            )}
-          </ScrollView>
+            <Ionicons name="add" size={22} color={C.white} />
+          </TouchableOpacity>
+        </View>
 
-          {/* Add Visitor Modal */}
-          <Modal
-            visible={showAddModal}
-            animationType="slide"
-            transparent={true}
-            onRequestClose={() => setShowAddModal(false)}
+        {/* Tab Switcher */}
+        <View style={styles.tabContainer}>
+          <TouchableOpacity
+            style={[styles.tab, activeTab === 'expected' && styles.activeTab]}
+            onPress={() => setActiveTab('expected')}
+            activeOpacity={0.7}
           >
-            <View style={styles.modalOverlay}>
-              <View style={styles.modalContent}>
-                <View style={styles.modalHeader}>
-                  <Text style={styles.modalTitle}>Pre-Register Visitor</Text>
-                  <TouchableOpacity onPress={() => setShowAddModal(false)}>
-                    <Ionicons name="close" size={24} color={Colors.text.primary} />
-                  </TouchableOpacity>
+            <Text style={[styles.tabText, activeTab === 'expected' && styles.activeTabText]}>
+              Expected ({expectedVisitors.length})
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.tab, activeTab === 'history' && styles.activeTab]}
+            onPress={() => setActiveTab('history')}
+            activeOpacity={0.7}
+          >
+            <Text style={[styles.tabText, activeTab === 'history' && styles.activeTabText]}>
+              History ({historyVisitors.length})
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        >
+          {activeTab === 'expected' ? (
+            expectedVisitors.length === 0 ? (
+              <View style={styles.emptyState}>
+                <View style={styles.emptyIcon}>
+                  <Ionicons name="person-add-outline" size={40} color={C.textMuted} />
                 </View>
-
-                <ScrollView showsVerticalScrollIndicator={false}>
-                  <Text style={styles.inputLabel}>Visitor Name *</Text>
-                  <TextInput
-                    style={styles.input}
-                    placeholder="Enter visitor's full name"
-                    placeholderTextColor={Colors.gray[400]}
-                    value={visitorForm.name}
-                    onChangeText={(text) => setVisitorForm({ ...visitorForm, name: text })}
-                  />
-
-                  <Text style={styles.inputLabel}>Phone Number</Text>
-                  <TextInput
-                    style={styles.input}
-                    placeholder="+94 XX XXX XXXX"
-                    placeholderTextColor={Colors.gray[400]}
-                    value={visitorForm.phone}
-                    onChangeText={(text) => setVisitorForm({ ...visitorForm, phone: text })}
-                    keyboardType="phone-pad"
-                  />
-
-                  <Text style={styles.inputLabel}>Vehicle Number</Text>
-                  <TextInput
-                    style={styles.input}
-                    placeholder="e.g., CAB-1234 (optional)"
-                    placeholderTextColor={Colors.gray[400]}
-                    value={visitorForm.vehicleNumber}
-                    onChangeText={(text) => setVisitorForm({ ...visitorForm, vehicleNumber: text })}
-                    autoCapitalize="characters"
-                  />
-
-                  <Text style={styles.inputLabel}>Purpose of Visit *</Text>
-                  <TextInput
-                    style={styles.input}
-                    placeholder="e.g., Delivery, Guest, Maintenance"
-                    placeholderTextColor={Colors.gray[400]}
-                    value={visitorForm.purpose}
-                    onChangeText={(text) => setVisitorForm({ ...visitorForm, purpose: text })}
-                  />
-
-                  <Text style={styles.inputLabel}>Expected Date</Text>
-                  <TextInput
-                    style={styles.input}
-                    placeholder="YYYY-MM-DD (optional)"
-                    placeholderTextColor={Colors.gray[400]}
-                    value={visitorForm.expectedDate}
-                    onChangeText={(text) => setVisitorForm({ ...visitorForm, expectedDate: text })}
-                  />
-
-                  <Text style={styles.inputLabel}>Expected Time</Text>
-                  <TextInput
-                    style={styles.input}
-                    placeholder="HH:MM (optional)"
-                    placeholderTextColor={Colors.gray[400]}
-                    value={visitorForm.expectedTime}
-                    onChangeText={(text) => setVisitorForm({ ...visitorForm, expectedTime: text })}
-                  />
-
-                  <View style={styles.infoBox}>
-                    <Ionicons name="information-circle" size={20} color={Colors.info} />
-                    <Text style={styles.infoText}>
-                      Security will be notified about your expected visitor. They will receive
-                      a verification call upon arrival.
-                    </Text>
-                  </View>
-
-                  <TouchableOpacity
-                    style={styles.submitButton}
-                    onPress={handleAddVisitor}
-                    activeOpacity={0.8}
-                  >
-                    <LinearGradient
-                      colors={['#2ECC71', '#27AE60']}
-                      style={styles.submitButtonGradient}
-                    >
-                      <Text style={styles.submitButtonText}>Register Visitor</Text>
-                    </LinearGradient>
-                  </TouchableOpacity>
-                </ScrollView>
+                <Text style={styles.emptyTitle}>No Expected Visitors</Text>
+                <Text style={styles.emptySubtitle}>Pre-register visitors to notify security</Text>
               </View>
+            ) : (
+              expectedVisitors.map(visitor => <VisitorCard key={visitor.id} visitor={visitor} />)
+            )
+          ) : historyVisitors.length === 0 ? (
+            <View style={styles.emptyState}>
+              <View style={styles.emptyIcon}>
+                <Ionicons name="time-outline" size={40} color={C.textMuted} />
+              </View>
+              <Text style={styles.emptyTitle}>No Visitor History</Text>
+              <Text style={styles.emptySubtitle}>Past visitor records will appear here</Text>
             </View>
-          </Modal>
-        </SafeAreaView>
-      </LinearGradient>
+          ) : (
+            historyVisitors.map(visitor => <VisitorCard key={visitor.id} visitor={visitor} />)
+          )}
+        </ScrollView>
+
+        {/* Add Visitor Modal */}
+        <Modal visible={showAddModal} animationType="slide" transparent onRequestClose={() => setShowAddModal(false)}>
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <View style={styles.modalHandle} />
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>Pre-Register Visitor</Text>
+                <TouchableOpacity onPress={() => setShowAddModal(false)} style={styles.modalClose}>
+                  <Ionicons name="close" size={22} color={C.textDark} />
+                </TouchableOpacity>
+              </View>
+
+              <ScrollView showsVerticalScrollIndicator={false}>
+                {[
+                  { key: 'name', label: 'Visitor Name *', placeholder: "Enter visitor's full name", icon: 'person-outline' as const, kbd: 'default' as const },
+                  { key: 'phone', label: 'Phone Number', placeholder: '+94 XX XXX XXXX', icon: 'call-outline' as const, kbd: 'phone-pad' as const },
+                  { key: 'vehicleNumber', label: 'Vehicle Number', placeholder: 'e.g., CAB-1234 (optional)', icon: 'car-outline' as const, kbd: 'default' as const },
+                  { key: 'purpose', label: 'Purpose of Visit *', placeholder: 'e.g., Delivery, Guest, Maintenance', icon: 'document-text-outline' as const, kbd: 'default' as const },
+                  { key: 'expectedDate', label: 'Expected Date', placeholder: 'YYYY-MM-DD (optional)', icon: 'calendar-outline' as const, kbd: 'default' as const },
+                  { key: 'expectedTime', label: 'Expected Time', placeholder: 'HH:MM (optional)', icon: 'time-outline' as const, kbd: 'default' as const },
+                ].map(field => (
+                  <View key={field.key}>
+                    <Text style={styles.inputLabel}>{field.label}</Text>
+                    <View style={[styles.inputContainer, focusedField === field.key && { borderColor: C.primary }]}>
+                      <Ionicons name={field.icon} size={18} color={C.textMuted} style={styles.inputIcon} />
+                      <TextInput
+                        style={styles.input}
+                        placeholder={field.placeholder}
+                        placeholderTextColor={C.textMuted}
+                        value={(visitorForm as any)[field.key]}
+                        onChangeText={text => setVisitorForm({ ...visitorForm, [field.key]: text })}
+                        keyboardType={field.kbd}
+                        autoCapitalize={field.key === 'vehicleNumber' ? 'characters' : 'none'}
+                        onFocus={() => setFocusedField(field.key)}
+                        onBlur={() => setFocusedField(null)}
+                      />
+                    </View>
+                  </View>
+                ))}
+
+                <View style={styles.infoBox}>
+                  <Ionicons name="information-circle" size={18} color={C.primary} />
+                  <Text style={styles.infoText}>
+                    Security will be notified about your expected visitor. They will receive a verification call upon arrival.
+                  </Text>
+                </View>
+
+                <TouchableOpacity style={styles.submitButton} onPress={handleAddVisitor} activeOpacity={0.85}>
+                  <Text style={styles.submitButtonText}>Register Visitor</Text>
+                </TouchableOpacity>
+              </ScrollView>
+            </View>
+          </View>
+        </Modal>
+      </SafeAreaView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  background: {
-    flex: 1,
-  },
-  safeArea: {
-    flex: 1,
-  },
+  container: { flex: 1, backgroundColor: C.bg },
+  safeArea: { flex: 1 },
+
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 15,
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    paddingHorizontal: 20, paddingVertical: 14,
   },
   backButton: {
-    width: 40,
-    height: 40,
-    justifyContent: 'center',
+    width: 42, height: 42, borderRadius: 14,
+    backgroundColor: C.white, alignItems: 'center', justifyContent: 'center',
+    ...Platform.select({
+      ios: { shadowColor: C.textMuted, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.08, shadowRadius: 6 },
+      android: { elevation: 2 },
+    }),
   },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: Colors.white,
-  },
+  headerTitle: { fontSize: 20, fontWeight: '700', color: C.textDark },
   addButton: {
-    width: 40,
-    height: 40,
-    alignItems: 'flex-end',
-    justifyContent: 'center',
+    width: 42, height: 42, borderRadius: 14,
+    backgroundColor: C.cyan, alignItems: 'center', justifyContent: 'center',
   },
+
   tabContainer: {
-    flexDirection: 'row',
-    marginHorizontal: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: 12,
-    padding: 4,
-    marginBottom: 20,
+    flexDirection: 'row', marginHorizontal: 20, gap: 8,
+    backgroundColor: C.white, borderRadius: 16, padding: 4, marginBottom: 16,
+    ...Platform.select({
+      ios: { shadowColor: C.textMuted, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 8 },
+      android: { elevation: 2 },
+    }),
   },
-  tab: {
-    flex: 1,
-    paddingVertical: 10,
-    alignItems: 'center',
-    borderRadius: 10,
-  },
-  activeTab: {
-    backgroundColor: Colors.primary,
-  },
-  tabText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: 'rgba(255, 255, 255, 0.6)',
-  },
-  activeTabText: {
-    color: Colors.white,
-  },
-  scrollContent: {
-    paddingHorizontal: 20,
-    paddingBottom: 100,
-  },
+  tab: { flex: 1, paddingVertical: 11, alignItems: 'center', borderRadius: 13 },
+  activeTab: { backgroundColor: C.primary },
+  tabText: { fontSize: 14, fontWeight: '600', color: C.textMuted },
+  activeTabText: { color: C.white },
+
+  scrollContent: { paddingHorizontal: 20, paddingBottom: 100 },
+
   visitorCard: {
-    backgroundColor: Colors.white,
-    borderRadius: 15,
-    padding: 15,
-    marginBottom: 15,
+    backgroundColor: C.white, borderRadius: 20, padding: 16, marginBottom: 14,
+    ...Platform.select({
+      ios: { shadowColor: C.textMuted, shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.08, shadowRadius: 10 },
+      android: { elevation: 2 },
+    }),
   },
-  visitorHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  visitorAvatar: {
-    width: 45,
-    height: 45,
-    borderRadius: 12,
-    backgroundColor: Colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  visitorInitial: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: Colors.white,
-  },
-  visitorInfo: {
-    flex: 1,
-    marginLeft: 12,
-  },
-  visitorName: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: Colors.text.primary,
-  },
-  visitorPurpose: {
-    fontSize: 13,
-    color: Colors.text.secondary,
-    marginTop: 2,
-  },
-  statusBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 10,
-  },
-  statusText: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: Colors.white,
-  },
-  visitorDetails: {
-    gap: 8,
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: Colors.gray[200],
-  },
-  detailRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-  detailText: {
-    fontSize: 13,
-    color: Colors.text.secondary,
-  },
-  actionButtons: {
-    flexDirection: 'row',
-    gap: 12,
-    marginTop: 15,
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: Colors.gray[200],
-  },
+  visitorHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 12 },
+  visitorAvatar: { width: 46, height: 46, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
+  visitorInitial: { fontSize: 20, fontWeight: '700' },
+  visitorInfo: { flex: 1, marginLeft: 12 },
+  visitorName: { fontSize: 16, fontWeight: '700', color: C.textDark },
+  visitorPurpose: { fontSize: 13, color: C.textLight, marginTop: 2 },
+  statusBadge: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 20 },
+  statusDot: { width: 7, height: 7, borderRadius: 4 },
+  statusText: { fontSize: 11, fontWeight: '700' },
+
+  visitorDetails: { gap: 8, paddingTop: 12, borderTopWidth: 1, borderTopColor: C.border },
+  detailRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  detailText: { fontSize: 13, color: C.textLight },
+
+  actionButtons: { flexDirection: 'row', gap: 12, marginTop: 14, paddingTop: 12, borderTopWidth: 1, borderTopColor: C.border },
   editButton: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    paddingVertical: 10,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: Colors.primary,
-  },
-  editButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: Colors.primary,
+    flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
+    paddingVertical: 10, borderRadius: 12, borderWidth: 1.5, borderColor: C.primary, backgroundColor: C.primaryLight,
   },
   cancelVisitorButton: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    paddingVertical: 10,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: Colors.error,
+    flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
+    paddingVertical: 10, borderRadius: 12, borderWidth: 1.5, borderColor: C.error, backgroundColor: C.errorBg,
   },
-  cancelVisitorButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: Colors.error,
+  actionBtnText: { fontSize: 13, fontWeight: '600' },
+
+  emptyState: { alignItems: 'center', paddingTop: 60 },
+  emptyIcon: {
+    width: 80, height: 80, borderRadius: 40, backgroundColor: C.white, alignItems: 'center', justifyContent: 'center', marginBottom: 16,
+    ...Platform.select({
+      ios: { shadowColor: C.textMuted, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.08, shadowRadius: 12 },
+      android: { elevation: 3 },
+    }),
   },
-  emptyState: {
-    alignItems: 'center',
-    paddingTop: 60,
+  emptyTitle: { fontSize: 18, fontWeight: '700', color: C.textDark, marginBottom: 6 },
+  emptySubtitle: { fontSize: 14, color: C.textLight, textAlign: 'center' },
+
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(15,23,42,0.4)', justifyContent: 'flex-end' },
+  modalContent: { backgroundColor: C.white, borderTopLeftRadius: 28, borderTopRightRadius: 28, padding: 20, maxHeight: '88%' },
+  modalHandle: { width: 36, height: 4, borderRadius: 2, backgroundColor: C.border, alignSelf: 'center', marginBottom: 16 },
+  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
+  modalTitle: { fontSize: 20, fontWeight: '700', color: C.textDark },
+  modalClose: { width: 36, height: 36, borderRadius: 12, backgroundColor: C.gray50, alignItems: 'center', justifyContent: 'center' },
+
+  inputLabel: { fontSize: 13, fontWeight: '600', color: C.textDark, marginBottom: 6, marginTop: 14 },
+  inputContainer: {
+    flexDirection: 'row', alignItems: 'center', backgroundColor: C.gray50,
+    borderRadius: 14, borderWidth: 1.5, borderColor: C.border, paddingHorizontal: 14,
   },
-  emptyTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: Colors.white,
-    marginTop: 15,
-  },
-  emptySubtitle: {
-    fontSize: 14,
-    color: 'rgba(255, 255, 255, 0.6)',
-    textAlign: 'center',
-    marginTop: 8,
-  },
-  // Modal styles
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end',
-  },
-  modalContent: {
-    backgroundColor: Colors.white,
-    borderTopLeftRadius: 25,
-    borderTopRightRadius: 25,
-    padding: 20,
-    maxHeight: '85%',
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: Colors.text.primary,
-  },
-  inputLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: Colors.text.primary,
-    marginBottom: 8,
-    marginTop: 12,
-  },
-  input: {
-    backgroundColor: Colors.gray[100],
-    borderRadius: 12,
-    paddingHorizontal: 15,
-    paddingVertical: 14,
-    fontSize: 16,
-    color: Colors.text.primary,
-    borderWidth: 1,
-    borderColor: Colors.gray[200],
-  },
-  infoBox: {
-    flexDirection: 'row',
-    backgroundColor: Colors.info + '15',
-    borderRadius: 12,
-    padding: 15,
-    marginTop: 20,
-    gap: 10,
-  },
-  infoText: {
-    flex: 1,
-    fontSize: 13,
-    color: Colors.info,
-    lineHeight: 18,
-  },
+  inputIcon: { marginRight: 10 },
+  input: { flex: 1, paddingVertical: 14, fontSize: 15, color: C.textDark },
+
+  infoBox: { flexDirection: 'row', backgroundColor: C.primaryLight, borderRadius: 14, padding: 14, marginTop: 20, gap: 10 },
+  infoText: { flex: 1, fontSize: 13, color: C.primary, lineHeight: 18, fontWeight: '500' },
+
   submitButton: {
-    borderRadius: 12,
-    overflow: 'hidden',
-    marginTop: 25,
-    marginBottom: 20,
+    backgroundColor: C.cyan, borderRadius: 16, paddingVertical: 16, alignItems: 'center', marginTop: 24, marginBottom: 20,
+    ...Platform.select({
+      ios: { shadowColor: C.cyan, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.25, shadowRadius: 10 },
+      android: { elevation: 4 },
+    }),
   },
-  submitButtonGradient: {
-    paddingVertical: 16,
-    alignItems: 'center',
-  },
-  submitButtonText: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: Colors.white,
-  },
+  submitButtonText: { fontSize: 16, fontWeight: '700', color: C.white },
 });
