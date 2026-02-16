@@ -181,3 +181,10 @@ const NavIcon = ({ icon, label }) => (
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f8fafc' },
+
+// Header Styles
+  header: { backgroundColor: '#3498db', padding: 20, paddingBottom: 45 },
+  headerTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  backArrow: { fontSize: 36, color: 'white', fontWeight: '300', marginTop: -5 },
+  headerTitle: { color: 'white', fontSize: 20, fontWeight: 'bold' },
+  headerSubtitle: { color: 'rgba(255,255,255,0.85)', fontSize: 13, marginTop: 8, textAlign: 'left' },
