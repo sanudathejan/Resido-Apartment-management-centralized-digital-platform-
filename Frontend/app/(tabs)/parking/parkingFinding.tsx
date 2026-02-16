@@ -206,3 +206,7 @@ const styles = StyleSheet.create({
   tabContent: { flexDirection: 'row', alignItems: 'center' },
   tabText: { marginLeft: 8, color: '#64748b', fontSize: 14, fontWeight: '600' },
   activeTabText: { color: '#27ae60' },
+
+// Search Bar Styles
+  searchContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'white', borderRadius: 14, paddingHorizontal: 15, marginTop: 15, borderWidth: 1, borderColor: '#e2e8f0', height: 55 },
+  searchInput: { flex: 1, marginLeft: 10, fontSize: 15, color: '#334155' },
