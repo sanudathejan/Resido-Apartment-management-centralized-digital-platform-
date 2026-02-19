@@ -113,4 +113,25 @@ export default function ParkingScreen() {
               />
             </View>
 
+            {/* 3. Pending Requests: Other residents asking for a spot */}
+                  <View style={styles.sectionHeader}>
+                    <Text style={styles.sectionTitle}>PENDING REQUESTS</Text>
+                    <View style={styles.countBadge}>
+                        <Text style={styles.countText}>2 New</Text>
+                    </View>
+                  </View>
+
+                  <RequestCard
+                    name="Guest for Apt 4B"
+                    time="Requested 15m ago"
+                    note="My visitor needs a spot for 3 hours. Would appreciate the help!"
+                  />
+                  <RequestCard
+                    name="James Wilson"
+                    time="Apt 12C • Requested 2h ago"
+                    note="Needs parking tomorrow, 6 PM - 10 PM"
+                  />
+                </>
+              );
+
 
