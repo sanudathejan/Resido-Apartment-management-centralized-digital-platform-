@@ -64,3 +64,8 @@ export default function ParkingScreen() {
 // Toggle State for the "Lend My Slot" switch
   const [isLending, setIsLending] = useState(false);
 
+/* ─── UI HANDLERS ─── */
+  const handleToggleLending = (value: boolean) => {
+    setIsLending(value);
+    // Add logic here to update the backend via parkingService
+  };
