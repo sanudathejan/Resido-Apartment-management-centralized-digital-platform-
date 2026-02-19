@@ -25,3 +25,19 @@ import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@/context/AuthContext';
 import { parkingService } from '@/services';
 import { ParkingSlot, VisitorEntry } from '@/types';
+
+/* ─── Updated Design Tokens ─── */
+const C = {
+  bg: '#F8FAFC', // Slightly cleaner background
+  primary: '#2563EB',
+  primaryLight: '#EFF6FF',
+  white: '#FFFFFF',
+  textDark: '#0F172A',
+  textLight: '#64748B',
+  textMuted: '#94A3B8',
+  border: '#E2E8F0',
+  success: '#10B981',
+  warning: '#F59E0B',
+  error: '#EF4444',
+  secondary: '#7C3AED',
+} as const;
