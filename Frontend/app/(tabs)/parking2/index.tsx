@@ -41,3 +41,15 @@ const C = {
   error: '#EF4444',
   secondary: '#7C3AED',
 } as const;
+
+const shadow = (elevation: number) => ({
+  ...Platform.select({
+    ios: {
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: elevation },
+      shadowOpacity: 0.1,
+      shadowRadius: elevation * 2,
+    },
+    android: { elevation },
+  }),
+});
