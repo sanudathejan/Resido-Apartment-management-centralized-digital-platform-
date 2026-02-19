@@ -228,3 +228,29 @@ const TabButton = ({ active, label, icon, onPress }: any) => (
 );
 
 
+/**
+ * RequestCard: Display for other residents asking to use your parking slot
+ */
+const RequestCard = ({ name, time, note }: any) => (
+    <View style={[styles.requestCard, shadow(1)]}>
+        <View style={styles.visitorRow}>
+            <View style={styles.avatarSmall} />
+            <View style={{ flex: 1 }}>
+                <Text style={styles.visitorName}>{name}</Text>
+                <Text style={styles.visitorSub}>{time}</Text>
+            </View>
+            <Ionicons name="chatbubble-ellipses" size={20} color={C.textMuted} />
+        </View>
+        <Text style={styles.requestNote}>"{note}"</Text>
+        <View style={styles.actionRow}>
+            <TouchableOpacity style={styles.declineBtn}>
+                <Text style={styles.declineText}>Decline</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.acceptBtn}>
+                <Text style={styles.acceptText}>Accept</Text>
+            </TouchableOpacity>
+        </View>
+    </View>
+);
+
+
