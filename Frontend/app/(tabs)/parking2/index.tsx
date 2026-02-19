@@ -60,3 +60,7 @@ export default function ParkingScreen() {
   const [parkingSlot, setParkingSlot] = useState<any>(null); // Replace any with your type
   const [loading, setLoading] = useState(false);
   const [showVisitorModal, setShowVisitorModal] = useState(false);
+
+// Toggle State for the "Lend My Slot" switch
+  const [isLending, setIsLending] = useState(false);
+
