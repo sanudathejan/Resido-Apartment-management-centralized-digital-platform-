@@ -215,4 +215,16 @@ return (
   );
 }
 
+/* ─── SUB-COMPONENTS ─── */
+
+/**
+ * TabButton: Navigates between Parking management and Visitor lists
+ */
+const TabButton = ({ active, label, icon, onPress }: any) => (
+    <TouchableOpacity onPress={onPress} style={[styles.tab, active && styles.tabActive]}>
+        <Ionicons name={icon} size={18} color={active ? C.primary : C.textMuted} />
+        <Text style={[styles.tabText, active && styles.tabTextActive]}>{label}</Text>
+    </TouchableOpacity>
+);
+
 
