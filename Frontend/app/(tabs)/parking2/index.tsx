@@ -96,3 +96,21 @@ export default function ParkingScreen() {
             </View>
         </View>
       </View>
+
+      {/* 2. Lending Management: Switch to allow others to use the slot */}
+            <View style={[styles.toggleCard, shadow(2)]}>
+              <View style={{ flex: 1 }}>
+                  <Text style={styles.cardTitle}>Lend My Slot</Text>
+                  <Text style={styles.cardSubtitle}>
+                      Mark your slot as free for other residents to use temporarily while you're away.
+                  </Text>
+              </View>
+              <Switch
+                  value={isLending}
+                  onValueChange={handleToggleLending}
+                  trackColor={{ false: '#CBD5E1', true: '#2563EB' }}
+                  thumbColor={Platform.OS === 'android' ? C.white : ''}
+              />
+            </View>
+
+
