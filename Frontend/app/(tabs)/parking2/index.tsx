@@ -181,4 +181,38 @@ export default function ParkingScreen() {
     </>
   );
 
+return (
+    <SafeAreaView style={styles.container} edges={['top']}>
+        {/* Header Section */}
+        <View style={styles.header}>
+            <Text style={styles.headerTitle}>Parking & Visitors</Text>
+            <Text style={styles.headerSubtitle}>Manage parking and visitor entries</Text>
+        </View>
+
+        {/* Custom Tab Switcher */}
+        <View style={styles.tabContainer}>
+            <TabButton
+                active={activeTab === 'parking'}
+                label="My Parking"
+                icon="car"
+                onPress={() => setActiveTab('parking')}
+            />
+            <TabButton
+                active={activeTab === 'visitors'}
+                label="Visitors"
+                icon="people"
+                onPress={() => setActiveTab('visitors')}
+            />
+        </View>
+
+        <ScrollView
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
+        >
+            {activeTab === 'parking' ? renderParkingTab() : renderVisitorsTab()}
+        </ScrollView>
+    </SafeAreaView>
+  );
+}
+
 
