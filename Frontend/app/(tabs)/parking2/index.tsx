@@ -134,4 +134,51 @@ export default function ParkingScreen() {
                 </>
               );
 
+/* ─── RENDER: VISITORS TAB ─── */
+  const renderVisitorsTab = () => (
+    <>
+      {/* Primary Action: Register new entry */}
+      <TouchableOpacity
+        style={[styles.registerButton, shadow(2)]}
+        onPress={() => setShowVisitorModal(true)}
+      >
+        <Ionicons name="person-add" size={20} color={C.white} />
+        <Text style={styles.registerButtonText}>Register New Visitor</Text>
+      </TouchableOpacity>
+
+      <Text style={styles.sectionTitle}>Visitor History</Text>
+
+      {/* Visitor Detail Card: Shows contact, vehicle, and timestamp info */}
+      <View style={[styles.visitorCard, shadow(1)]}>
+          <View style={styles.visitorRow}>
+              <View style={styles.avatar}>
+                <Text style={styles.avatarText}>JS</Text>
+              </View>
+              <View style={{ flex: 1 }}>
+                  <Text style={styles.visitorName}>John Smith</Text>
+                  <Text style={styles.visitorSub}>Family visit</Text>
+              </View>
+              <View style={styles.statusIn}>
+                <Text style={styles.statusInText}>• Checked In</Text>
+              </View>
+          </View>
+
+          <View style={styles.detailsBox}>
+              <View style={styles.detailItem}>
+                <Ionicons name="call-outline" size={14} color={C.textLight} />
+                <Text style={styles.detailText}>+94 77 123 4567</Text>
+              </View>
+              <View style={styles.detailItem}>
+                <Ionicons name="car-outline" size={14} color={C.textLight} />
+                <Text style={styles.detailText}>XYZ-5678</Text>
+              </View>
+              <View style={styles.detailItem}>
+                <Ionicons name="time-outline" size={14} color={C.textLight} />
+                <Text style={styles.detailText}>2/19/2026, 5:13:19 PM</Text>
+              </View>
+          </View>
+      </View>
+    </>
+  );
+
 
