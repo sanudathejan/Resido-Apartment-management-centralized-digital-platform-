@@ -253,4 +253,116 @@ const RequestCard = ({ name, time, note }: any) => (
     </View>
 );
 
+/* ─── STYLESHEET ─── */
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: C.bg },
+  header: { paddingHorizontal: 20, paddingTop: 10, paddingBottom: 20 },
+  headerTitle: { fontSize: 24, fontWeight: '800', color: C.textDark },
+  headerSubtitle: { fontSize: 14, color: C.textLight, marginTop: 4 },
+
+  // Tabs
+  tabContainer: {
+    flexDirection: 'row',
+    marginHorizontal: 20,
+    backgroundColor: '#E2E8F0',
+    borderRadius: 14,
+    padding: 4
+  },
+  tab: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 10,
+    borderRadius: 10
+  },
+  tabActive: { backgroundColor: C.white },
+  tabText: { marginLeft: 8, fontSize: 14, fontWeight: '600', color: C.textMuted },
+  tabTextActive: { color: C.primary },
+
+  scrollContent: { padding: 20, paddingBottom: 40 },
+
+  // Parking Slot Card
+  card: { backgroundColor: C.white, borderRadius: 24, overflow: 'hidden', marginBottom: 20 },
+  slotImage: { width: '100%', height: 160 },
+  slotHeaderOverlay: { position: 'absolute', top: 12, right: 12 },
+  badgePrimary: { backgroundColor: C.primary, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 8 },
+  badgeTextWhite: { color: C.white, fontSize: 10, fontWeight: '800' },
+  slotDetails: { padding: 18, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  slotSubLabel: { fontSize: 11, fontWeight: '700', color: C.primary, letterSpacing: 0.5 },
+  slotMainTitle: { fontSize: 22, fontWeight: '800', color: C.textDark },
+
+  // Status Badges (Green/Available)
+  statusBadgeGreen: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#ECFDF5',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 12
+  },
+  dotGreen: { width: 6, height: 6, borderRadius: 3, backgroundColor: C.success, marginRight: 6 },
+  statusTextGreen: { color: C.success, fontSize: 12, fontWeight: '700' },
+
+  // Lending Toggle Card
+  toggleCard: {
+    backgroundColor: C.white,
+    borderRadius: 20,
+    padding: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 24
+  },
+  cardTitle: { fontSize: 16, fontWeight: '700', color: C.textDark },
+  cardSubtitle: { fontSize: 13, color: C.textLight, marginTop: 4, lineHeight: 18 },
+
+  // Section Headers
+  sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
+  sectionTitle: { fontSize: 12, fontWeight: '700', color: C.textLight, letterSpacing: 1 },
+  countBadge: { backgroundColor: '#DBEAFE', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 10 },
+  countText: { color: C.primary, fontSize: 11, fontWeight: '700' },
+
+  // Request Cards
+  requestCard: { backgroundColor: C.white, borderRadius: 20, padding: 16, marginBottom: 12 },
+  avatarSmall: { width: 32, height: 32, borderRadius: 16, backgroundColor: '#F1F5F9' },
+  requestNote: { fontSize: 13, fontStyle: 'italic', color: C.textLight, marginVertical: 12, lineHeight: 18 },
+  actionRow: { flexDirection: 'row', gap: 12, marginTop: 4 },
+  declineBtn: { flex: 1, padding: 12, borderRadius: 12, borderWidth: 1, borderColor: C.border, alignItems: 'center' },
+  acceptBtn: { flex: 1, padding: 12, borderRadius: 12, backgroundColor: C.primary, alignItems: 'center' },
+  declineText: { fontWeight: '700', color: C.textDark },
+  acceptText: { fontWeight: '700', color: C.white },
+
+  // Visitor List Styles
+  visitorCard: { backgroundColor: C.white, borderRadius: 20, padding: 16, marginBottom: 12 },
+  visitorRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  avatar: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#F3E8FF',
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  avatarText: { color: C.secondary, fontWeight: '700' },
+  visitorName: { fontSize: 16, fontWeight: '700', color: C.textDark },
+  visitorSub: { fontSize: 12, color: C.textLight, marginTop: 1 },
+  statusIn: { backgroundColor: '#DCFCE7', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12 },
+  statusInText: { color: C.success, fontSize: 11, fontWeight: '700' },
+  detailsBox: { backgroundColor: '#F8FAFC', borderRadius: 14, padding: 12, marginTop: 14, gap: 8 },
+  detailItem: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  detailText: { fontSize: 12, color: C.textLight },
+
+  // Register Button
+  registerButton: {
+    backgroundColor: C.primary,
+    flexDirection: 'row',
+    padding: 16,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 24
+  },
+  registerButtonText: { color: C.white, fontWeight: '700', marginLeft: 8 },
+});
+
 
