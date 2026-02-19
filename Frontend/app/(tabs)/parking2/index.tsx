@@ -53,3 +53,10 @@ const shadow = (elevation: number) => ({
     android: { elevation },
   }),
 });
+
+export default function ParkingScreen() {
+  const { user } = useAuth();
+  const [activeTab, setActiveTab] = useState<'parking' | 'visitors'>('parking');
+  const [parkingSlot, setParkingSlot] = useState<any>(null); // Replace any with your type
+  const [loading, setLoading] = useState(false);
+  const [showVisitorModal, setShowVisitorModal] = useState(false);
