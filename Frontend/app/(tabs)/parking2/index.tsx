@@ -56,7 +56,7 @@ const shadow = (elevation: number) => ({
 
 export default function ParkingScreen() {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState<'parking' | 'visitors'>('parking');
+  const [activeTab, setActiveTab] = useState<'parking' | 'visitors'>('parking');// define a state variable called activeTab. This is what remembers which button you last clicked.
   const [parkingSlot, setParkingSlot] = useState<any>(null); // Replace any with your type
   const [loading, setLoading] = useState(false);
   const [showVisitorModal, setShowVisitorModal] = useState(false);
