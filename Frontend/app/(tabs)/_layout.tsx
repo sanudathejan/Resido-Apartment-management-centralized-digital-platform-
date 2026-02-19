@@ -109,6 +109,10 @@ export default function TabLayout() {
   );
 }
 
+
+
+
+
 const styles = StyleSheet.create({
   tabBar: {
     backgroundColor: TAB_COLORS.background,
