@@ -102,6 +102,16 @@ const FEATURE_CARDS: FeatureCard[] = [
     iconColor: '#DC2626',
     iconBg: '#FEF2F2',
   },
+/* Add this entry to your Quick Actions array */
+{
+  id: 'parking2',
+  title: 'Parking 2',
+  subtitle: 'New Management',
+  icon: 'car-sport', // Using a different car icon for distinction
+  color: '#7C3AED',  // A violet color to distinguish it from the first blue Parking icon
+  route: '/(tabs)/parking2', // This matches your new folder name
+},
+
 ];
 
 function getGreeting(): string {
