@@ -179,3 +179,28 @@ const HistoryRow = ({ title, date, amount }: any) => (
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: THEME.background },
   scrollContent: { paddingHorizontal: 20, paddingBottom: 40 },
+
+
+/* Header Styles */
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+  },
+  headerTitle: { fontSize: 18, fontWeight: '700', color: THEME.textDark },
+  headerIconBg: {
+    width: 42, height: 42, borderRadius: 21,
+    backgroundColor: '#EBF2FF', alignItems: 'center', justifyContent: 'center',
+  },
+  headerIconBorder: {
+    width: 42, height: 42, borderRadius: 21,
+    borderWidth: 1, borderColor: THEME.border,
+    alignItems: 'center', justifyContent: 'center', backgroundColor: THEME.white,
+  },
+  notifDot: {
+    position: 'absolute', top: 12, right: 12,
+    width: 7, height: 7, borderRadius: 4,
+    backgroundColor: '#EF4444', borderWidth: 1.5, borderColor: THEME.white,
+  },
