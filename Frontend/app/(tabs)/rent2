@@ -58,3 +58,10 @@ export default function RentScreen() {
                     <Ionicons name="calendar-outline" size={14} color={THEME.white} />
                     <Text style={styles.heroDateText}>Due in 3 days • Oct 2023</Text>
                   </View>
+
+        {/* Main Action Button */}
+                  <TouchableOpacity style={styles.payNowButton} activeOpacity={0.85}>
+                    <MaterialCommunityIcons name="cash-multiple" size={20} color={THEME.primary} />
+                    <Text style={styles.payNowText}>Pay Now</Text>
+                  </TouchableOpacity>
+                </View>
