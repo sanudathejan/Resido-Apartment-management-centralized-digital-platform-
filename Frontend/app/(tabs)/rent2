@@ -132,3 +132,26 @@ export default function RentScreen() {
                   </SafeAreaView>
                 );
               }
+
+/**
+ * Bill Detail Component
+ * Renders individual rows with icons and progress bars
+ */
+const BillDetailItem = ({ icon, title, desc, price, color, progressWidth }: any) => (
+  <View style={styles.billItem}>
+    <View style={[styles.billIconBox, { backgroundColor: `${color}15` }]}>
+      <MaterialCommunityIcons name={icon} size={22} color={color} />
+    </View>
+    <View style={styles.billCenter}>
+      <Text style={styles.billTitleText}>{title}</Text>
+      <Text style={styles.billDescText}>{desc}</Text>
+    </View>
+    <View style={styles.billRight}>
+      <Text style={styles.billPriceText}>${price}</Text>
+      {/* Custom Progress Bar matching the image */}
+      <View style={styles.progressBarBase}>
+        <View style={[styles.progressBarActive, { backgroundColor: color, width: progressWidth }]} />
+      </View>
+    </View>
+  </View>
+);
