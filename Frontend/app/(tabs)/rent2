@@ -48,3 +48,13 @@ export default function RentScreen() {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}
         >
+
+        {/* --- 2. HERO CARD (TOTAL DUE) --- */}
+                <View style={styles.heroCard}>
+                  <Text style={styles.heroLabel}>Total Amount Due</Text>
+                  <Text style={styles.heroAmount}>$1,200.00</Text>
+
+                  <View style={styles.heroDateRow}>
+                    <Ionicons name="calendar-outline" size={14} color={THEME.white} />
+                    <Text style={styles.heroDateText}>Due in 3 days • Oct 2023</Text>
+                  </View>
