@@ -22,6 +22,19 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 
+// Define the THEME object so the rest of the code can use it
+const THEME = {
+  primary: '#2B72F1',      // The main brand blue
+  background: '#F8FAFC',   // Soft grey/white background
+  white: '#FFFFFF',
+  textDark: '#1E293B',     // Deep slate for titles
+  textLight: '#64748B',    // Muted slate for descriptions
+  border: '#F1F5F9',
+  accentOrange: '#F59E0B', // Utility color
+  accentGreen: '#10B981',  // Service fee color
+};
+
+
 export default function RentScreen() {
   const [autoPay, setAutoPay] = useState(false);
 
@@ -206,7 +219,7 @@ const styles = StyleSheet.create({
   },
 
 
-* Hero Card Styles */
+/* Hero Card Styles */
   heroCard: {
     backgroundColor: THEME.primary,
     borderRadius: 24,
