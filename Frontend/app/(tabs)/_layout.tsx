@@ -7,6 +7,7 @@ import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { Platform, StyleSheet, View } from "react-native";
 
+
 const TAB_COLORS = {
   active: '#2563EB',
   inactive: '#94A3B8',
@@ -120,6 +121,18 @@ export default function TabLayout() {
           ),
         }}
       />
+    <Tab.Screen
+      name="Payments"
+      component={RentScreen}
+      options={{
+        headerShown: false, // Uses the custom header we built in the RentScreen
+        tabBarLabel: 'Payments',
+        tabBarIcon: ({ color, size }) => (
+          <MaterialCommunityIcons name="cash-register" size={size} color={color} />
+        ),
+      }}
+    />
+
     </Tabs>
   );
 }
