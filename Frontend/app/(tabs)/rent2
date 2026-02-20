@@ -24,3 +24,27 @@ import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 
 export default function RentScreen() {
   const [autoPay, setAutoPay] = useState(false);
+
+  return (
+      <SafeAreaView style={styles.container} edges={['top']}>
+        <StatusBar barStyle="dark-content" />
+
+        {/* --- 1. HEADER SECTION --- */}
+        <View style={styles.header}>
+          <TouchableOpacity style={styles.headerIconBg}>
+            <Ionicons name="arrow-back" size={22} color={THEME.primary} />
+          </TouchableOpacity>
+
+          <Text style={styles.headerTitle}>Rent & Payments</Text>
+
+          <TouchableOpacity style={styles.headerIconBorder}>
+            <Ionicons name="notifications-outline" size={20} color={THEME.textDark} />
+            {/* Notification Indicator Dot */}
+            <View style={styles.notifDot} />
+          </TouchableOpacity>
+        </View>
+
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
+        >
