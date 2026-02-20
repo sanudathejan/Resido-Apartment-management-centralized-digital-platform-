@@ -155,3 +155,23 @@ const BillDetailItem = ({ icon, title, desc, price, color, progressWidth }: any)
     </View>
   </View>
 );
+
+/**
+ * History Row Component
+ * Simple list item for previous payments
+ */
+const HistoryRow = ({ title, date, amount }: any) => (
+  <View style={styles.historyRow}>
+    <View style={styles.historyIconBg}>
+      <MaterialCommunityIcons name="file-document-outline" size={22} color={THEME.textLight} />
+    </View>
+    <View style={styles.historyTextContainer}>
+      <Text style={styles.historyTitle}>{title}</Text>
+      <Text style={styles.historyDate}>{date}</Text>
+    </View>
+    <View style={styles.historyAmountContainer}>
+      <Text style={styles.historyAmount}>${amount}</Text>
+      <Text style={styles.paidBadge}>PAID</Text>
+    </View>
+  </View>
+);
