@@ -115,3 +115,20 @@ export default function RentScreen() {
                           trackColor={{ false: '#CBD5E1', true: THEME.primary }}
                         />
                       </View>
+
+              {/* --- 5. PAYMENT HISTORY --- */}
+                      <View style={styles.sectionHeader}>
+                        <Text style={styles.sectionTitle}>Payment History</Text>
+                        <TouchableOpacity><Text style={styles.viewAllText}>View All</Text></TouchableOpacity>
+                      </View>
+
+                      <View style={styles.historyList}>
+                        <HistoryRow title="September Rent" date="Sep 01, 2023" amount="1,200.00" />
+                        <HistoryRow title="August Rent" date="Aug 01, 2023" amount="1,200.00" />
+                        <HistoryRow title="July Rent" date="Jul 01, 2023" amount="1,200.00" />
+                      </View>
+
+                    </ScrollView>
+                  </SafeAreaView>
+                );
+              }
