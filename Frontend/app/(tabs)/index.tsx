@@ -106,11 +106,21 @@ const FEATURE_CARDS: FeatureCard[] = [
 {
   id: 'parking2',
   title: 'Parking 2',
-  subtitle: 'New Management',
+  subtitle: 'Slot Management',
   icon: 'car-sport', // Using a different car icon for distinction
   color: '#7C3AED',  // A violet color to distinguish it from the first blue Parking icon
   route: '/(tabs)/parking2', // This matches your new folder name
 },
+
+{
+    icon: 'wallet',
+    title: 'Payments2',
+    subtitle: 'Rent & Bills',
+    route: '/(tabs)/payments2',
+    iconColor: '#059669',
+    iconBg: '#ECFDF5',
+
+    },
 
 ];
 

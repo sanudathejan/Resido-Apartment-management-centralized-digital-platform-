@@ -121,17 +121,21 @@ export default function TabLayout() {
           ),
         }}
       />
-    <Tab.Screen
-      name="Payments"
-      component={RentScreen}
-      options={{
-        headerShown: false, // Uses the custom header we built in the RentScreen
-        tabBarLabel: 'Payments',
-        tabBarIcon: ({ color, size }) => (
-          <MaterialCommunityIcons name="cash-register" size={size} color={color} />
-        ),
-      }}
-    />
+      <Tabs.Screen
+        name="payments/index" // Ensure your new file is in app/(tabs)/payments/index.tsx
+        options={{
+          title: 'Payments2',
+          tabBarLabel: 'Payments2',
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons
+              name={focused ? "wallet" : "wallet-outline"}
+              size={24}
+              color={color}
+            />
+          ),
+        }}
+      />
+
 
     </Tabs>
   );
