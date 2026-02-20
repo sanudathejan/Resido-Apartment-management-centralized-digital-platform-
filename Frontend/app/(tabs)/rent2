@@ -251,3 +251,14 @@ heroLabel: { color: 'rgba(255,255,255,0.7)', fontSize: 14, fontWeight: '500' },
   billPriceText: { fontSize: 16, fontWeight: '700', color: THEME.textDark },
   progressBarBase: { width: 70, height: 4, backgroundColor: '#F1F5F9', borderRadius: 2, marginTop: 8 },
   progressBarActive: { height: 4, borderRadius: 2 },
+
+/* Auto-Pay Styles */
+  autoPayContainer: {
+    backgroundColor: '#F0F6FF', borderRadius: 20, padding: 15,
+    flexDirection: 'row', alignItems: 'center', marginTop: 20,
+  },
+  autoPayIcon: { width: 38, height: 38, borderRadius: 19, backgroundColor: THEME.primary, alignItems: 'center', justifyContent: 'center' },
+  autoPayTextContent: { flex: 1, marginLeft: 12 },
+  autoPayTitle: { fontSize: 15, fontWeight: '700', color: THEME.textDark },
+  autoPaySub: { fontSize: 12, color: THEME.textLight },
+
