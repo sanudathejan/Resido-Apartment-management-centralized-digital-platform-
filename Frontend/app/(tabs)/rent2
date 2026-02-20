@@ -218,3 +218,17 @@ const styles = StyleSheet.create({
       android: { elevation: 8 },
     }),
   },
+
+heroLabel: { color: 'rgba(255,255,255,0.7)', fontSize: 14, fontWeight: '500' },
+  heroAmount: { color: THEME.white, fontSize: 36, fontWeight: '800', marginVertical: 8 },
+  heroDateRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 20 },
+  heroDateText: { color: THEME.white, fontSize: 13, marginLeft: 6, opacity: 0.9 },
+  payNowButton: {
+    backgroundColor: THEME.white,
+    borderRadius: 16,
+    height: 54,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  payNowText: { color: THEME.primary, fontSize: 16, fontWeight: '700', marginLeft: 8 },
