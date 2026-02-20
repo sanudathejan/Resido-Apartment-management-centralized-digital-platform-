@@ -71,3 +71,30 @@ export default function RentScreen() {
                   <Text style={styles.sectionTitle}>Bill Details</Text>
                   <Text style={styles.sectionCount}>3 Items</Text>
                 </View>
+
+        <View style={styles.billContainer}>
+                  <BillDetailItem
+                    icon="home-variant"
+                    title="Base Rent"
+                    desc="Monthly apartment lease"
+                    price="1,000.00"
+                    color={THEME.primary}
+                    progressWidth="100%" // Full width bar for primary bill
+                  />
+                  <BillDetailItem
+                    icon="lightning-bolt"
+                    title="Utilities"
+                    desc="Water, Electricity, Gas"
+                    price="150.00"
+                    color={THEME.accentOrange}
+                    progressWidth="30%" // Partial bar as seen in design
+                  />
+                  <BillDetailItem
+                    icon="hammer-wrench"
+                    title="Service Fee"
+                    desc="Maintenance & Security"
+                    price="50.00"
+                    color={THEME.accentGreen}
+                    progressWidth="15%" // Small bar as seen in design
+                  />
+                </View>
