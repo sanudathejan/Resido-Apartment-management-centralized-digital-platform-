@@ -175,3 +175,7 @@ const HistoryRow = ({ title, date, amount }: any) => (
     </View>
   </View>
 );
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: THEME.background },
+  scrollContent: { paddingHorizontal: 20, paddingBottom: 40 },
