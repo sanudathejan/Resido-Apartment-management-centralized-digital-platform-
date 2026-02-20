@@ -1,0 +1,23 @@
+/**
+ * Rent & Payments Screen
+ * * Layout Structure:
+ * 1. Custom Header with Back and Notification buttons.
+ * 2. Hero Card: High-contrast blue container for primary "Pay Now" action.
+ * 3. Bill Details: Itemized list with progress-bar style indicators.
+ * 4. Auto-Pay: Highlighted toggle section.
+ * 5. Payment History: Simplified list with status badges.
+ */
+
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  Switch,
+  Platform,
+  StatusBar,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
