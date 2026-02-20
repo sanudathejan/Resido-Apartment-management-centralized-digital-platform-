@@ -98,3 +98,20 @@ export default function RentScreen() {
                     progressWidth="15%" // Small bar as seen in design
                   />
                 </View>
+
+
+              {/* --- 4. AUTO-PAY TOGGLE SECTION --- */}
+                      <View style={styles.autoPayContainer}>
+                        <View style={styles.autoPayIcon}>
+                          <Ionicons name="sync" size={20} color={THEME.white} />
+                        </View>
+                        <View style={styles.autoPayTextContent}>
+                          <Text style={styles.autoPayTitle}>Auto-pay Setup</Text>
+                          <Text style={styles.autoPaySub}>Never miss a due date again</Text>
+                        </View>
+                        <Switch
+                          value={autoPay}
+                          onValueChange={setAutoPay}
+                          trackColor={{ false: '#CBD5E1', true: THEME.primary }}
+                        />
+                      </View>
