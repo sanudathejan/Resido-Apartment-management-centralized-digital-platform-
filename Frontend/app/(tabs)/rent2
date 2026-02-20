@@ -65,3 +65,9 @@ export default function RentScreen() {
                     <Text style={styles.payNowText}>Pay Now</Text>
                   </TouchableOpacity>
                 </View>
+
+        {/* --- 3. BILL DETAILS SECTION --- */}
+                <View style={styles.sectionHeader}>
+                  <Text style={styles.sectionTitle}>Bill Details</Text>
+                  <Text style={styles.sectionCount}>3 Items</Text>
+                </View>
