@@ -2,7 +2,7 @@
  * Home Dashboard Screen
  * Modern 2026 light theme - premium minimal UI
  * Supports both Resident and Manager views
- * Feature cards in compact 2-column grid
+ * Compact 2-column feature grid
  */
 
 import React, { useState } from 'react';
@@ -25,8 +25,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@/context/AuthContext';
 
 const { width } = Dimensions.get('window');
-const CARD_GAP = 12;
-const CARD_WIDTH = (width - 48 - CARD_GAP) / 2; // 24px padding each side
 
 // Design tokens
 const COLORS = {
@@ -167,26 +165,6 @@ export default function HomeScreen() {
     setViewMode(viewMode === 'RESIDENT' ? 'MANAGER' : 'RESIDENT');
   };
 
-  const renderFeatureCard = (card: FeatureCard, index: number) => (
-    <TouchableOpacity
-      key={card.title}
-      style={[
-        styles.featureCard,
-        index % 2 === 0 ? { marginRight: CARD_GAP / 2 } : { marginLeft: CARD_GAP / 2 },
-      ]}
-      onPress={() => router.push(card.route as any)}
-      activeOpacity={0.7}
-    >
-      <View style={[styles.featureIconContainer, { backgroundColor: card.iconBg }]}>
-        <Ionicons name={card.icon} size={22} color={card.iconColor} />
-      </View>
-      <View style={styles.featureTextContainer}>
-        <Text style={styles.featureTitle}>{card.title}</Text>
-        <Text style={styles.featureSubtitle}>{card.subtitle}</Text>
-      </View>
-    </TouchableOpacity>
-  );
-
   // Manager Dashboard View
   const ManagerDashboard = () => (
     <>
@@ -223,7 +201,20 @@ export default function HomeScreen() {
       {/* Feature Grid */}
       <Text style={styles.sectionTitle}>Quick Actions</Text>
       <View style={styles.featureGrid}>
-        {FEATURE_CARDS.map((card, index) => renderFeatureCard(card, index))}
+        {FEATURE_CARDS.map((card, index) => (
+          <TouchableOpacity
+            key={card.title}
+            style={styles.featureCard}
+            onPress={() => router.push(card.route as any)}
+            activeOpacity={0.7}
+          >
+            <View style={[styles.featureIconContainer, { backgroundColor: card.iconBg }]}>
+              <Ionicons name={card.icon} size={22} color={card.iconColor} />
+            </View>
+            <Text style={styles.featureTitle}>{card.title}</Text>
+            <Text style={styles.featureSubtitle}>{card.subtitle}</Text>
+          </TouchableOpacity>
+        ))}
       </View>
     </>
   );
@@ -231,10 +222,22 @@ export default function HomeScreen() {
   // Resident Dashboard View
   const ResidentDashboard = () => (
     <>
-      {/* Feature Grid */}
       <Text style={styles.sectionTitle}>Quick Actions</Text>
       <View style={styles.featureGrid}>
-        {FEATURE_CARDS.map((card, index) => renderFeatureCard(card, index))}
+        {FEATURE_CARDS.map((card, index) => (
+          <TouchableOpacity
+            key={card.title}
+            style={styles.featureCard}
+            onPress={() => router.push(card.route as any)}
+            activeOpacity={0.7}
+          >
+            <View style={[styles.featureIconContainer, { backgroundColor: card.iconBg }]}>
+              <Ionicons name={card.icon} size={22} color={card.iconColor} />
+            </View>
+            <Text style={styles.featureTitle}>{card.title}</Text>
+            <Text style={styles.featureSubtitle}>{card.subtitle}</Text>
+          </TouchableOpacity>
+        ))}
       </View>
     </>
   );
@@ -323,7 +326,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingTop: 8,
     paddingBottom: Platform.select({ ios: 120, android: 100, web: 30 }),
   },
@@ -427,19 +430,22 @@ const styles = StyleSheet.create({
     letterSpacing: -0.3,
   },
 
-  // Feature Grid — compact 2-column cards with icon + text side by side
+  /*
+   * Feature Grid — 2 columns using percentage width
+   * Using 48% width with space-between ensures two cards per row
+   * regardless of screen/container width
+   */
   featureGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
+    justifyContent: 'space-between',
   },
   featureCard: {
-    width: CARD_WIDTH,
-    flexDirection: 'row',
-    alignItems: 'center',
+    width: '48%',
     backgroundColor: COLORS.white,
     borderRadius: 18,
-    padding: 14,
-    marginBottom: CARD_GAP,
+    padding: 16,
+    marginBottom: 12,
     ...Platform.select({
       ios: {
         shadowColor: COLORS.cardShadow,
@@ -448,6 +454,9 @@ const styles = StyleSheet.create({
         shadowRadius: 10,
       },
       android: { elevation: 2 },
+      web: {
+        boxShadow: '0 2px 8px rgba(148,163,184,0.12)',
+      },
     }),
   },
   featureIconContainer: {
@@ -456,10 +465,7 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 12,
-  },
-  featureTextContainer: {
-    flex: 1,
+    marginBottom: 10,
   },
   featureTitle: {
     fontSize: 14,
@@ -574,7 +580,7 @@ const styles = StyleSheet.create({
   // SOS Button
   sosButton: {
     position: 'absolute',
-    bottom: Platform.select({ ios: 100, android: 80, web: 16 }),
+    bottom: Platform.select({ ios: 100, android: 80, web: 80 }),
     right: 20,
     zIndex: 100,
   },
