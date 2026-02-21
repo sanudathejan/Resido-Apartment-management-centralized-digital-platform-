@@ -38,6 +38,10 @@ So in total, there are 77 houses in the apartment
 
 -For parking, all residents are given a parking lot number since the number of houses = number of parking slots
 
+-PAYMENTS
+
+-Residents will submit a proof of payment (a pic) to the managers. Then managers can either accept payment or reject it.
+
 
 
 -SOS Alert
