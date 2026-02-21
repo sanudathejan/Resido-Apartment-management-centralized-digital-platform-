@@ -1,0 +1,156 @@
+### ==========================================
+### PHASE 1: MANAGER SETUP
+### ==========================================
+
+### 1. Register a New Manager
+POST http://localhost:8080/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Alice Admin",
+  "email": "manager@resiido.com",
+  "password": "password123",
+  "role": "MANAGER"
+}
+
+
+### 2. Verify the Manager Account
+# Replace '12345' with the actual code from the database.
+POST http://localhost:8080/api/auth/verify-account
+Content-Type: application/json
+
+{
+  "email": "manager@resiido.com",
+  "code": "45379"
+}
+
+### 3. Login as Manager
+# Copy the long JWT string from the response and set it as your {{manager_token}}
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "manager@resiido.com",
+  "password": "password123"
+}
+
+//Manager tokem = eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYW5hZ2VyQHJlc2lpZG8uY29tIiwiaWF0IjoxNzcxNTc4NzkxLCJleHAiOjE3NzE2MTQ3OTF9.6wvjtUS2yb9Tm2cfRxOckxuTAqa8BKJ_poUYrZhenRs
+
+### ==========================================
+### PHASE 2: RESIDENT SETUP & ASSET LINKING
+### ==========================================
+
+### 4. Register a New Resident (Requests House 1-05)
+# Note: House "1-05" MUST exist in the database before running this!
+POST http://localhost:8080/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Bob Resident",
+  "email": "bob@resiido.com",
+  "password": "password123",
+  "role": "RESIDENT",
+  "requestedHouseNumber": "1-05"
+}
+
+
+### 5. Verify the Resident Account
+# Replace '67890' with Bob's actual code.
+# Notice: Your code automatically assigns House '1-05' and Parking 'P-1-05' during this step!
+POST http://localhost:8080/api/auth/verify-account
+Content-Type: application/json
+
+{
+  "email": "bob@resiido.com",
+  "code": "04205"
+}
+
+### 6. Login as Resident
+# Copy the long JWT string from the response and set it as your {{resident_token}}
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "bob@resiido.com",
+  "password": "password123"
+}
+
+//Resident token = eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJib2JAcmVzaWlkby5jb20iLCJpYXQiOjE3NzE1ODA1MTAsImV4cCI6MTc3MTYxNjUxMH0.0lLRFelDXeQ2oKTFoSU5rb6213Z9EFApSMEnYb-vULM
+
+### 7. Optional Check: Verify Safe Delete Authorization
+# Try deleting Bob using Bob's token (Should succeed - Self Delete)
+# OR Try deleting Bob using the Manager's token (Should succeed - Manager Override)
+DELETE http://localhost:8080/api/auth/delete/11
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJib2JAcmVzaWlkby5jb20iLCJpYXQiOjE3NzE1Nzg5NDMsImV4cCI6MTc3MTYxNDk0M30.kO-woM4mbODPfGIeKEHjWBY_yWlVFrH6bTeEC81YAew
+
+
+
+
+
+
+### ==========================================
+### MAINTENANCE FEATURE TESTS
+### ==========================================
+
+### 1. Resident Creates a Maintenance Request
+# Notice we don't pass the status or resident ID. The controller handles that!
+POST http://localhost:8080/api/maintenance
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJib2JAcmVzaWlkby5jb20iLCJpYXQiOjE3NzE1ODA1MTAsImV4cCI6MTc3MTYxNjUxMH0.0lLRFelDXeQ2oKTFoSU5rb6213Z9EFApSMEnYb-vULM
+
+{
+  "title": "Leaking Kitchen Sink",
+  "description": "There is a puddle forming under the kitchen sink. Looks like a loose pipe."
+}
+
+### ---------------------------------------------------
+
+### 2. Resident Creates a Second Request (So we can test deleting one later)
+POST http://localhost:8080/api/maintenance
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJib2JAcmVzaWlkby5jb20iLCJpYXQiOjE3NzE1ODA1MTAsImV4cCI6MTc3MTYxNjUxMH0.0lLRFelDXeQ2oKTFoSU5rb6213Z9EFApSMEnYb-vULM
+
+{
+  "title": "Broken AC",
+  "description": "The AC in the living room is blowing warm air."
+}
+
+### ---------------------------------------------------
+
+### 3. Resident Views Their Requests
+# Should return a list of ONLY the resident's requests (both Leaking Sink and Broken AC).
+GET http://localhost:8080/api/maintenance
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJib2JAcmVzaWlkby5jb20iLCJpYXQiOjE3NzE1ODA1MTAsImV4cCI6MTc3MTYxNjUxMH0.0lLRFelDXeQ2oKTFoSU5rb6213Z9EFApSMEnYb-vULM
+
+### ---------------------------------------------------
+
+### 4. Manager Views ALL Requests
+# Should return everyone's requests. If you have multiple residents, the manager sees them all here.
+GET http://localhost:8080/api/maintenance
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYW5hZ2VyQHJlc2lpZG8uY29tIiwiaWF0IjoxNzcxNTc4NzkxLCJleHAiOjE3NzE2MTQ3OTF9.6wvjtUS2yb9Tm2cfRxOckxuTAqa8BKJ_poUYrZhenRs
+
+### ---------------------------------------------------
+
+### 5. Manager Updates the Status
+# Note: Content-Type is text/plain because your controller expects a raw String, not JSON.
+# Change '1' to the actual ID of the "Leaking Kitchen Sink" request.
+PUT http://localhost:8080/api/maintenance/4/status
+Content-Type: text/plain
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYW5hZ2VyQHJlc2lpZG8uY29tIiwiaWF0IjoxNzcxNTc4NzkxLCJleHAiOjE3NzE2MTQ3OTF9.6wvjtUS2yb9Tm2cfRxOckxuTAqa8BKJ_poUYrZhenRs
+
+IN_PROGRESS
+
+### ---------------------------------------------------
+
+### 6. Resident Cancels/Deletes a Request
+# Change '2' to the actual ID of the "Broken AC" request.
+# Since the resident owns this request, it should delete successfully.
+DELETE http://localhost:8080/api/maintenance/3
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJib2JAcmVzaWlkby5jb20iLCJpYXQiOjE3NzE1ODA1MTAsImV4cCI6MTc3MTYxNjUxMH0.0lLRFelDXeQ2oKTFoSU5rb6213Z9EFApSMEnYb-vULM
+
+### ---------------------------------------------------
+
+### 7. Manager Deletes a Request (Override)
+# Manager deletes the remaining "Leaking Kitchen Sink" request.
+DELETE http://localhost:8080/api/maintenance/4
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYW5hZ2VyQHJlc2lpZG8uY29tIiwiaWF0IjoxNzcxNTc4NzkxLCJleHAiOjE3NzE2MTQ3OTF9.6wvjtUS2yb9Tm2cfRxOckxuTAqa8BKJ_poUYrZhenRs
