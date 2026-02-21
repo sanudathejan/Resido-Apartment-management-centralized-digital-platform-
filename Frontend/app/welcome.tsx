@@ -1,7 +1,8 @@
 /**
  * Welcome Screen
  * Modern 2026 light theme — premium minimal splash
- * Logo PNG already contains the building graphic + "RESIIDO" text
+ * Logo PNG contains the building graphic + "RESIIDO" text
+ * If user is already authenticated, offer "Continue" option
  */
 
 import React from 'react';
@@ -17,6 +18,8 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
+import { useAuth } from '@/context/AuthContext';
 
 const { width, height } = Dimensions.get('window');
 
@@ -31,18 +34,21 @@ const COLORS = {
   white: '#FFFFFF',
   border: '#E2E8F0',
   cardShadow: '#94A3B8',
+  green: '#10B981',
 };
 
-// Cap the logo so it never exceeds 35 % of screen height
-const LOGO_MAX_H = height * 0.30;
+// Cap logo at 28% of screen height so it fits well
+const LOGO_MAX_H = height * 0.28;
 
 export default function WelcomeScreen() {
   const router = useRouter();
+  const { isAuthenticated, user } = useAuth();
 
   return (
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
       <SafeAreaView style={styles.safeArea}>
+
         {/* ── Hero: centred logo ─────────────────────────────────── */}
         <View style={styles.heroSection}>
           <Image
@@ -55,15 +61,35 @@ export default function WelcomeScreen() {
 
         {/* ── Feature Pills ─────────────────────────────────────── */}
         <View style={styles.pillsContainer}>
-          {['Parking', 'Payments', 'Maintenance', 'Visitors'].map((f) => (
-            <View key={f} style={styles.pill}>
-              <Text style={styles.pillText}>{f}</Text>
+          {[
+            { label: 'Parking', icon: 'car-sport-outline' as const },
+            { label: 'Payments', icon: 'wallet-outline' as const },
+            { label: 'Maintenance', icon: 'construct-outline' as const },
+            { label: 'Visitors', icon: 'people-outline' as const },
+          ].map((f) => (
+            <View key={f.label} style={styles.pill}>
+              <Ionicons name={f.icon} size={14} color={COLORS.primary} />
+              <Text style={styles.pillText}>{f.label}</Text>
             </View>
           ))}
         </View>
 
         {/* ── Bottom Buttons ────────────────────────────────────── */}
         <View style={styles.buttonSection}>
+          {/* If already logged in, show a continue button */}
+          {isAuthenticated && (
+            <TouchableOpacity
+              style={styles.continueButton}
+              onPress={() => router.replace('/(tabs)')}
+              activeOpacity={0.85}
+            >
+              <Ionicons name="arrow-forward-circle" size={20} color={COLORS.white} />
+              <Text style={styles.continueButtonText}>
+                Continue as {user?.name || 'User'}
+              </Text>
+            </TouchableOpacity>
+          )}
+
           <TouchableOpacity
             style={styles.registerButton}
             onPress={() => router.push('/register')}
@@ -102,8 +128,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   logo: {
-    width: width * 0.50,
+    width: width * 0.48,
     height: LOGO_MAX_H,
+    maxWidth: 240,
     maxHeight: LOGO_MAX_H,
     marginBottom: 12,
   },
@@ -119,11 +146,14 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     justifyContent: 'center',
     gap: 8,
-    paddingBottom: 28,
+    paddingBottom: 24,
   },
   pill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
     backgroundColor: COLORS.white,
-    paddingHorizontal: 16,
+    paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 20,
     borderWidth: 1,
@@ -138,7 +168,30 @@ const styles = StyleSheet.create({
   /* ── Buttons ─────────────────────────────────────────────────── */
   buttonSection: {
     paddingBottom: Platform.OS === 'ios' ? 20 : 30,
-    gap: 14,
+    gap: 12,
+  },
+  continueButton: {
+    backgroundColor: COLORS.green,
+    paddingVertical: 16,
+    borderRadius: 18,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    ...Platform.select({
+      ios: {
+        shadowColor: COLORS.green,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.25,
+        shadowRadius: 10,
+      },
+      android: { elevation: 4 },
+    }),
+  },
+  continueButtonText: {
+    color: COLORS.white,
+    fontSize: 16,
+    fontWeight: '700',
   },
   registerButton: {
     backgroundColor: COLORS.primary,
