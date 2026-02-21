@@ -46,7 +46,7 @@ So in total, there are 77 houses in the apartment
 
 -COMMON AREA BOOKING
 
--This wi
+-hardcoded areas - "Rooftop", "Swimming Pool".
 
 
 -SOS Alert
