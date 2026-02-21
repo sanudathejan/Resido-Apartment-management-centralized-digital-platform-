@@ -1,23 +1,10 @@
 /**
- * Index - Redirects to Welcome screen
- * Entry point that handles initial navigation
+ * Index - Entry point
+ * Redirects to the animated splash screen on first load
  */
 
 import { Redirect } from "expo-router";
-import { useAuth } from "@/context/AuthContext";
 
 export default function Index() {
-  const { isAuthenticated, isLoading } = useAuth();
-
-  // While loading, don't redirect yet
-  if (isLoading) {
-    return null;
-  }
-
-  // If authenticated, go to tabs; otherwise, go to welcome
-  if (isAuthenticated) {
-    return <Redirect href="/(tabs)" />;
-  }
-
-  return <Redirect href="/welcome" />;
+  return <Redirect href="/splash" />;
 }

@@ -26,6 +26,10 @@ export default function RootLayout() {
           <Stack screenOptions={{ headerShown: false }}>
             {/* Entry Point */}
             <Stack.Screen name="index" />
+            <Stack.Screen
+              name="splash"
+              options={{ animation: 'fade' }}
+            />
 
             {/* Public Screens */}
             <Stack.Screen name="welcome" />

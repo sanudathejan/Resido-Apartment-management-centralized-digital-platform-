@@ -2,6 +2,7 @@
  * Login Screen
  * Modern 2026 light theme - premium minimal UI
  * Supports both Resident and Manager login
+ * Logo image already includes "RESIIDO" branding
  */
 
 import React, { useState } from 'react';
@@ -55,7 +56,6 @@ export default function LoginScreen() {
   const [focusedField, setFocusedField] = useState<string | null>(null);
 
   const roleColor = selectedRole === 'resident' ? COLORS.residentColor : COLORS.managerColor;
-  const roleBg = selectedRole === 'resident' ? COLORS.residentBg : COLORS.managerBg;
 
   const handleLogin = async () => {
     if (!email.trim()) {
@@ -110,14 +110,13 @@ export default function LoginScreen() {
               <Ionicons name="arrow-back" size={22} color={COLORS.textDark} />
             </TouchableOpacity>
 
-            {/* Logo & Brand */}
+            {/* Logo — image already contains "RESIIDO" branding */}
             <View style={styles.brandSection}>
               <Image
                 source={require('../assets/images/ResiiDo_logo_nobg.png')}
                 style={styles.logo}
                 resizeMode="contain"
               />
-              <Text style={styles.brandName}>Resiido</Text>
               <Text style={styles.subtitle}>Welcome back</Text>
             </View>
 
@@ -350,22 +349,17 @@ const styles = StyleSheet.create({
     }),
   },
 
-  // Brand
+  // Brand — logo image already includes "RESIIDO" text, no duplicate needed
   brandSection: {
     alignItems: 'center',
-    marginTop: 24,
-    marginBottom: 28,
+    marginTop: 16,
+    marginBottom: 20,
   },
   logo: {
-    width: 72,
-    height: 72,
-    marginBottom: 12,
-  },
-  brandName: {
-    fontSize: 28,
-    fontWeight: '800',
-    color: COLORS.textDark,
-    letterSpacing: -0.5,
+    width: 100,
+    height: 100,
+    maxHeight: 100,
+    marginBottom: 6,
   },
   subtitle: {
     fontSize: 15,

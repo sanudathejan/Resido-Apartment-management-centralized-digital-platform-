@@ -2,6 +2,7 @@
  * Register Screen
  * Modern 2026 light theme - premium minimal UI
  * Supports Resident/Manager role selection
+ * Logo image already includes "RESIIDO" branding
  */
 
 import React, { useState } from 'react';
@@ -120,14 +121,13 @@ export default function RegisterScreen() {
               <Ionicons name="arrow-back" size={22} color={COLORS.textDark} />
             </TouchableOpacity>
 
-            {/* Logo & Brand */}
+            {/* Logo — image already contains "RESIIDO" branding */}
             <View style={styles.brandSection}>
               <Image
                 source={require('../assets/images/ResiiDo_logo_nobg.png')}
                 style={styles.logo}
                 resizeMode="contain"
               />
-              <Text style={styles.brandName}>Resiido</Text>
               <Text style={styles.subtitle}>Create your account</Text>
             </View>
 
@@ -276,7 +276,7 @@ export default function RegisterScreen() {
               {/* Role Info */}
               <View style={[styles.roleInfoCard, { backgroundColor: selectedRole === 'resident' ? COLORS.residentBg : COLORS.managerBg }]}>
                 <Ionicons
-                  name={selectedRole === 'resident' ? 'information-circle-outline' : 'information-circle-outline'}
+                  name="information-circle-outline"
                   size={18}
                   color={roleColor}
                 />
@@ -377,22 +377,17 @@ const styles = StyleSheet.create({
     }),
   },
 
-  // Brand
+  // Brand — logo image already includes "RESIIDO" brand text
   brandSection: {
     alignItems: 'center',
-    marginTop: 20,
-    marginBottom: 24,
+    marginTop: 16,
+    marginBottom: 20,
   },
   logo: {
-    width: 64,
-    height: 64,
-    marginBottom: 10,
-  },
-  brandName: {
-    fontSize: 26,
-    fontWeight: '800',
-    color: COLORS.textDark,
-    letterSpacing: -0.5,
+    width: 100,
+    height: 100,
+    maxHeight: 100,
+    marginBottom: 6,
   },
   subtitle: {
     fontSize: 15,

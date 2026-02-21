@@ -1,7 +1,7 @@
 /**
  * Welcome Screen
- * Modern 2026 light theme - premium minimal splash
- * Centered logo with Register/Login buttons
+ * Modern 2026 light theme — premium minimal splash
+ * Logo PNG already contains the building graphic + "RESIIDO" text
  */
 
 import React from 'react';
@@ -18,7 +18,7 @@ import {
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-const { width } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 
 const COLORS = {
   background: '#F4F7FB',
@@ -33,6 +33,9 @@ const COLORS = {
   cardShadow: '#94A3B8',
 };
 
+// Cap the logo so it never exceeds 35 % of screen height
+const LOGO_MAX_H = height * 0.30;
+
 export default function WelcomeScreen() {
   const router = useRouter();
 
@@ -40,39 +43,26 @@ export default function WelcomeScreen() {
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
       <SafeAreaView style={styles.safeArea}>
-        {/* Top Spacing */}
-        <View style={styles.spacer} />
-
-        {/* Logo Section */}
-        <View style={styles.logoSection}>
-          <View style={styles.logoContainer}>
-            <Image
-              source={require('../assets/images/ResiiDo_logo_nobg.png')}
-              style={styles.logo}
-              resizeMode="contain"
-            />
-          </View>
-          <Text style={styles.appName}>Resiido</Text>
+        {/* ── Hero: centred logo ─────────────────────────────────── */}
+        <View style={styles.heroSection}>
+          <Image
+            source={require('../assets/images/ResiiDo_logo_nobg.png')}
+            style={styles.logo}
+            resizeMode="contain"
+          />
           <Text style={styles.tagline}>Smart living, simplified</Text>
         </View>
 
-        {/* Feature Pills */}
+        {/* ── Feature Pills ─────────────────────────────────────── */}
         <View style={styles.pillsContainer}>
-          <View style={styles.pill}>
-            <Text style={styles.pillText}>Parking</Text>
-          </View>
-          <View style={styles.pill}>
-            <Text style={styles.pillText}>Payments</Text>
-          </View>
-          <View style={styles.pill}>
-            <Text style={styles.pillText}>Maintenance</Text>
-          </View>
-          <View style={styles.pill}>
-            <Text style={styles.pillText}>Visitors</Text>
-          </View>
+          {['Parking', 'Payments', 'Maintenance', 'Visitors'].map((f) => (
+            <View key={f} style={styles.pill}>
+              <Text style={styles.pillText}>{f}</Text>
+            </View>
+          ))}
         </View>
 
-        {/* Bottom Buttons */}
+        {/* ── Bottom Buttons ────────────────────────────────────── */}
         <View style={styles.buttonSection}>
           <TouchableOpacity
             style={styles.registerButton}
@@ -104,44 +94,18 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 24,
   },
-  spacer: {
-    flex: 0.15,
-  },
 
-  // Logo
-  logoSection: {
-    flex: 0.5,
+  /* ── Hero ─────────────────────────────────────────────────────── */
+  heroSection: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  logoContainer: {
-    width: width * 0.35,
-    height: width * 0.35,
-    borderRadius: width * 0.1,
-    backgroundColor: COLORS.white,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 20,
-    ...Platform.select({
-      ios: {
-        shadowColor: COLORS.cardShadow,
-        shadowOffset: { width: 0, height: 8 },
-        shadowOpacity: 0.12,
-        shadowRadius: 20,
-      },
-      android: { elevation: 6 },
-    }),
   },
   logo: {
-    width: width * 0.22,
-    height: width * 0.22,
-  },
-  appName: {
-    fontSize: 38,
-    fontWeight: '800',
-    color: COLORS.textDark,
-    letterSpacing: -1,
-    marginBottom: 6,
+    width: width * 0.50,
+    height: LOGO_MAX_H,
+    maxHeight: LOGO_MAX_H,
+    marginBottom: 12,
   },
   tagline: {
     fontSize: 16,
@@ -149,13 +113,13 @@ const styles = StyleSheet.create({
     color: COLORS.textLight,
   },
 
-  // Feature Pills
+  /* ── Feature Pills ───────────────────────────────────────────── */
   pillsContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'center',
     gap: 8,
-    marginBottom: 40,
+    paddingBottom: 28,
   },
   pill: {
     backgroundColor: COLORS.white,
@@ -171,7 +135,7 @@ const styles = StyleSheet.create({
     color: COLORS.textLight,
   },
 
-  // Buttons
+  /* ── Buttons ─────────────────────────────────────────────────── */
   buttonSection: {
     paddingBottom: Platform.OS === 'ios' ? 20 : 30,
     gap: 14,

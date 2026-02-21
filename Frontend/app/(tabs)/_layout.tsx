@@ -1,6 +1,7 @@
 /**
  * Tab Layout for Resiido
  * Modern 2026 light theme bottom tabs
+ * Fixed for proper display on web + mobile
  */
 
 import { Tabs } from "expo-router";
@@ -109,25 +110,35 @@ export default function TabLayout() {
   );
 }
 
+const TAB_HEIGHT = Platform.select({ ios: 88, android: 68, web: 70, default: 68 });
+const TAB_PADDING_BOTTOM = Platform.select({ ios: 28, android: 10, web: 10, default: 10 });
+
 const styles = StyleSheet.create({
   tabBar: {
     backgroundColor: TAB_COLORS.background,
     borderTopWidth: 0,
-    height: Platform.OS === "ios" ? 88 : 68,
-    paddingTop: 8,
-    paddingBottom: Platform.OS === "ios" ? 28 : 12,
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
+    height: TAB_HEIGHT,
+    paddingTop: 6,
+    paddingBottom: TAB_PADDING_BOTTOM,
     ...Platform.select({
+      web: {
+        // Not absolute on web — let it flow in the normal layout
+        borderTopWidth: 1,
+        borderTopColor: '#E2E8F0',
+      },
       ios: {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
         shadowColor: '#94A3B8',
         shadowOffset: { width: 0, height: -4 },
         shadowOpacity: 0.08,
         shadowRadius: 16,
       },
-      android: { elevation: 12 },
+      android: {
+        elevation: 12,
+      },
     }),
   },
   tabBarLabel: {

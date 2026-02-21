@@ -2,6 +2,7 @@
  * Home Dashboard Screen
  * Modern 2026 light theme - premium minimal UI
  * Supports both Resident and Manager views
+ * Feature cards in compact 2-column grid
  */
 
 import React, { useState } from 'react';
@@ -24,8 +25,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@/context/AuthContext';
 
 const { width } = Dimensions.get('window');
-const CARD_GAP = 14;
-const CARD_WIDTH = (width - 40 - CARD_GAP) / 2;
+const CARD_GAP = 12;
+const CARD_WIDTH = (width - 48 - CARD_GAP) / 2; // 24px padding each side
 
 // Design tokens
 const COLORS = {
@@ -177,10 +178,12 @@ export default function HomeScreen() {
       activeOpacity={0.7}
     >
       <View style={[styles.featureIconContainer, { backgroundColor: card.iconBg }]}>
-        <Ionicons name={card.icon} size={26} color={card.iconColor} />
+        <Ionicons name={card.icon} size={22} color={card.iconColor} />
       </View>
-      <Text style={styles.featureTitle}>{card.title}</Text>
-      <Text style={styles.featureSubtitle}>{card.subtitle}</Text>
+      <View style={styles.featureTextContainer}>
+        <Text style={styles.featureTitle}>{card.title}</Text>
+        <Text style={styles.featureSubtitle}>{card.subtitle}</Text>
+      </View>
     </TouchableOpacity>
   );
 
@@ -190,7 +193,7 @@ export default function HomeScreen() {
       {/* Manager Info Card */}
       <View style={styles.managerCard}>
         <View style={styles.managerCardHeader}>
-          <Ionicons name="business" size={22} color={COLORS.primary} />
+          <Ionicons name="business" size={20} color={COLORS.primary} />
           <Text style={styles.managerCardTitle}>Building Overview</Text>
         </View>
         <View style={styles.managerStatRow}>
@@ -302,7 +305,7 @@ export default function HomeScreen() {
           activeOpacity={0.85}
         >
           <View style={styles.sosInner}>
-            <Ionicons name="alert" size={22} color={COLORS.white} />
+            <Ionicons name="alert" size={20} color={COLORS.white} />
             <Text style={styles.sosLabel}>SOS</Text>
           </View>
         </TouchableOpacity>
@@ -320,9 +323,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 24,
     paddingTop: 8,
-    paddingBottom: 120,
+    paddingBottom: Platform.select({ ios: 120, android: 100, web: 30 }),
   },
 
   // Header
@@ -331,19 +334,19 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'flex-start',
     marginTop: 12,
-    marginBottom: 24,
+    marginBottom: 20,
   },
   headerLeft: {
     flex: 1,
   },
   greeting: {
-    fontSize: 15,
+    fontSize: 14,
     color: COLORS.textLight,
     fontWeight: '500',
     marginBottom: 4,
   },
   userName: {
-    fontSize: 26,
+    fontSize: 24,
     fontWeight: '800',
     color: COLORS.textDark,
     letterSpacing: -0.5,
@@ -365,9 +368,9 @@ const styles = StyleSheet.create({
     color: COLORS.primary,
   },
   avatar: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     backgroundColor: COLORS.avatarBg,
     alignItems: 'center',
     justifyContent: 'center',
@@ -375,7 +378,7 @@ const styles = StyleSheet.create({
     borderColor: COLORS.primary,
   },
   avatarText: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: '700',
     color: COLORS.primary,
   },
@@ -385,9 +388,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 20,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
+    marginBottom: 16,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
     backgroundColor: COLORS.white,
     borderRadius: 24,
     alignSelf: 'center',
@@ -402,10 +405,10 @@ const styles = StyleSheet.create({
     }),
   },
   viewModeLabel: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '500',
     color: COLORS.textMuted,
-    marginHorizontal: 10,
+    marginHorizontal: 8,
   },
   viewModeLabelActive: {
     color: COLORS.textDark,
@@ -417,50 +420,55 @@ const styles = StyleSheet.create({
 
   // Section Title
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 17,
     fontWeight: '700',
     color: COLORS.textDark,
-    marginBottom: 16,
+    marginBottom: 14,
     letterSpacing: -0.3,
   },
 
-  // Feature Grid
+  // Feature Grid — compact 2-column cards with icon + text side by side
   featureGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
   },
   featureCard: {
     width: CARD_WIDTH,
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: COLORS.white,
-    borderRadius: 22,
-    padding: 18,
+    borderRadius: 18,
+    padding: 14,
     marginBottom: CARD_GAP,
     ...Platform.select({
       ios: {
         shadowColor: COLORS.cardShadow,
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.1,
-        shadowRadius: 12,
+        shadowOffset: { width: 0, height: 3 },
+        shadowOpacity: 0.08,
+        shadowRadius: 10,
       },
-      android: { elevation: 3 },
+      android: { elevation: 2 },
     }),
   },
   featureIconContainer: {
-    width: 50,
-    height: 50,
-    borderRadius: 16,
+    width: 44,
+    height: 44,
+    borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 14,
+    marginRight: 12,
+  },
+  featureTextContainer: {
+    flex: 1,
   },
   featureTitle: {
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '700',
     color: COLORS.textDark,
-    marginBottom: 3,
+    marginBottom: 2,
   },
   featureSubtitle: {
-    fontSize: 12,
+    fontSize: 11,
     color: COLORS.textLight,
     fontWeight: '400',
   },
@@ -468,9 +476,9 @@ const styles = StyleSheet.create({
   // Manager Card
   managerCard: {
     backgroundColor: COLORS.white,
-    borderRadius: 22,
-    padding: 20,
-    marginBottom: 24,
+    borderRadius: 18,
+    padding: 18,
+    marginBottom: 20,
     ...Platform.select({
       ios: {
         shadowColor: COLORS.cardShadow,
@@ -485,10 +493,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    marginBottom: 16,
+    marginBottom: 14,
   },
   managerCardTitle: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '700',
     color: COLORS.textDark,
   },
@@ -502,7 +510,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   managerStatValue: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '700',
     color: COLORS.textDark,
     marginBottom: 2,
@@ -513,14 +521,14 @@ const styles = StyleSheet.create({
   },
   managerStatDivider: {
     width: 1,
-    height: 32,
+    height: 28,
     backgroundColor: COLORS.border,
-    marginHorizontal: 12,
+    marginHorizontal: 10,
   },
   managerLocation: {
     fontSize: 13,
     color: COLORS.textLight,
-    marginBottom: 14,
+    marginBottom: 12,
   },
   dashboardLink: {
     flexDirection: 'row',
@@ -543,7 +551,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    marginTop: 24,
+    marginTop: 16,
     paddingVertical: 14,
     borderRadius: 16,
     backgroundColor: COLORS.white,
@@ -566,14 +574,14 @@ const styles = StyleSheet.create({
   // SOS Button
   sosButton: {
     position: 'absolute',
-    bottom: Platform.OS === 'ios' ? 100 : 80,
+    bottom: Platform.select({ ios: 100, android: 80, web: 16 }),
     right: 20,
     zIndex: 100,
   },
   sosInner: {
-    width: 62,
-    height: 62,
-    borderRadius: 31,
+    width: 58,
+    height: 58,
+    borderRadius: 29,
     backgroundColor: COLORS.sosRed,
     alignItems: 'center',
     justifyContent: 'center',
@@ -588,7 +596,7 @@ const styles = StyleSheet.create({
     }),
   },
   sosLabel: {
-    fontSize: 10,
+    fontSize: 9,
     fontWeight: '800',
     color: COLORS.white,
     letterSpacing: 1,
