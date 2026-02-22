@@ -109,6 +109,18 @@ public class AuthController {
         return jwtUtil.generateToken(authRequest.getEmail());
     }
 
+    @PostMapping("/forgot-password")
+    public ResponseEntity<String> forgotPassword(@RequestBody ForgotPasswordRequest req) {
+        passwordResetService.sendResetLink(req.getEmail());
+        return ResponseEntity.ok("Reset link sent if email exists.");
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<String> resetPassword(@RequestBody ResetPasswordRequest req) {
+        passwordResetService.resetPassword(req.getToken(), req.getNewPassword());
+        return ResponseEntity.ok("Password updated successfully.");
+    }
+
     //DELETE USER (Safe Unlink)
     @DeleteMapping("/delete/{id}")
     @Transactional
