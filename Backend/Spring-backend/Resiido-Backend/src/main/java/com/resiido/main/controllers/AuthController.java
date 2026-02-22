@@ -23,6 +23,10 @@ import java.security.Principal;
 import java.util.Map;
 import java.util.Random;
 
+import com.resiido.main.dtos.ForgotPasswordRequest;
+import com.resiido.main.dtos.ResetPasswordRequest;
+import com.resiido.main.services.PasswordResetService;
+
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
