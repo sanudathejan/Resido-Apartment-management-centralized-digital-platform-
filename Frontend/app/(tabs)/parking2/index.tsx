@@ -253,7 +253,7 @@ const RequestCard = ({ name, time, note }: any) => (
     </View>
 );
 
-/* ─── STYLESHEET ─── */
+/* ─── High-Readability StyleSheet ─── */
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: C.bg },
   header: { paddingHorizontal: 20, paddingTop: 10, paddingBottom: 20 },
