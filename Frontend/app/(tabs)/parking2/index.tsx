@@ -282,7 +282,7 @@ const styles = StyleSheet.create({
 
   scrollContent: { padding: 20, paddingBottom: 40 },
 
-  // Parking Slot Card
+// Parking Slot Card
   card: { backgroundColor: C.white, borderRadius: 24, overflow: 'hidden', marginBottom: 20 },
   slotImage: { width: '100%', height: 160 },
   slotHeaderOverlay: { position: 'absolute', top: 12, right: 12 },
@@ -322,10 +322,17 @@ const styles = StyleSheet.create({
   countBadge: { backgroundColor: '#DBEAFE', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 10 },
   countText: { color: C.primary, fontSize: 11, fontWeight: '700' },
 
-  // Request Cards
+// Request Cards
   requestCard: { backgroundColor: C.white, borderRadius: 20, padding: 16, marginBottom: 12 },
   avatarSmall: { width: 32, height: 32, borderRadius: 16, backgroundColor: '#F1F5F9' },
-  requestNote: { fontSize: 13, fontStyle: 'italic', color: C.textLight, marginVertical: 12, lineHeight: 18 },
+  // Increased darkness and line height for notes
+  requestNote: {
+    fontSize: 14,
+    fontStyle: 'italic',
+    color: C.textDark,
+    marginVertical: 12,
+    lineHeight: 20
+  },
   actionRow: { flexDirection: 'row', gap: 12, marginTop: 4 },
   declineBtn: { flex: 1, padding: 12, borderRadius: 12, borderWidth: 1, borderColor: C.border, alignItems: 'center' },
   acceptBtn: { flex: 1, padding: 12, borderRadius: 12, backgroundColor: C.primary, alignItems: 'center' },
