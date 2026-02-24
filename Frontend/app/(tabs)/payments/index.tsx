@@ -282,7 +282,12 @@ heroLabel: { color: 'rgba(255,255,255,0.7)', fontSize: 14, fontWeight: '500' },
   autoPaySub: { fontSize: 12, color: THEME.textLight },
 
 /* History Styles */
-  viewAllText: { color: THEME.primary, fontSize: 14, fontWeight: '600', marginLeft: 'auto' },
+  viewAllText: {
+    color: THEME.primary,
+    fontSize: 14,
+    fontWeight: '600'
+    // removed marginLeft: 'auto'
+  },
   historyList: { marginTop: 5 },
   historyRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12 },
   historyIconBg: { width: 44, height: 44, borderRadius: 12, backgroundColor: '#F8FAFC', alignItems: 'center', justifyContent: 'center' },
