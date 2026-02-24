@@ -339,25 +339,15 @@ const styles = StyleSheet.create({
   declineText: { fontWeight: '700', color: C.textDark },
   acceptText: { fontWeight: '700', color: C.white },
 
-  // Visitor List Styles
+// Visitor History - Darker labels
   visitorCard: { backgroundColor: C.white, borderRadius: 20, padding: 16, marginBottom: 12 },
   visitorRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  avatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: '#F3E8FF',
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
+  avatar: { width: 44, height: 44, borderRadius: 22, backgroundColor: '#F3E8FF', alignItems: 'center', justifyContent: 'center' },
   avatarText: { color: C.secondary, fontWeight: '700' },
   visitorName: { fontSize: 16, fontWeight: '700', color: C.textDark },
-  visitorSub: { fontSize: 12, color: C.textLight, marginTop: 1 },
+  visitorSub: { fontSize: 12, color: C.textMuted, marginTop: 1 },
   statusIn: { backgroundColor: '#DCFCE7', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12 },
   statusInText: { color: C.success, fontSize: 11, fontWeight: '700' },
-  detailsBox: { backgroundColor: '#F8FAFC', borderRadius: 14, padding: 12, marginTop: 14, gap: 8 },
-  detailItem: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  detailText: { fontSize: 12, color: C.textLight },
 
   // Register Button
   registerButton: {
