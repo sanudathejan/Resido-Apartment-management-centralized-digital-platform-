@@ -283,7 +283,14 @@ const styles = StyleSheet.create({
   scrollContent: { padding: 20, paddingBottom: 40 },
 
 // Parking Slot Card
-  card: { backgroundColor: C.white, borderRadius: 24, overflow: 'hidden', marginBottom: 20 },
+card: {
+  backgroundColor: C.white,
+  borderRadius: 24,
+  overflow: 'hidden',
+  marginBottom: 20,
+  borderWidth: 1,
+  borderColor: '#94A3B8'    // (Medium border color)
+},
   slotImage: { width: '100%', height: 160 },
   slotHeaderOverlay: { position: 'absolute', top: 12, right: 12 },
   badgePrimary: { backgroundColor: C.primary, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 8 },
