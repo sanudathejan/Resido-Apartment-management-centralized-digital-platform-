@@ -31,12 +31,12 @@ const C = {
   bg: '#F1F5F9',        // Slightly darker grey background to make white boxes "pop"
   primary: '#1D4ED8',   // Deeper blue for better text contrast
   primaryLight: '#DBEAFE',
-  white: '#FFFFFF'
-  textDark: '#0F172A',
-  textLight: '#64748B',
-  textMuted: '#94A3B8',
-  border: '#E2E8F0',
-  success: '#10B981',
+  white: '#FFFFFF',
+  textDark: '#0F172A',  // Deep slate for headers
+  textLight: '#334155', // Darkened from #64748B for significantly better readability
+  textMuted: '#64748B', // Standard grey for secondary info
+  border: '#CBD5E1',    // Slightly darker border for clearer definition
+  success: '#065F46',   // Deep emerald (much easier to read than bright green)
   warning: '#F59E0B',
   error: '#EF4444',
   secondary: '#7C3AED',
