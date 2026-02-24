@@ -349,7 +349,19 @@ const styles = StyleSheet.create({
   statusIn: { backgroundColor: '#DCFCE7', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12 },
   statusInText: { color: C.success, fontSize: 11, fontWeight: '700' },
 
-  // Register Button
+// Details Box - Darkened background and added border for visibility
+  detailsBox: {
+    backgroundColor: '#F1F5F9',
+    borderRadius: 14,
+    padding: 12,
+    marginTop: 14,
+    gap: 8,
+    borderWidth: 1,
+    borderColor: C.border
+  },
+  detailItem: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  detailText: { fontSize: 13, color: C.textLight, fontWeight: '500' },
+
   registerButton: {
     backgroundColor: C.primary,
     flexDirection: 'row',
@@ -361,5 +373,4 @@ const styles = StyleSheet.create({
   },
   registerButtonText: { color: C.white, fontWeight: '700', marginLeft: 8 },
 });
-
 
