@@ -28,7 +28,7 @@ import { ParkingSlot, VisitorEntry } from '@/types';
 
 /* ─── Updated Design Tokens ─── */
 const C = {
-  bg: '#CBD5E1',        // Slightly darker grey background to make white boxes "pop"
+  bg: '#E2E8F0',        // Slightly darker grey background to make white boxes "pop"
   primary: '#1D4ED8',   // Deeper blue for better text contrast
   primaryLight: '#DBEAFE',
   white: '#FFFFFF',
@@ -318,7 +318,9 @@ card: {
     padding: 20,
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 24
+    marginBottom: 24,
+    borderWidth: 1,
+    borderColor: '#94A3B8'
   },
   cardTitle: { fontSize: 16, fontWeight: '700', color: C.textDark },
   cardSubtitle: { fontSize: 13, color: C.textLight, marginTop: 4, lineHeight: 18 },
@@ -330,7 +332,7 @@ card: {
   countText: { color: C.primary, fontSize: 11, fontWeight: '700' },
 
 // Request Cards
-  requestCard: { backgroundColor: C.white, borderRadius: 20, padding: 16, marginBottom: 12 },
+  requestCard: { backgroundColor: C.white, borderRadius: 20, padding: 16, marginBottom: 12 ,borderWidth: 1,borderColor: '#94A3B8'},
   avatarSmall: { width: 32, height: 32, borderRadius: 16, backgroundColor: '#F1F5F9' },
   // Increased darkness and line height for notes
   requestNote: {
@@ -347,9 +349,9 @@ card: {
   acceptText: { fontWeight: '700', color: C.white },
 
 // Visitor History - Darker labels
-  visitorCard: { backgroundColor: C.white, borderRadius: 20, padding: 16, marginBottom: 12 },
+  visitorCard: { backgroundColor: C.white, borderRadius: 20, padding: 16, marginBottom: 12,borderWidth: 1,borderColor: '#94A3B8' },
   visitorRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  avatar: { width: 44, height: 44, borderRadius: 22, backgroundColor: '#F3E8FF', alignItems: 'center', justifyContent: 'center' },
+  avatar: { width: 44, height: 44, borderRadius: 22, backgroundColor:'#F3E8FF', alignItems: 'center', justifyContent: 'center' },
   avatarText: { color: C.secondary, fontWeight: '700' },
   visitorName: { fontSize: 16, fontWeight: '700', color: C.textDark },
   visitorSub: { fontSize: 12, color: C.textMuted, marginTop: 1 },
