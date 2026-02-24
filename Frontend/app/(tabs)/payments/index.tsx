@@ -25,7 +25,7 @@ import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 // Define the THEME object so the rest of the code can use it
 const THEME = {
   primary: '#2B72F1',      // The main brand blue
-  background: '#E2E8F0',   // Soft grey/white background
+  background: '#B4CFEC',   // Soft grey/white background
   white: '#FFFFFF',
   textDark: '#1E293B',     // Deep slate for titles
   textLight: '#64748B',    // Muted slate for descriptions
