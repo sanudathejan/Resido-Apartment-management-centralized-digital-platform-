@@ -28,7 +28,7 @@ import { ParkingSlot, VisitorEntry } from '@/types';
 
 /* ─── Updated Design Tokens ─── */
 const C = {
-  bg: '#F1F5F9',        // Slightly darker grey background to make white boxes "pop"
+  bg: '#CBD5E1',        // Slightly darker grey background to make white boxes "pop"
   primary: '#1D4ED8',   // Deeper blue for better text contrast
   primaryLight: '#DBEAFE',
   white: '#FFFFFF',
