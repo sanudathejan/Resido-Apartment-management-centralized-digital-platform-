@@ -247,7 +247,13 @@ heroLabel: { color: 'rgba(255,255,255,0.7)', fontSize: 14, fontWeight: '500' },
   payNowText: { color: THEME.primary, fontSize: 16, fontWeight: '700', marginLeft: 8 },
 
 /* Bill Details Styles */
-  sectionHeader: { flexDirection: 'row', alignItems: 'center', marginTop: 28, marginBottom: 15 },
+ sectionHeader: {
+   flexDirection: 'row',
+   alignItems: 'center',
+   justifyContent: 'space-between', // Pushes items to opposite sides
+   marginTop: 28,
+   marginBottom: 15
+ },
   sectionTitle: { fontSize: 18, fontWeight: '700', color: THEME.textDark },
   sectionCount: { fontSize: 13, color: THEME.textLight, marginLeft: 8 },
   billContainer: { gap: 12 },
