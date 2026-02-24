@@ -37,9 +37,9 @@ const C = {
   textMuted: '#64748B', // Standard grey for secondary info
   border: '#CBD5E1',    // Slightly darker border for clearer definition
   success: '#065F46',   // Deep emerald (much easier to read than bright green)
-  warning: '#F59E0B',
-  error: '#EF4444',
-  secondary: '#7C3AED',
+  warning: '#92400E',
+  error: '#991B1B',
+  secondary: '#5B21B6',
 } as const;
 
 const shadow = (elevation: number) => ({
@@ -264,7 +264,7 @@ const styles = StyleSheet.create({
   tabContainer: {
     flexDirection: 'row',
     marginHorizontal: 20,
-    backgroundColor: '#E2E8F0',
+    backgroundColor: '#CBD5E1',//Darker track
     borderRadius: 14,
     padding: 4
   },
