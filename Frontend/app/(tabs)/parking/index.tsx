@@ -90,9 +90,11 @@ export default function ParkingScreen() {
                 <Text style={styles.slotSubLabel}>ASSIGNED SLOT</Text>
                 <Text style={styles.slotMainTitle}>Slot P-A12</Text>
             </View>
-            <View style={styles.statusBadgeGreen}>
-                <View style={styles.dotGreen} />
-                <Text style={styles.statusTextGreen}>Available</Text>
+            <View style={isLending ? styles.statusBadgeGreen : styles.statusBadgeMuted}>
+                <View style={isLending ? styles.dotGreen : styles.dotMuted} />
+                <Text style={isLending ? styles.statusTextGreen : styles.statusTextMuted}>
+                    {isLending ? 'Lending Active' : 'Private'}
+                </Text>
             </View>
         </View>
       </View>
