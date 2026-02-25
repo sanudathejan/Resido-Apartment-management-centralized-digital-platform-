@@ -21,7 +21,7 @@ import { useAuth } from '@/context/AuthContext';
 
 /* ── design tokens ─────────────────────────────────────────────── */
 const C = {
-  bg: '#F4F7FB',
+  bg: '#A9A9A9',
   primary: '#2563EB',
   primaryLight: '#EFF6FF',
   avatarBg: '#DBEAFE',

@@ -29,7 +29,7 @@ const CARD_WIDTH = (width - 40 - CARD_GAP) / 2;
 
 // Design tokens
 const COLORS = {
-  background: '#F4F7FB',
+  background: '#B4CFEC',
   primary: '#2563EB',
   primaryLight: '#EFF6FF',
   sosRed: '#EF4444',
