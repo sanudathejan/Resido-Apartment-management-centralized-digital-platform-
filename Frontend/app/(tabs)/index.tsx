@@ -29,7 +29,7 @@ const CARD_WIDTH = (width - 40 - CARD_GAP) / 2;
 
 // Design tokens
 const COLORS = {
-  background: '#B4CFEC',
+  background: '#A9A9A9',
   primary: '#2563EB',
   primaryLight: '#EFF6FF',
   sosRed: '#EF4444',
@@ -70,14 +70,7 @@ const FEATURE_CARDS: FeatureCard[] = [
     iconColor: '#7C3AED',
     iconBg: '#F5F3FF',
   },
-  {
-    icon: 'wallet',
-    title: 'Payments',
-    subtitle: 'Rent & bills',
-    route: '/(tabs)/rent',
-    iconColor: '#059669',
-    iconBg: '#ECFDF5',
-  },
+
   {
     icon: 'construct',
     title: 'Maintenance',

@@ -75,21 +75,6 @@ export default function TabLayout() {
         }}
       />
 
-      <Tabs.Screen
-        name="rent/index"
-        options={{
-          title: "Payments",
-          tabBarIcon: ({ color, focused }) => (
-            <View style={focused ? styles.activeIconContainer : undefined}>
-              <Ionicons
-                name={focused ? "wallet" : "wallet-outline"}
-                size={22}
-                color={color}
-              />
-            </View>
-          ),
-        }}
-      />
 
       <Tabs.Screen
         name="profile/index"
