@@ -114,8 +114,33 @@ export default function ParkingScreen() {
                   thumbColor={Platform.OS === 'android' ? C.white : ''}
               />
             </View>
+      {/* 3. Pending Requests: Now passing specific names, dates, and times */}
+      <View style={styles.sectionHeader}>
+        <Text style={styles.sectionTitle}>PENDING REQUESTS</Text>
+        <View style={styles.countBadge}>
+            <Text style={styles.countText}>2 New</Text>
+        </View>
+      </View>
 
-           
+      <RequestCard
+        name="Resident ID: 405" // Pass 'name' prop here
+        date="25 Feb 2026"
+        startTime="09:00 AM"
+        endTime="12:00 PM"
+        note="Need a spot for my guest's car."
+        onAccept={() => Alert.alert("Accepted", "Slot P-A12 is now booked.")}
+        onDecline={() => Alert.alert("Denied", "Request has been removed.")}
+      />
+
+      <RequestCard
+        name="Resident ID: 112" // Pass 'name' prop here
+        date="26 Feb 2026"
+        startTime="06:00 PM"
+        endTime="10:00 PM"
+        note="Quick visit for a delivery."
+        onAccept={() => {}}
+        onDecline={() => {}}
+      />
 
 
                 </>
