@@ -3,33 +3,33 @@
  * Matching High Fidelity Prototype with gradient header and white form card
  */
 
+import { Colors } from '@/constants/colors';
+import { useAuth } from '@/context/AuthContext';
+import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
+  Alert,
+  Dimensions,
+  Image,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  Alert,
+  StyleSheet,
+  Text,
   TextInput,
-  Image,
-  Dimensions,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
-import { Colors } from '@/constants/colors';
-import { useAuth } from '@/context/AuthContext';
 
 const { width } = Dimensions.get('window');
 
 export default function LoginScreen() {
   const router = useRouter();
   const { login } = useAuth();
-  
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -40,7 +40,7 @@ export default function LoginScreen() {
       Alert.alert('Error', 'Please enter email and password');
       return;
     }
-    
+
     setIsLoading(true);
     try {
       await login({ email, password });
@@ -62,13 +62,13 @@ export default function LoginScreen() {
         style={styles.header}
       >
         <SafeAreaView>
-          <TouchableOpacity 
-            style={styles.backButton} 
+          <TouchableOpacity
+            style={styles.backButton}
             onPress={() => router.back()}
           >
             <Ionicons name="arrow-back" size={24} color={Colors.white} />
           </TouchableOpacity>
-          
+
           <View style={styles.headerContent}>
             <Image
               source={require('../assets/images/ResiiDo_logo_nobg.png')}
@@ -86,7 +86,7 @@ export default function LoginScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.formContainer}
       >
-        <ScrollView 
+        <ScrollView
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
@@ -115,14 +115,14 @@ export default function LoginScreen() {
                 onChangeText={setPassword}
                 secureTextEntry={!showPassword}
               />
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.eyeIcon}
                 onPress={() => setShowPassword(!showPassword)}
               >
-                <Ionicons 
-                  name={showPassword ? "eye-off-outline" : "eye-outline"} 
-                  size={22} 
-                  color={Colors.gray[400]} 
+                <Ionicons
+                  name={showPassword ? "eye-off-outline" : "eye-outline"}
+                  size={22}
+                  color={Colors.gray[400]}
                 />
               </TouchableOpacity>
             </View>
@@ -152,7 +152,7 @@ export default function LoginScreen() {
             </TouchableOpacity>
 
             {/* Create Account Link */}
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.createAccountLink}
               onPress={() => router.push('/register')}
             >
@@ -187,7 +187,7 @@ export default function LoginScreen() {
             {/* Demo Login Options */}
             <View style={styles.demoSection}>
               <Text style={styles.demoTitle}>Demo Accounts</Text>
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.demoButton}
                 onPress={() => {
                   setEmail('resident@demo.com');
@@ -196,7 +196,7 @@ export default function LoginScreen() {
               >
                 <Text style={styles.demoButtonText}>🏠 Fill Resident Demo</Text>
               </TouchableOpacity>
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.demoButton}
                 onPress={() => {
                   setEmail('manager@demo.com');
@@ -296,12 +296,14 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     overflow: 'hidden',
     marginBottom: 16,
+    marginHorizontal: -6,
   },
   loginButtonDisabled: {
     opacity: 0.7,
   },
   loginButtonGradient: {
     paddingVertical: 16,
+    paddingHorizontal: 6,
     alignItems: 'center',
   },
   loginButtonText: {
