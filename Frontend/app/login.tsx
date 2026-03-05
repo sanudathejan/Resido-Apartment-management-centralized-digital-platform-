@@ -81,6 +81,7 @@ export default function LoginScreen() {
         </SafeAreaView>
       </LinearGradient>
 
+
       {/* White Form Card */}
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -140,7 +141,7 @@ export default function LoginScreen() {
               activeOpacity={0.8}
             >
               <LinearGradient
-                colors={['#1A5276', '#154360']}
+                colors={['#0E2F44', '#0A1F2E']}
                 style={styles.loginButtonGradient}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
