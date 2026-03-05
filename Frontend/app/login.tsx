@@ -56,7 +56,7 @@ export default function LoginScreen() {
     <View style={styles.container}>
       {/* Gradient Header */}
       <LinearGradient
-        colors={['#2ECC71', '#27AE60', '#3498DB']}
+        colors={['#1A7A45', '#145F36', '#1A5276']}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={styles.header}
@@ -97,7 +97,7 @@ export default function LoginScreen() {
               <TextInput
                 style={styles.input}
                 placeholder="Email"
-                placeholderTextColor={Colors.gray[400]}
+                placeholderTextColor={Colors.gray[500]}
                 value={email}
                 onChangeText={setEmail}
                 keyboardType="email-address"
@@ -110,7 +110,7 @@ export default function LoginScreen() {
               <TextInput
                 style={styles.input}
                 placeholder="Password"
-                placeholderTextColor={Colors.gray[400]}
+                placeholderTextColor={Colors.gray[500]}
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry={!showPassword}
@@ -140,7 +140,7 @@ export default function LoginScreen() {
               activeOpacity={0.8}
             >
               <LinearGradient
-                colors={['#3498DB', '#2980B9']}
+                colors={['#1A5276', '#154360']}
                 style={styles.loginButtonGradient}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
@@ -169,7 +169,7 @@ export default function LoginScreen() {
             {/* Social Login Buttons */}
             <View style={styles.socialButtons}>
               <TouchableOpacity style={styles.socialButton}>
-                <Ionicons name="logo-apple" size={20} color={Colors.black} />
+                <Ionicons name="logo-apple" size={20} color={Colors.white} />
                 <Text style={styles.socialButtonText}>Continue with Apple</Text>
               </TouchableOpacity>
 
@@ -216,7 +216,7 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: '#0D1B2A',
   },
   header: {
     paddingBottom: 30,
@@ -265,11 +265,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   inputContainer: {
-    backgroundColor: Colors.white,
+    backgroundColor: '#1B2A3B',
     borderRadius: 12,
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: Colors.gray[200],
+    borderColor: '#2C3E50',
     flexDirection: 'row',
     alignItems: 'center',
   },
@@ -278,7 +278,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 16,
     fontSize: 16,
-    color: Colors.text.primary,
+    color: '#E8F0F7',
   },
   eyeIcon: {
     paddingHorizontal: 16,
@@ -288,7 +288,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   forgotPasswordText: {
-    color: Colors.secondary,
+    color: '#5DADE2',
     fontSize: 14,
     fontWeight: '500',
   },
@@ -314,7 +314,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   createAccountText: {
-    color: Colors.secondary,
+    color: '#5DADE2',
     fontSize: 14,
     fontWeight: '500',
   },
@@ -326,11 +326,11 @@ const styles = StyleSheet.create({
   dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: Colors.gray[200],
+    backgroundColor: '#2C3E50',
   },
   dividerText: {
     marginHorizontal: 16,
-    color: Colors.text.secondary,
+    color: '#7F8C8D',
     fontSize: 13,
   },
   socialButtons: {
@@ -340,42 +340,42 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: Colors.white,
+    backgroundColor: '#1B2A3B',
     borderRadius: 12,
     paddingVertical: 14,
     borderWidth: 1,
-    borderColor: Colors.gray[200],
+    borderColor: '#2C3E50',
     gap: 10,
   },
   socialButtonText: {
     fontSize: 14,
     fontWeight: '600',
-    color: Colors.text.primary,
+    color: '#E8F0F7',
   },
   demoSection: {
     marginTop: 24,
     padding: 16,
-    backgroundColor: Colors.gray[50],
+    backgroundColor: '#152132',
     borderRadius: 12,
     gap: 10,
   },
   demoTitle: {
     fontSize: 12,
     fontWeight: '600',
-    color: Colors.gray[500],
+    color: '#7F8C8D',
     textAlign: 'center',
     marginBottom: 8,
   },
   demoButton: {
-    backgroundColor: Colors.white,
+    backgroundColor: '#1B2A3B',
     alignItems: 'center',
     paddingVertical: 12,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: Colors.gray[200],
+    borderColor: '#2C3E50',
   },
   demoButtonText: {
-    color: Colors.text.primary,
+    color: '#E8F0F7',
     fontSize: 14,
     fontWeight: '500',
   },
