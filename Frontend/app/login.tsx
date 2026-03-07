@@ -5,23 +5,29 @@
  * Logo image already includes "RESIIDO" branding
  */
 
+import { Colors } from '@/constants/colors';
+import { useAuth } from '@/context/AuthContext';
+import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
+  Alert,
+  Dimensions,
+  Image,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  Alert,
+  StyleSheet,
+  Text,
   TextInput,
   Image,
-  ActivityIndicator,
+  Dimensions,
 } from 'react-native';
-import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Colors } from '@/constants/colors';
 import { useAuth } from '@/context/AuthContext';
 
 const COLORS = {
@@ -91,168 +97,110 @@ export default function LoginScreen() {
 
   return (
     <View style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          style={styles.keyboardView}
-        >
-          <ScrollView
-            contentContainerStyle={styles.scrollContent}
-            showsVerticalScrollIndicator={false}
-            keyboardShouldPersistTaps="handled"
+      {/* Gradient Header */}
+      <LinearGradient
+        colors={['#2ECC71', '#27AE60', '#3498DB']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.header}
+      >
+        <SafeAreaView>
+          <TouchableOpacity 
+            style={styles.backButton} 
+            onPress={() => router.back()}
           >
-            {/* Back Button */}
-            <TouchableOpacity
-              style={styles.backButton}
-              onPress={() => router.back()}
-              activeOpacity={0.7}
-            >
-              <Ionicons name="arrow-back" size={22} color={COLORS.textDark} />
-            </TouchableOpacity>
+            <Ionicons name="arrow-back" size={24} color={Colors.white} />
+          </TouchableOpacity>
+          
+          <View style={styles.headerContent}>
+            <Image
+              source={require('../assets/images/ResiiDo_logo_nobg.png')}
+              style={styles.logo}
+              resizeMode="contain"
+            />
+            <Text style={styles.brandName}>RESIIDO</Text>
+            <Text style={styles.title}>WELCOME BACK</Text>
+          </View>
+        </SafeAreaView>
+      </LinearGradient>
 
-            {/* Logo — image already contains "RESIIDO" branding */}
-            <View style={styles.brandSection}>
-              <Image
-                source={require('../assets/images/ResiiDo_logo_nobg.png')}
-                style={styles.logo}
-                resizeMode="contain"
+      {/* White Form Card */}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.formContainer}
+      >
+        <ScrollView 
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={styles.formCard}>
+            {/* Email Input */}
+            <View style={styles.inputContainer}>
+              <TextInput
+                style={styles.input}
+                placeholder="Email"
+                placeholderTextColor={Colors.gray[400]}
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                autoCapitalize="none"
               />
-              <Text style={styles.subtitle}>Welcome back</Text>
             </View>
 
-            {/* Role Selector */}
-            <View style={styles.roleSelector}>
-              <TouchableOpacity
-                style={[
-                  styles.roleTab,
-                  selectedRole === 'resident' && {
-                    backgroundColor: COLORS.residentBg,
-                    borderColor: COLORS.residentColor,
-                  },
-                ]}
-                onPress={() => setSelectedRole('resident')}
-                activeOpacity={0.7}
+            {/* Password Input */}
+            <View style={styles.inputContainer}>
+              <TextInput
+                style={styles.input}
+                placeholder="Password"
+                placeholderTextColor={Colors.gray[400]}
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry={!showPassword}
+              />
+              <TouchableOpacity 
+                style={styles.eyeIcon}
+                onPress={() => setShowPassword(!showPassword)}
               >
-                <Ionicons
-                  name="home-outline"
-                  size={18}
-                  color={selectedRole === 'resident' ? COLORS.residentColor : COLORS.textMuted}
+                <Ionicons 
+                  name={showPassword ? "eye-off-outline" : "eye-outline"} 
+                  size={22} 
+                  color={Colors.gray[400]} 
                 />
-                <Text
-                  style={[
-                    styles.roleTabText,
-                    selectedRole === 'resident' && { color: COLORS.residentColor, fontWeight: '700' },
-                  ]}
-                >
-                  Resident
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[
-                  styles.roleTab,
-                  selectedRole === 'manager' && {
-                    backgroundColor: COLORS.managerBg,
-                    borderColor: COLORS.managerColor,
-                  },
-                ]}
-                onPress={() => setSelectedRole('manager')}
-                activeOpacity={0.7}
-              >
-                <Ionicons
-                  name="briefcase-outline"
-                  size={18}
-                  color={selectedRole === 'manager' ? COLORS.managerColor : COLORS.textMuted}
-                />
-                <Text
-                  style={[
-                    styles.roleTabText,
-                    selectedRole === 'manager' && { color: COLORS.managerColor, fontWeight: '700' },
-                  ]}
-                >
-                  Manager
-                </Text>
               </TouchableOpacity>
             </View>
-
-            {/* Form */}
-            <View style={styles.form}>
-              {/* Email */}
-              <Text style={styles.inputLabel}>Email</Text>
-              <View
-                style={[
-                  styles.inputContainer,
-                  focusedField === 'email' && { borderColor: roleColor },
-                ]}
-              >
-                <Ionicons name="mail-outline" size={18} color={COLORS.textMuted} style={styles.inputIcon} />
-                <TextInput
-                  style={styles.input}
-                  placeholder="you@example.com"
-                  placeholderTextColor={COLORS.textMuted}
-                  value={email}
-                  onChangeText={setEmail}
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  autoComplete="email"
-                  onFocus={() => setFocusedField('email')}
-                  onBlur={() => setFocusedField(null)}
-                />
-              </View>
-
-              {/* Password */}
-              <Text style={styles.inputLabel}>Password</Text>
-              <View
-                style={[
-                  styles.inputContainer,
-                  focusedField === 'password' && { borderColor: roleColor },
-                ]}
-              >
-                <Ionicons name="lock-closed-outline" size={18} color={COLORS.textMuted} style={styles.inputIcon} />
-                <TextInput
-                  style={styles.input}
-                  placeholder="Enter your password"
-                  placeholderTextColor={COLORS.textMuted}
-                  value={password}
-                  onChangeText={setPassword}
-                  secureTextEntry={!showPassword}
-                  onFocus={() => setFocusedField('password')}
-                  onBlur={() => setFocusedField(null)}
-                />
-                <TouchableOpacity
-                  style={styles.eyeButton}
-                  onPress={() => setShowPassword(!showPassword)}
-                >
-                  <Ionicons
-                    name={showPassword ? 'eye-off-outline' : 'eye-outline'}
-                    size={20}
-                    color={COLORS.textMuted}
-                  />
-                </TouchableOpacity>
-              </View>
 
               {/* Forgot Password */}
               <TouchableOpacity style={styles.forgotButton} activeOpacity={0.7}>
                 <Text style={[styles.forgotText, { color: roleColor }]}>Forgot password?</Text>
               </TouchableOpacity>
 
-              {/* Login Button */}
-              <TouchableOpacity
-                style={[
-                  styles.loginButton,
-                  { backgroundColor: roleColor },
-                  isLoading && styles.loginButtonDisabled,
-                ]}
-                onPress={handleLogin}
-                disabled={isLoading}
-                activeOpacity={0.85}
+            {/* Login Button */}
+            <TouchableOpacity
+              style={[styles.loginButton, isLoading && styles.loginButtonDisabled]}
+              onPress={handleLogin}
+              disabled={isLoading}
+              activeOpacity={0.8}
+            >
+              <LinearGradient
+                colors={['#3498DB', '#2980B9']}
+                style={styles.loginButtonGradient}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
               >
-                {isLoading ? (
-                  <ActivityIndicator color={COLORS.white} size="small" />
-                ) : (
-                  <Text style={styles.loginButtonText}>Log in</Text>
-                )}
-              </TouchableOpacity>
+                <Text style={styles.loginButtonText}>
+                  {isLoading ? 'Logging in...' : 'Log in'}
+                </Text>
+              </LinearGradient>
+            </TouchableOpacity>
+
+            {/* Create Account Link */}
+            <TouchableOpacity 
+              style={styles.createAccountLink}
+              onPress={() => router.push('/register')}
+            >
+              <Text style={styles.createAccountText}>Create new account</Text>
+            </TouchableOpacity>
 
               {/* Divider */}
               <View style={styles.divider}>
@@ -261,53 +209,49 @@ export default function LoginScreen() {
                 <View style={styles.dividerLine} />
               </View>
 
-              {/* Social Buttons */}
-              <View style={styles.socialRow}>
-                <TouchableOpacity style={styles.socialButton} activeOpacity={0.7}>
-                  <Ionicons name="logo-google" size={20} color="#DB4437" />
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.socialButton} activeOpacity={0.7}>
-                  <Ionicons name="logo-apple" size={20} color={COLORS.textDark} />
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.socialButton} activeOpacity={0.7}>
-                  <Ionicons name="logo-facebook" size={20} color="#1877F2" />
-                </TouchableOpacity>
-              </View>
+            {/* Social Login Buttons */}
+            <View style={styles.socialButtons}>
+              <TouchableOpacity style={styles.socialButton}>
+                <Ionicons name="logo-apple" size={20} color={Colors.black} />
+                <Text style={styles.socialButtonText}>Continue with Apple</Text>
+              </TouchableOpacity>
 
-              {/* Demo Quick Fill */}
-              <View style={styles.demoSection}>
-                <Text style={styles.demoLabel}>Quick demo login</Text>
-                <View style={styles.demoRow}>
-                  <TouchableOpacity
-                    style={[styles.demoChip, { borderColor: COLORS.residentColor }]}
-                    onPress={() => fillDemo('resident')}
-                    activeOpacity={0.7}
-                  >
-                    <Ionicons name="home-outline" size={14} color={COLORS.residentColor} />
-                    <Text style={[styles.demoChipText, { color: COLORS.residentColor }]}>Resident</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={[styles.demoChip, { borderColor: COLORS.managerColor }]}
-                    onPress={() => fillDemo('manager')}
-                    activeOpacity={0.7}
-                  >
-                    <Ionicons name="briefcase-outline" size={14} color={COLORS.managerColor} />
-                    <Text style={[styles.demoChipText, { color: COLORS.managerColor }]}>Manager</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
+              <TouchableOpacity style={styles.socialButton}>
+                <Ionicons name="logo-google" size={20} color="#DB4437" />
+                <Text style={styles.socialButtonText}>Continue with Google</Text>
+              </TouchableOpacity>
 
-              {/* Register Link */}
-              <View style={styles.registerLink}>
-                <Text style={styles.registerLinkText}>Don't have an account? </Text>
-                <TouchableOpacity onPress={() => router.push('/register')} activeOpacity={0.7}>
-                  <Text style={[styles.registerLinkAction, { color: roleColor }]}>Sign up</Text>
-                </TouchableOpacity>
-              </View>
+              <TouchableOpacity style={styles.socialButton}>
+                <Ionicons name="logo-facebook" size={20} color="#4267B2" />
+                <Text style={styles.socialButtonText}>Continue with Facebook</Text>
+              </TouchableOpacity>
             </View>
-          </ScrollView>
-        </KeyboardAvoidingView>
-      </SafeAreaView>
+
+            {/* Demo Login Options */}
+            <View style={styles.demoSection}>
+              <Text style={styles.demoTitle}>Demo Accounts</Text>
+              <TouchableOpacity 
+                style={styles.demoButton}
+                onPress={() => {
+                  setEmail('resident@demo.com');
+                  setPassword('demo123');
+                }}
+              >
+                <Text style={styles.demoButtonText}>🏠 Fill Resident Demo</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={styles.demoButton}
+                onPress={() => {
+                  setEmail('manager@demo.com');
+                  setPassword('demo123');
+                }}
+              >
+                <Text style={styles.demoButtonText}>👔 Fill Manager Demo</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </View>
   );
 }
@@ -315,7 +259,7 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: Colors.background,
   },
   safeArea: {
     flex: 1,
@@ -402,6 +346,11 @@ const styles = StyleSheet.create({
     letterSpacing: 0.2,
   },
   inputContainer: {
+    backgroundColor: Colors.white,
+    borderRadius: 12,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: Colors.gray[200],
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: COLORS.white,
@@ -416,9 +365,10 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    paddingVertical: 15,
-    fontSize: 15,
-    color: COLORS.textDark,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    fontSize: 16,
+    color: Colors.text.primary,
   },
   eyeButton: {
     padding: 6,
@@ -431,31 +381,24 @@ const styles = StyleSheet.create({
     marginBottom: 24,
     marginTop: -4,
   },
-  forgotText: {
-    fontSize: 13,
-    fontWeight: '600',
+  forgotPasswordText: {
+    color: Colors.secondary,
+    fontSize: 14,
+    fontWeight: '500',
   },
 
   // Login Button
   loginButton: {
-    borderRadius: 16,
-    paddingVertical: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 24,
-    minHeight: 52,
-    ...Platform.select({
-      ios: {
-        shadowColor: '#2563EB',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.2,
-        shadowRadius: 10,
-      },
-      android: { elevation: 4 },
-    }),
+    borderRadius: 12,
+    overflow: 'hidden',
+    marginBottom: 16,
   },
   loginButtonDisabled: {
     opacity: 0.7,
+  },
+  loginButtonGradient: {
+    paddingVertical: 16,
+    alignItems: 'center',
   },
   loginButtonText: {
     color: COLORS.white,
@@ -463,8 +406,11 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     letterSpacing: 0.3,
   },
-
-  // Divider
+  createAccountText: {
+    color: Colors.secondary,
+    fontSize: 14,
+    fontWeight: '500',
+  },
   divider: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -473,11 +419,11 @@ const styles = StyleSheet.create({
   dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: COLORS.border,
+    backgroundColor: Colors.gray[200],
   },
   dividerText: {
-    marginHorizontal: 14,
-    color: COLORS.textMuted,
+    marginHorizontal: 16,
+    color: Colors.text.secondary,
     fontSize: 13,
     fontWeight: '500',
   },
@@ -496,23 +442,25 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: Colors.white,
+    borderRadius: 12,
+    paddingVertical: 14,
     borderWidth: 1,
-    borderColor: COLORS.border,
-    ...Platform.select({
-      ios: {
-        shadowColor: COLORS.cardShadow,
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.06,
-        shadowRadius: 6,
-      },
-      android: { elevation: 1 },
-    }),
+    borderColor: Colors.gray[200],
+    gap: 10,
+  },
+  socialButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: Colors.text.primary,
   },
 
   // Demo
   demoSection: {
-    alignItems: 'center',
-    marginBottom: 28,
+    marginTop: 24,
+    padding: 16,
+    backgroundColor: Colors.gray[50],
+    borderRadius: 12,
     gap: 10,
   },
   demoLabel: {
@@ -539,19 +487,20 @@ const styles = StyleSheet.create({
   demoChipText: {
     fontSize: 13,
     fontWeight: '600',
+    color: Colors.gray[500],
+    textAlign: 'center',
+    marginBottom: 8,
   },
-
-  // Register Link
-  registerLink: {
-    flexDirection: 'row',
-    justifyContent: 'center',
+  demoButton: {
+    backgroundColor: Colors.white,
     alignItems: 'center',
+    paddingVertical: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: Colors.gray[200],
   },
-  registerLinkText: {
-    fontSize: 14,
-    color: COLORS.textLight,
-  },
-  registerLinkAction: {
+  demoButtonText: {
+    color: Colors.text.primary,
     fontSize: 14,
     fontWeight: '700',
   },
