@@ -5,10 +5,12 @@ import com.resiido.main.models.User;
 import com.resiido.main.repositories.PasswordResetTokenRepository;
 import com.resiido.main.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -57,31 +59,55 @@ public class PasswordResetService {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(email);
         message.setSubject("Resiido Password Reset");
-        message.setText("Reset your password using link:\n" + link);
+        message.setText(
+                "Hello,\n\n" +
+                        "You requested to reset your password.\n" +
+                        "Use the link below to reset it:\n\n" +
+                        link + "\n\n" +
+                        "This link will expire in 15 minutes.\n\n" +
+                        "If you did not request this, please ignore this email."
+        );
 
         mailSender.send(message);
     }
 
-    // RESET PASSWORD
+    // RESET PASSWORD USING TOKEN
     public void resetPassword(String token, String newPassword) {
+        if (token == null || token.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Reset token is required");
+        }
 
-        PasswordResetToken prt = tokenRepository.findByToken(token)
-                .orElseThrow(() -> new RuntimeException("Invalid token"));
+        if (newPassword == null || newPassword.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "New password is required");
+        }
 
-        if (prt.isUsed())
-            throw new RuntimeException("Token already used");
+        if (newPassword.length() < 8) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Password must be at least 8 characters");
+        }
 
-        if (prt.getExpiresAt().isBefore(LocalDateTime.now()))
-            throw new RuntimeException("Token expired");
+        PasswordResetToken passwordResetToken = tokenRepository.findByToken(token)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid token"));
 
-        User user = userRepository.findByEmail(prt.getEmail())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        if (passwordResetToken.isUsed()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Token already used");
+        }
+
+        if (passwordResetToken.getExpiresAt().isBefore(LocalDateTime.now())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Token expired");
+        }
+
+        User user = userRepository.findByEmail(passwordResetToken.getEmail())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
 
-        prt.setUsed(true);
-        tokenRepository.save(prt);
+        // Mark token as used so it cannot be reused
+        passwordResetToken.setUsed(true);
+        tokenRepository.save(passwordResetToken);
+
+        // Optional cleanup:
+        // tokenRepository.deleteByEmail(passwordResetToken.getEmail());
     }
 }
 
