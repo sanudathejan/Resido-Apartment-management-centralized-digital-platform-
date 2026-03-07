@@ -111,12 +111,17 @@ public class AuthController {
 
     @PostMapping("/forgot-password")
     public ResponseEntity<String> forgotPassword(@RequestBody ForgotPasswordRequest req) {
+        System.out.println("AUTH CONTROLLER /forgot-password HIT");
+        System.out.println("EMAIL RECEIVED: " + req.getEmail());
         passwordResetService.sendResetLink(req.getEmail());
         return ResponseEntity.ok("Reset link sent if email exists.");
+
     }
 
     @PostMapping("/reset-password")
     public ResponseEntity<String> resetPassword(@RequestBody ResetPasswordRequest req) {
+        System.out.println("AUTH CONTROLLER /reset-password HIT");
+        System.out.println("REQ TOKEN: " + req.getToken());
         passwordResetService.resetPassword(req.getToken(), req.getNewPassword());
         return ResponseEntity.ok("Password updated successfully.");
     }

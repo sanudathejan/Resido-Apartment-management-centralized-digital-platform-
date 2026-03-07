@@ -1239,20 +1239,11 @@ GET http://localhost:8080/api/payments
 Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJoYXJyeUByZXNpZGVudC5jb20iLCJpYXQiOjE3NzEyMjYwODcsImV4cCI6MTc3MTI2MjA4N30.i6GV_XdpcHzmk6sIk7N46_6tUeGgxCe_yx8OEHq-Gwo
 
 
-### Request password reset code
+### Forgot password
 POST http://127.0.0.1:8080/api/auth/forgot-password
 Content-Type: application/json
 
 {
-  "email": "alice@test.com"
+  "email": "exampleresidence1@gmail.com"
 }
 
-### Reset password
-POST http://127.0.0.1:8080/api/auth/reset-password
-Content-Type: application/json
-
-{
-  "email": "alice@test.com",
-  "code": "123456",
-  "newPassword": "newpassword123"
-}

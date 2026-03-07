@@ -53,6 +53,9 @@ public class PasswordResetService {
         prt.setUsed(false);
 
         tokenRepository.save(prt);
+        System.out.println("RESET TOKEN SAVED FOR: " + email);
+        System.out.println("RESET TOKEN: " + token);
+
 
         String link = baseUrl + "/reset-password?token=" + token;
 
@@ -73,6 +76,9 @@ public class PasswordResetService {
 
     // RESET PASSWORD USING TOKEN
     public void resetPassword(String token, String newPassword) {
+        System.out.println("RESET PASSWORD CALLED");
+        System.out.println("TOKEN RECEIVED: " + token);
+
         if (token == null || token.isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Reset token is required");
         }
