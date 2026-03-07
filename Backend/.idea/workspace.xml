@@ -7,13 +7,6 @@
     <list default="true" id="38179f06-fa56-46b0-b0aa-8da74a2fb6a3" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/../.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../.idea/compiler.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/httpRequests/http-requests-log.http" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/httpRequests/http-requests-log.http" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Spring-backend/Resiido-Backend/src/main/java/com/resiido/main/controllers/AuthController.java" beforeDir="false" afterPath="$PROJECT_DIR$/Spring-backend/Resiido-Backend/src/main/java/com/resiido/main/controllers/AuthController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Spring-backend/Resiido-Backend/src/main/java/com/resiido/main/security/JwtUtil.java" beforeDir="false" afterPath="$PROJECT_DIR$/Spring-backend/Resiido-Backend/src/main/java/com/resiido/main/security/JwtUtil.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Spring-backend/Resiido-Backend/src/main/java/com/resiido/main/security/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/Spring-backend/Resiido-Backend/src/main/java/com/resiido/main/security/SecurityConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Spring-backend/Resiido-Backend/src/main/java/com/resiido/main/services/PasswordResetService.java" beforeDir="false" afterPath="$PROJECT_DIR$/Spring-backend/Resiido-Backend/src/main/java/com/resiido/main/services/PasswordResetService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Spring-backend/test.http" beforeDir="false" afterPath="$PROJECT_DIR$/Spring-backend/test.http" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -111,7 +104,7 @@
       <workItem from="1771234346219" duration="12000" />
       <workItem from="1772737354254" duration="14634000" />
       <workItem from="1772902586848" duration="3308000" />
-      <workItem from="1772906719289" duration="5952000" />
+      <workItem from="1772906719289" duration="6255000" />
     </task>
     <servers />
   </component>
