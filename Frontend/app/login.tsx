@@ -8,10 +8,12 @@ import { useAuth } from '@/context/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Alert,
+  Animated,
   Dimensions,
+  Easing,
   Image,
   KeyboardAvoidingView,
   Platform,
@@ -34,6 +36,27 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Slide-down animation for brand name
+  const slideAnim = useRef(new Animated.Value(-30)).current;
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 1200,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }),
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 1000,
+        easing: Easing.out(Easing.quad),
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, []);
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -75,8 +98,16 @@ export default function LoginScreen() {
               style={styles.logo}
               resizeMode="contain"
             />
-            <Text style={styles.brandName}>RESIIDO</Text>
-            <Text style={styles.title}>WELCOME BACK</Text>
+            <Animated.View
+              style={{
+                transform: [{ translateY: slideAnim }],
+                opacity: fadeAnim,
+                alignItems: 'center',
+              }}
+            >
+              <Text style={styles.brandName}>RESIIDO</Text>
+              <Text style={styles.title}>WELCOME BACK</Text>
+            </Animated.View>
           </View>
         </SafeAreaView>
       </LinearGradient>
