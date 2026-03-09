@@ -34,6 +34,7 @@ export default function LoginScreen() {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [passwordError, setPasswordError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -59,10 +60,19 @@ export default function LoginScreen() {
   }, []);
 
   const handleLogin = async () => {
-    if (!email || !password) {
-      Alert.alert('Error', 'Please enter email and password');
-      return;
+    let isValid = true;
+
+    if (!password.trim()) {
+      setPasswordError('Password cannot be empty');
+      isValid = false;
     }
+
+    if (!email.trim()) {
+      Alert.alert('Error', 'Please enter email');
+      isValid = false;
+    }
+
+    if (!isValid) return;
 
     setIsLoading(true);
     try {
@@ -138,13 +148,16 @@ export default function LoginScreen() {
             </View>
 
             {/* Password Input */}
-            <View style={styles.inputContainer}>
+            <View style={[styles.inputContainer, passwordError ? { borderColor: '#E74C3C' } : null]}>
               <TextInput
                 style={styles.input}
                 placeholder="Password"
                 placeholderTextColor={Colors.gray[500]}
                 value={password}
-                onChangeText={setPassword}
+                onChangeText={(text) => {
+                  setPassword(text);
+                  if (passwordError) setPasswordError('');
+                }}
                 secureTextEntry={!showPassword}
               />
               <TouchableOpacity
@@ -158,6 +171,9 @@ export default function LoginScreen() {
                 />
               </TouchableOpacity>
             </View>
+            {passwordError ? (
+              <Text style={styles.errorInlineText}>{passwordError}</Text>
+            ) : null}
 
             {/* Forgot Password */}
             <TouchableOpacity style={styles.forgotPassword}>
@@ -314,6 +330,13 @@ const styles = StyleSheet.create({
   },
   eyeIcon: {
     paddingHorizontal: 16,
+  },
+  errorInlineText: {
+    color: '#E74C3C',
+    fontSize: 12,
+    marginTop: -12,
+    marginBottom: 16,
+    marginLeft: 4,
   },
   forgotPassword: {
     alignSelf: 'flex-end',
