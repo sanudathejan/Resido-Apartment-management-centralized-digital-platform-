@@ -80,6 +80,25 @@ export interface AuthResponse {
   message?: string;
 }
 
+export interface RegistrationInitiateRequest {
+  name: string;
+  email: string;
+  password: string;
+  role?: UserRole;
+  phone?: string;
+  apartmentNumber?: string;
+}
+
+export interface RegistrationInitiateResponse {
+  message: string;
+  email: string;
+}
+
+export interface OtpVerifyRequest {
+  email: string;
+  otp: string;
+}
+
 // Payment types
 export interface Payment {
   id: number;
