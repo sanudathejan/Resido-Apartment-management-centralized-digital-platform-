@@ -26,7 +26,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 const { width } = Dimensions.get('window');
 
 // Number of OTP digits expected
-const OTP_LENGTH = 6;
+const OTP_LENGTH = 5;
 
 export default function OtpVerifyScreen() {
     const router = useRouter();
@@ -99,7 +99,7 @@ export default function OtpVerifyScreen() {
         const otpString = otp.join('');
 
         if (otpString.length < OTP_LENGTH) {
-            setErrorMsg(`Please enter the full ${OTP_LENGTH}-digit code.`);
+            setErrorMsg('OTP must be 5 digits');
             return;
         }
 
@@ -171,14 +171,6 @@ export default function OtpVerifyScreen() {
                 >
                     <View style={styles.formCard}>
 
-                        {/* Inline Error Message */}
-                        {errorMsg ? (
-                            <View style={styles.errorContainer}>
-                                <Ionicons name="alert-circle" size={20} color={Colors.error} />
-                                <Text style={styles.errorText}>{errorMsg}</Text>
-                            </View>
-                        ) : null}
-
                         {/* OTP Inputs Box */}
                         <View style={styles.otpContainer}>
                             {otp.map((digit, index) => (
@@ -193,18 +185,29 @@ export default function OtpVerifyScreen() {
                                     value={digit}
                                     onChangeText={(text) => handleOtpChange(text, index)}
                                     onKeyPress={(e) => handleKeyPress(e, index)}
-                                    keyboardType="number-pad"
+                                    keyboardType="numeric"
                                     maxLength={1}
                                     selectTextOnFocus
                                 />
                             ))}
                         </View>
 
+                        {/* Inline Error Message */}
+                        {errorMsg ? (
+                            <View style={styles.errorContainer}>
+                                <Ionicons name="alert-circle" size={20} color={Colors.error} />
+                                <Text style={styles.errorText}>{errorMsg}</Text>
+                            </View>
+                        ) : null}
+
                         {/* Verify Button */}
                         <TouchableOpacity
-                            style={[styles.verifyButton, isLoading && styles.verifyButtonDisabled]}
+                            style={[
+                                styles.verifyButton,
+                                (isLoading || otp.join('').length < OTP_LENGTH) && styles.verifyButtonDisabled
+                            ]}
                             onPress={handleVerify}
-                            disabled={isLoading}
+                            disabled={isLoading || otp.join('').length < OTP_LENGTH}
                             activeOpacity={0.8}
                         >
                             <LinearGradient
