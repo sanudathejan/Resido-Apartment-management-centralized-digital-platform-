@@ -23,14 +23,8 @@ import {
   StyleSheet,
   Text,
   TextInput,
-  Image,
-  Dimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
-import { Colors } from '@/constants/colors';
-import { useAuth } from '@/context/AuthContext';
 
 const COLORS = {
   background: '#F4F7FB',
