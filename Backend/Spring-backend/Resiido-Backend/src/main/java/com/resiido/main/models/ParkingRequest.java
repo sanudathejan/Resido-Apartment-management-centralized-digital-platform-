@@ -27,5 +27,5 @@ public class ParkingRequest {
     private ParkingSlot slot;
 
     @Column(nullable = false, length = 20)
-    private String visitorVehicleNumber;
+    private String visitorVehicleNumber; // visitor car plate number
 }
