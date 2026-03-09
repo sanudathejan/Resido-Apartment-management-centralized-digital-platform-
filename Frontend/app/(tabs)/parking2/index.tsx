@@ -90,11 +90,9 @@ export default function ParkingScreen() {
                 <Text style={styles.slotSubLabel}>ASSIGNED SLOT</Text>
                 <Text style={styles.slotMainTitle}>Slot P-A12</Text>
             </View>
-            <View style={isLending ? styles.statusBadgeGreen : styles.statusBadgeMuted}>
-                <View style={isLending ? styles.dotGreen : styles.dotMuted} />
-                <Text style={isLending ? styles.statusTextGreen : styles.statusTextMuted}>
-                    {isLending ? 'Lending Active' : 'Private'}
-                </Text>
+            <View style={styles.statusBadgeGreen}>
+                <View style={styles.dotGreen} />
+                <Text style={styles.statusTextGreen}>Available</Text>
             </View>
         </View>
       </View>
@@ -114,35 +112,25 @@ export default function ParkingScreen() {
                   thumbColor={Platform.OS === 'android' ? C.white : ''}
               />
             </View>
-      {/* 3. Pending Requests: Now passing specific names, dates, and times */}
-      <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>PENDING REQUESTS</Text>
-        <View style={styles.countBadge}>
-            <Text style={styles.countText}>2 New</Text>
-        </View>
-      </View>
 
-      <RequestCard
-        name="Resident ID: 405" // Pass 'name' prop here
-        date="25 Feb 2026"
-        startTime="09:00 AM"
-        endTime="12:00 PM"
-        note="Need a spot for my guest's car."
-        onAccept={() => Alert.alert("Accepted", "Slot P-A12 is now booked.")}
-        onDecline={() => Alert.alert("Denied", "Request has been removed.")}
-      />
+            {/* 3. Pending Requests: Other residents asking for a spot */}
+                  <View style={styles.sectionHeader}>
+                    <Text style={styles.sectionTitle}>PENDING REQUESTS</Text>
+                    <View style={styles.countBadge}>
+                        <Text style={styles.countText}>2 New</Text>
+                    </View>
+                  </View>
 
-      <RequestCard
-        name="Resident ID: 112" // Pass 'name' prop here
-        date="26 Feb 2026"
-        startTime="06:00 PM"
-        endTime="10:00 PM"
-        note="Quick visit for a delivery."
-        onAccept={() => {}}
-        onDecline={() => {}}
-      />
-
-
+                  <RequestCard
+                    name="Guest for Apt 4B"
+                    time="Requested 15m ago"
+                    note="My visitor needs a spot for 3 hours. Would appreciate the help!"
+                  />
+                  <RequestCard
+                    name="James Wilson"
+                    time="Apt 12C • Requested 2h ago"
+                    note="Needs parking tomorrow, 6 PM - 10 PM"
+                  />
                 </>
               );
 

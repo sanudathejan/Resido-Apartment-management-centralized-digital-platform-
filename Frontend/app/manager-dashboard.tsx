@@ -24,7 +24,7 @@ const { width } = Dimensions.get('window');
 
 /** Local design-system color tokens */
 const C = {
-  background: '#F4F7FB',
+  background: '#D8F3DC',
   primary: '#2563EB',
   primaryLight: '#EFF6FF',
   white: '#FFFFFF',

@@ -28,7 +28,7 @@ const { width } = Dimensions.get('window');
 
 // Design tokens
 const COLORS = {
-  background: '#F4F7FB',
+  background: '#D8F3DC',
   primary: '#2563EB',
   primaryLight: '#EFF6FF',
   sosRed: '#EF4444',
@@ -69,14 +69,7 @@ const FEATURE_CARDS: FeatureCard[] = [
     iconColor: '#7C3AED',
     iconBg: '#F5F3FF',
   },
-  {
-    icon: 'wallet',
-    title: 'Payments',
-    subtitle: 'Rent & bills',
-    route: '/(tabs)/rent',
-    iconColor: '#059669',
-    iconBg: '#ECFDF5',
-  },
+
   {
     icon: 'construct',
     title: 'Maintenance',
@@ -101,6 +94,26 @@ const FEATURE_CARDS: FeatureCard[] = [
     iconColor: '#DC2626',
     iconBg: '#FEF2F2',
   },
+/* Add this entry to your Quick Actions array */
+{
+  id: 'parking2',
+  title: 'Parking 2',
+  subtitle: 'Slot Management',
+  icon: 'car-sport', // Using a different car icon for distinction
+  color: '#7C3AED',  // A violet color to distinguish it from the first blue Parking icon
+  route: '/(tabs)/parking2', // This matches your new folder name
+},
+
+{
+    icon: 'wallet',
+    title: 'Payments',
+    subtitle: 'Rent & Bills',
+    route: '/(tabs)/payments',
+    iconColor: '#059669',
+    iconBg: '#ECFDF5',
+
+    },
+
 ];
 
 function getGreeting(): string {

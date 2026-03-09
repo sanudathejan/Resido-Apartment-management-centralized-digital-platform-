@@ -8,6 +8,7 @@ import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { Platform, StyleSheet, View } from "react-native";
 
+
 const TAB_COLORS = {
   active: '#2563EB',
   inactive: '#94A3B8',
@@ -75,21 +76,6 @@ export default function TabLayout() {
         }}
       />
 
-      <Tabs.Screen
-        name="rent/index"
-        options={{
-          title: "Payments",
-          tabBarIcon: ({ color, focused }) => (
-            <View style={focused ? styles.activeIconContainer : undefined}>
-              <Ionicons
-                name={focused ? "wallet" : "wallet-outline"}
-                size={22}
-                color={color}
-              />
-            </View>
-          ),
-        }}
-      />
 
       <Tabs.Screen
         name="profile/index"
@@ -106,6 +92,37 @@ export default function TabLayout() {
           ),
         }}
       />
+
+      <Tabs.Screen
+        name="parking2/index" // This must match your new file path
+        options={{
+          title: 'Parking 2', // This fixes the "parking2/i..." text
+          tabBarLabel: 'Parking 2',
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons
+              name={focused ? "car-sport" : "car-sport-outline"}
+              size={24}
+              color={color}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="payments/index" // Ensure your new file is in app/(tabs)/payments/index.tsx
+        options={{
+          title: 'Payments2',
+          tabBarLabel: 'Payments2',
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons
+              name={focused ? "wallet" : "wallet-outline"}
+              size={24}
+              color={color}
+            />
+          ),
+        }}
+      />
+
+
     </Tabs>
   );
 }
