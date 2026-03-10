@@ -38,8 +38,14 @@ export default function OtpVerifyScreen() {
     const [isLoading, setIsLoading] = useState(false);
     const [errorMsg, setErrorMsg] = useState('');
 
-    const [resendTimer, setResendTimer] = useState(60);
+    const [resendTimer, setResendTimer] = useState(30);
     const [canResend, setCanResend] = useState(false);
+
+    const formatTime = (seconds: number) => {
+        const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+        const s = (seconds % 60).toString().padStart(2, '0');
+        return `${m}:${s}`;
+    };
 
     // Refs for each digit input to auto-advance focus
     const inputRefs = useRef<Array<TextInput | null>>(Array(OTP_LENGTH).fill(null));
@@ -123,7 +129,7 @@ export default function OtpVerifyScreen() {
     const handleResendOtp = () => {
         // Note: We could hook up authService.resendOtp(email) here.
         // Assuming backend takes care of it, we just reset the timer for UI
-        setResendTimer(60);
+        setResendTimer(30);
         setCanResend(false);
         setErrorMsg('');
         // TODO: Await actual service call here
@@ -200,14 +206,26 @@ export default function OtpVerifyScreen() {
                             </View>
                         ) : null}
 
+                        {/* Timer Display */}
+                        <View style={styles.timerContainer}>
+                            <Ionicons
+                                name={canResend ? "close-circle-outline" : "time-outline"}
+                                size={canResend ? 20 : 24}
+                                color={canResend ? Colors.error : Colors.text.primary}
+                            />
+                            <Text style={[styles.timerText, canResend && styles.timerTextExpired]}>
+                                {canResend ? 'OTP has expired' : formatTime(resendTimer)}
+                            </Text>
+                        </View>
+
                         {/* Verify Button */}
                         <TouchableOpacity
                             style={[
                                 styles.verifyButton,
-                                (isLoading || otp.join('').length < OTP_LENGTH) && styles.verifyButtonDisabled
+                                (isLoading || otp.join('').length < OTP_LENGTH || canResend) && styles.verifyButtonDisabled
                             ]}
                             onPress={handleVerify}
-                            disabled={isLoading || otp.join('').length < OTP_LENGTH}
+                            disabled={isLoading || otp.join('').length < OTP_LENGTH || canResend}
                             activeOpacity={0.8}
                         >
                             <LinearGradient
@@ -233,7 +251,7 @@ export default function OtpVerifyScreen() {
                                     styles.resendLink,
                                     !canResend && styles.resendLinkDisabled
                                 ]}>
-                                    {canResend ? 'Resend OTP' : `Resend in ${resendTimer}s`}
+                                    Resend OTP
                                 </Text>
                             </TouchableOpacity>
                         </View>
@@ -316,10 +334,27 @@ const styles = StyleSheet.create({
         marginLeft: 8,
         flex: 1,
     },
+    timerContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: 24,
+    },
+    timerText: {
+        fontSize: 24,
+        fontWeight: '700',
+        color: Colors.text.primary,
+        marginLeft: 8,
+        fontVariant: ['tabular-nums'],
+    },
+    timerTextExpired: {
+        color: Colors.error,
+        fontSize: 16,
+    },
     otpContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        marginBottom: 40,
+        marginBottom: 30,
         paddingHorizontal: 10,
     },
     otpInput: {
