@@ -5,7 +5,7 @@
  * Logo image already includes "RESIIDO" branding
  */
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -18,6 +18,8 @@ import {
   TextInput,
   Image,
   ActivityIndicator,
+  Modal,
+  FlatList,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -44,10 +46,47 @@ const COLORS = {
 
 type RegisterRole = 'resident' | 'manager';
 
+// Generate all 77 house numbers
+const generateHouseNumbers = (): string[] => {
+  const houses: string[] = [];
+  // Ground floor: G-01 to G-07
+  for (let unit = 1; unit <= 7; unit++) {
+    houses.push(`G-${String(unit).padStart(2, '0')}`);
+  }
+  // Floors 1–10: X-01 to X-07
+  for (let floor = 1; floor <= 10; floor++) {
+    for (let unit = 1; unit <= 7; unit++) {
+      houses.push(`${floor}-${String(unit).padStart(2, '0')}`);
+    }
+  }
+  return houses;
+};
+
+const ALL_HOUSE_NUMBERS = generateHouseNumbers();
+
+// Group house numbers by floor for section display
+const FLOOR_LABELS: Record<string, string> = {
+  'G': 'Ground Floor',
+  '1': 'Floor 1',
+  '2': 'Floor 2',
+  '3': 'Floor 3',
+  '4': 'Floor 4',
+  '5': 'Floor 5',
+  '6': 'Floor 6',
+  '7': 'Floor 7',
+  '8': 'Floor 8',
+  '9': 'Floor 9',
+  '10': 'Floor 10',
+};
+
 export default function RegisterScreen() {
   const router = useRouter();
   const { register } = useAuth();
 
+  const [name, setName] = useState('');
+  const [houseNumber, setHouseNumber] = useState('');
+  const [showHousePicker, setShowHousePicker] = useState(false);
+  const [houseSearchQuery, setHouseSearchQuery] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -57,9 +96,24 @@ export default function RegisterScreen() {
   const [selectedRole, setSelectedRole] = useState<RegisterRole>('resident');
   const [focusedField, setFocusedField] = useState<string | null>(null);
 
+  // Filtered house numbers based on search
+  const filteredHouseNumbers = useMemo(() => {
+    if (!houseSearchQuery.trim()) return ALL_HOUSE_NUMBERS;
+    const q = houseSearchQuery.toLowerCase();
+    return ALL_HOUSE_NUMBERS.filter(h => h.toLowerCase().includes(q));
+  }, [houseSearchQuery]);
+
   const roleColor = selectedRole === 'resident' ? COLORS.residentColor : COLORS.managerColor;
 
   const handleRegister = async () => {
+    if (!name.trim()) {
+      Alert.alert('Missing Name', 'Please enter your full name.');
+      return;
+    }
+    if (selectedRole === 'resident' && !houseNumber) {
+      Alert.alert('Missing House Number', 'Please select your house number.');
+      return;
+    }
     if (!email.trim()) {
       Alert.alert('Missing Email', 'Please enter your email address.');
       return;
@@ -87,8 +141,9 @@ export default function RegisterScreen() {
       await register({
         email: email.trim(),
         password,
-        name: email.split('@')[0],
+        name: name.trim(),
         role,
+        ...(selectedRole === 'resident' ? { houseNumber } : {}),
       });
       router.push({
         pathname: '/verify',
@@ -189,6 +244,57 @@ export default function RegisterScreen() {
 
             {/* Form */}
             <View style={styles.form}>
+              {/* Full Name */}
+              <Text style={styles.inputLabel}>Full Name</Text>
+              <View
+                style={[
+                  styles.inputContainer,
+                  focusedField === 'name' && { borderColor: roleColor },
+                ]}
+              >
+                <Ionicons name="person-outline" size={18} color={COLORS.textMuted} style={styles.inputIcon} />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Enter your full name"
+                  placeholderTextColor={COLORS.textMuted}
+                  value={name}
+                  onChangeText={setName}
+                  autoCapitalize="words"
+                  onFocus={() => setFocusedField('name')}
+                  onBlur={() => setFocusedField(null)}
+                />
+              </View>
+
+              {/* House Number — Resident only */}
+              {selectedRole === 'resident' && (
+                <>
+                  <Text style={styles.inputLabel}>House Number</Text>
+                  <TouchableOpacity
+                    style={[
+                      styles.inputContainer,
+                      focusedField === 'house' && { borderColor: roleColor },
+                    ]}
+                    onPress={() => {
+                      setShowHousePicker(true);
+                      setHouseSearchQuery('');
+                    }}
+                    activeOpacity={0.7}
+                  >
+                    <Ionicons name="business-outline" size={18} color={COLORS.textMuted} style={styles.inputIcon} />
+                    <Text
+                      style={[
+                        styles.input,
+                        { paddingVertical: 15 },
+                        !houseNumber && { color: COLORS.textMuted },
+                      ]}
+                    >
+                      {houseNumber || 'Select your house number'}
+                    </Text>
+                    <Ionicons name="chevron-down" size={18} color={COLORS.textMuted} />
+                  </TouchableOpacity>
+                </>
+              )}
+
               {/* Email */}
               <Text style={styles.inputLabel}>Email</Text>
               <View
@@ -337,6 +443,114 @@ export default function RegisterScreen() {
           </ScrollView>
         </KeyboardAvoidingView>
       </SafeAreaView>
+
+      {/* House Number Picker Modal */}
+      <Modal
+        visible={showHousePicker}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowHousePicker(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            {/* Modal Header */}
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Select House Number</Text>
+              <TouchableOpacity
+                onPress={() => setShowHousePicker(false)}
+                style={styles.modalCloseButton}
+                activeOpacity={0.7}
+              >
+                <Ionicons name="close" size={22} color={COLORS.textDark} />
+              </TouchableOpacity>
+            </View>
+
+            {/* Search Bar */}
+            <View style={styles.modalSearchContainer}>
+              <Ionicons name="search-outline" size={18} color={COLORS.textMuted} />
+              <TextInput
+                style={styles.modalSearchInput}
+                placeholder="Search house number..."
+                placeholderTextColor={COLORS.textMuted}
+                value={houseSearchQuery}
+                onChangeText={setHouseSearchQuery}
+                autoCapitalize="none"
+              />
+              {houseSearchQuery.length > 0 && (
+                <TouchableOpacity onPress={() => setHouseSearchQuery('')}>
+                  <Ionicons name="close-circle" size={18} color={COLORS.textMuted} />
+                </TouchableOpacity>
+              )}
+            </View>
+
+            {/* House Number List */}
+            <FlatList
+              data={filteredHouseNumbers}
+              keyExtractor={(item) => item}
+              showsVerticalScrollIndicator={false}
+              style={styles.modalList}
+              renderItem={({ item, index }) => {
+                const floorKey = item.split('-')[0];
+                const prevItem = index > 0 ? filteredHouseNumbers[index - 1] : null;
+                const prevFloorKey = prevItem ? prevItem.split('-')[0] : null;
+                const showFloorHeader = floorKey !== prevFloorKey;
+
+                return (
+                  <>
+                    {showFloorHeader && (
+                      <View style={styles.floorHeader}>
+                        <Text style={styles.floorHeaderText}>
+                          {FLOOR_LABELS[floorKey] || `Floor ${floorKey}`}
+                        </Text>
+                      </View>
+                    )}
+                    <TouchableOpacity
+                      style={[
+                        styles.houseItem,
+                        houseNumber === item && {
+                          backgroundColor: COLORS.residentBg,
+                          borderColor: COLORS.residentColor,
+                        },
+                      ]}
+                      onPress={() => {
+                        setHouseNumber(item);
+                        setShowHousePicker(false);
+                      }}
+                      activeOpacity={0.7}
+                    >
+                      <Ionicons
+                        name="home-outline"
+                        size={18}
+                        color={houseNumber === item ? COLORS.residentColor : COLORS.textMuted}
+                      />
+                      <Text
+                        style={[
+                          styles.houseItemText,
+                          houseNumber === item && {
+                            color: COLORS.residentColor,
+                            fontWeight: '700',
+                          },
+                        ]}
+                      >
+                        {item}
+                      </Text>
+                      {houseNumber === item && (
+                        <Ionicons name="checkmark-circle" size={20} color={COLORS.residentColor} />
+                      )}
+                    </TouchableOpacity>
+                  </>
+                );
+              }}
+              ListEmptyComponent={
+                <View style={styles.emptySearch}>
+                  <Ionicons name="search" size={32} color={COLORS.textMuted} />
+                  <Text style={styles.emptySearchText}>No matching house numbers</Text>
+                </View>
+              }
+            />
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -556,5 +770,102 @@ const styles = StyleSheet.create({
   loginLinkAction: {
     fontSize: 14,
     fontWeight: '700',
+  },
+
+  // House Picker Modal
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: COLORS.white,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    maxHeight: '75%',
+    paddingBottom: Platform.OS === 'ios' ? 34 : 20,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 12,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: COLORS.textDark,
+    letterSpacing: 0.2,
+  },
+  modalCloseButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    backgroundColor: COLORS.background,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modalSearchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.background,
+    borderRadius: 14,
+    marginHorizontal: 20,
+    marginBottom: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    gap: 10,
+  },
+  modalSearchInput: {
+    flex: 1,
+    fontSize: 14,
+    color: COLORS.textDark,
+    paddingVertical: 0,
+  },
+  modalList: {
+    paddingHorizontal: 20,
+  },
+  floorHeader: {
+    paddingTop: 14,
+    paddingBottom: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
+    marginBottom: 6,
+  },
+  floorHeaderText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: COLORS.textLight,
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
+  },
+  houseItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 14,
+    borderRadius: 14,
+    marginBottom: 4,
+    borderWidth: 1.5,
+    borderColor: 'transparent',
+  },
+  houseItemText: {
+    flex: 1,
+    fontSize: 15,
+    fontWeight: '600',
+    color: COLORS.textDark,
+  },
+  emptySearch: {
+    alignItems: 'center',
+    paddingVertical: 40,
+    gap: 10,
+  },
+  emptySearchText: {
+    fontSize: 14,
+    color: COLORS.textMuted,
+    fontWeight: '500',
   },
 });
