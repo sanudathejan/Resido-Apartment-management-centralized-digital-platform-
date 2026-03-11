@@ -35,6 +35,14 @@ Content-Type: application/json
 }
 
 
+
+### ==========================================
+### PUBLIC REGISTRATION ENDPOINTS
+### ==========================================
+
+### Get all houses and their occupancy status (No Token Required)
+GET http://localhost:8080/api/houses/status
+
 ### ==========================================
 ### PHASE 2: RESIDENT SETUP & ASSET LINKING
 ### ==========================================
