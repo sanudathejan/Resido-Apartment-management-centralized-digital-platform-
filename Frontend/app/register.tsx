@@ -170,12 +170,25 @@ export default function RegisterScreen() {
         role,
         ...(selectedRole === 'resident' ? { requestedHouseNumber: houseNumber } : {}),
       });
-      router.push({
-        pathname: '/verify',
-        params: { email: email.trim() }
-      });
+      Alert.alert('Success', 'Account created successfully!', [
+        {
+          text: 'Continue',
+          onPress: () => {
+            router.push({
+              pathname: '/verify',
+              params: { email: email.trim() }
+            });
+          },
+        },
+      ]);
     } catch (error: any) {
-      Alert.alert('Registration Failed', error.message || 'Unable to create account. Please try again.');
+      const message = error.message || 'Unable to create account. Please try again.';
+      // Check for common network errors
+      if (message.includes('Network request failed') || message.includes('Failed to fetch')) {
+        Alert.alert('Connection Error', 'Could not connect to the server. Please check your internet connection and make sure the backend is running.');
+      } else {
+        Alert.alert('Registration Failed', message);
+      }
     } finally {
       setIsLoading(false);
     }
