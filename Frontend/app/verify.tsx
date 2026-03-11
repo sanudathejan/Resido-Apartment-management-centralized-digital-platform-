@@ -4,6 +4,7 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
+  Pressable,
   KeyboardAvoidingView,
   Platform,
   Alert,
@@ -13,7 +14,7 @@ import {
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useAuth } from '@/context/AuthContext';
+import { API_CONFIG } from '@/constants/config';
 
 const COLORS = {
   background: '#F4F7FB',
@@ -31,7 +32,6 @@ export default function VerifyScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{ email: string }>();
   const email = params.email || '';
-  const { verifyRegistration } = useAuth();
 
   const [code, setCode] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -40,20 +40,52 @@ export default function VerifyScreen() {
   const isComplete = code.length === 5;
   const isValidCode = isComplete && /^\d+$/.test(code);
 
-  const handleVerify = async () => {
+  const handleVerify = () => {
     if (!isValidCode) return;
 
     setIsLoading(true);
-    try {
-      await verifyRegistration(email, code);
-      Alert.alert('Success', 'Your account has been verified successfully.', [
-        { text: 'Continue', onPress: () => router.replace('/(tabs)') },
-      ]);
-    } catch (error: any) {
-      Alert.alert('Verification Failed', error.message || 'Invalid verification code. Please try again.');
-    } finally {
-      setIsLoading(false);
-    }
+
+    const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.VERIFY}`;
+    const payload = {
+      email,
+      code,
+    };
+
+    console.log('Verifying:', JSON.stringify(payload));
+
+    fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    })
+      .then(async (response) => {
+        const text = await response.text();
+        console.log('Verify response:', response.status, text);
+
+        if (!response.ok) {
+          let errorMsg = 'Verification failed';
+          try {
+            const json = JSON.parse(text);
+            errorMsg = json.message || json.error || errorMsg;
+          } catch (_e) {
+            if (text) errorMsg = text;
+          }
+          Alert.alert('Verification Failed', errorMsg);
+        } else {
+          // Success → go to dashboard
+          router.replace('/(tabs)');
+        }
+      })
+      .catch((error) => {
+        console.log('Verify error:', error);
+        Alert.alert(
+          'Connection Error',
+          'Could not connect to the server. Please make sure the backend is running.'
+        );
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
   };
 
   return (
@@ -107,21 +139,21 @@ export default function VerifyScreen() {
                 <Text style={styles.errorText}>OTP must be 5 digits</Text>
               )}
 
-              <TouchableOpacity
-                style={[
+              <Pressable
+                style={({ pressed }) => [
                   styles.verifyButton,
                   (!isValidCode || isLoading) && styles.verifyButtonDisabled,
+                  pressed && isValidCode && { opacity: 0.85 },
                 ]}
                 onPress={handleVerify}
                 disabled={!isValidCode || isLoading}
-                activeOpacity={0.85}
               >
                 {isLoading ? (
                   <ActivityIndicator color={COLORS.white} size="small" />
                 ) : (
                   <Text style={styles.verifyButtonText}>Verify & Continue</Text>
                 )}
-              </TouchableOpacity>
+              </Pressable>
             </View>
           </View>
         </KeyboardAvoidingView>

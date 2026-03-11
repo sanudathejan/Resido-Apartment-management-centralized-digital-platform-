@@ -12,6 +12,7 @@ export const API_CONFIG = {
     // Auth
     LOGIN: '/api/auth/login',
     REGISTER: '/api/auth/register',
+    VERIFY: '/api/auth/verify-account',
     
     // Users
     USERS: '/api/users',
