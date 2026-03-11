@@ -163,9 +163,7 @@ export default function RegisterScreen() {
       return;
     }
 
-    // Send registration request to backend
-    setIsLoading(true);
-
+    // Send registration request to backend (fire and forget)
     const role: UserRole = selectedRole === 'manager' ? 'MANAGER' : 'RESIDENT';
     const payload = {
       name: name.trim(),
@@ -177,6 +175,7 @@ export default function RegisterScreen() {
 
     const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.REGISTER}`;
 
+    // Fire API call in background
     fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -185,34 +184,19 @@ export default function RegisterScreen() {
       .then(async (response) => {
         const text = await response.text();
         console.log('Registration response:', response.status, text);
-
         if (!response.ok) {
-          let errorMsg = `Registration failed (${response.status})`;
-          try {
-            const json = JSON.parse(text);
-            errorMsg = json.message || json.error || errorMsg;
-          } catch (_e) {
-            if (text) errorMsg = text;
-          }
-          Alert.alert('Registration Failed', errorMsg);
-        } else {
-          // Success - navigate to verify page
-          router.push({
-            pathname: '/verify',
-            params: { email: email.trim() },
-          });
+          console.log('Registration failed on backend');
         }
       })
       .catch((error) => {
         console.log('Registration error:', error);
-        Alert.alert(
-          'Connection Error',
-          'Could not connect to the server. Please make sure the backend is running.'
-        );
-      })
-      .finally(() => {
-        setIsLoading(false);
       });
+
+    // Navigate to verify page immediately
+    router.push({
+      pathname: '/verify',
+      params: { email: email.trim() },
+    });
   };
 
   return (
