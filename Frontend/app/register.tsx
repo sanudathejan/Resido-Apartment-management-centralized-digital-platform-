@@ -11,6 +11,7 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
+  Pressable,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -24,7 +25,6 @@ import {
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useAuth } from '@/context/AuthContext';
 import { UserRole } from '@/types';
 import { API_CONFIG } from '@/constants/config';
 import houseService, { House } from '@/services/houseService';
@@ -70,7 +70,6 @@ const FLOOR_LABELS: Record<string, string> = {
 
 export default function RegisterScreen() {
   const router = useRouter();
-  const { register } = useAuth();
 
   const [name, setName] = useState('');
   const [houseNumber, setHouseNumber] = useState('');
@@ -96,7 +95,6 @@ export default function RegisterScreen() {
     setHousesError(null);
     try {
       const data = await houseService.getAllHouses();
-      // Sort houses: Ground floor first, then by floor number, then by unit number
       const sorted = data.sort((a, b) => {
         const [floorA, unitA] = a.houseNumber.split('-');
         const [floorB, unitB] = b.houseNumber.split('-');
@@ -114,7 +112,6 @@ export default function RegisterScreen() {
     }
   }, []);
 
-  // Fetch houses when component mounts
   useEffect(() => {
     fetchHouses();
   }, [fetchHouses]);
@@ -131,9 +128,12 @@ export default function RegisterScreen() {
 
   const roleColor = selectedRole === 'resident' ? COLORS.residentColor : COLORS.managerColor;
 
-  const handleRegister = async () => {
-    console.log('=== Create Account button pressed ===');
-    
+  // ==========================================
+  // REGISTER HANDLER - Direct fetch to backend
+  // ==========================================
+  const handleRegister = () => {
+    console.log('=== CREATE ACCOUNT PRESSED ===');
+
     if (!name.trim()) {
       Alert.alert('Missing Name', 'Please enter your full name.');
       return;
@@ -163,60 +163,63 @@ export default function RegisterScreen() {
       return;
     }
 
+    const role: UserRole = selectedRole === 'manager' ? 'MANAGER' : 'RESIDENT';
+    const payload = {
+      name: name.trim(),
+      email: email.trim(),
+      password,
+      role,
+      ...(selectedRole === 'resident' ? { requestedHouseNumber: houseNumber } : {}),
+    };
+
+    console.log('Payload:', JSON.stringify(payload));
     setIsLoading(true);
-    try {
-      const role: UserRole = selectedRole === 'manager' ? 'MANAGER' : 'RESIDENT';
-      const payload = {
-        name: name.trim(),
-        email: email.trim(),
-        password,
-        role,
-        ...(selectedRole === 'resident' ? { requestedHouseNumber: houseNumber } : {}),
-      };
 
-      console.log('Sending registration payload:', JSON.stringify(payload));
+    const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.REGISTER}`;
+    console.log('POST to:', url);
 
-      const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.REGISTER}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
+    fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    })
+      .then(async (response) => {
+        const text = await response.text();
+        console.log('Response:', response.status, text);
 
-      const responseText = await response.text();
-      console.log('Registration response:', response.status, responseText);
-
-      if (!response.ok) {
-        let errorMsg = `Registration failed (${response.status})`;
-        try {
-          const errorJson = JSON.parse(responseText);
-          errorMsg = errorJson.message || errorJson.error || errorMsg;
-        } catch (_e) {
-          if (responseText) errorMsg = responseText;
+        if (!response.ok) {
+          let errorMsg = `Registration failed (${response.status})`;
+          try {
+            const json = JSON.parse(text);
+            errorMsg = json.message || json.error || errorMsg;
+          } catch (_e) {
+            if (text) errorMsg = text;
+          }
+          Alert.alert('Registration Failed', errorMsg);
+        } else {
+          Alert.alert('Success', 'Account created successfully!', [
+            {
+              text: 'Continue',
+              onPress: () => {
+                router.push({
+                  pathname: '/verify',
+                  params: { email: email.trim() },
+                });
+              },
+            },
+          ]);
         }
-        Alert.alert('Registration Failed', errorMsg);
-        return;
-      }
-
-      Alert.alert('Success', 'Account created successfully!', [
-        {
-          text: 'Continue',
-          onPress: () => {
-            router.push({
-              pathname: '/verify',
-              params: { email: email.trim() }
-            });
-          },
-        },
-      ]);
-    } catch (error: any) {
-      console.log('Registration error:', error);
-      Alert.alert(
-        'Connection Error',
-        'Could not connect to the server. Please check:\n\n1. Backend is running on port 8080\n2. Phone & PC are on the same WiFi\n3. Firewall allows port 8080'
-      );
-    } finally {
-      setIsLoading(false);
-    }
+      })
+      .catch((error) => {
+        console.log('Fetch error:', error);
+        Alert.alert(
+          'Connection Error',
+          'Could not connect to the server.\n\n1. Is your backend running?\n2. Are phone & PC on the same WiFi?\n3. Check firewall settings.'
+        );
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
   };
 
   return (
@@ -240,7 +243,7 @@ export default function RegisterScreen() {
               <Ionicons name="arrow-back" size={22} color={COLORS.textDark} />
             </TouchableOpacity>
 
-            {/* Logo — image already contains "RESIIDO" branding */}
+            {/* Logo */}
             <View style={styles.brandSection}>
               <Image
                 source={require('../assets/images/ResiiDo_logo_nobg.png')}
@@ -468,42 +471,22 @@ export default function RegisterScreen() {
               </View>
 
               {/* Register Button */}
-              <TouchableOpacity
-                style={[
+              <Pressable
+                style={({ pressed }) => [
                   styles.registerButton,
                   { backgroundColor: roleColor },
                   isLoading && styles.registerButtonDisabled,
+                  pressed && { opacity: 0.85 },
                 ]}
                 onPress={handleRegister}
                 disabled={isLoading}
-                activeOpacity={0.85}
               >
                 {isLoading ? (
                   <ActivityIndicator color={COLORS.white} size="small" />
                 ) : (
                   <Text style={styles.registerButtonText}>Create Account</Text>
                 )}
-              </TouchableOpacity>
-
-              {/* Divider */}
-              <View style={styles.divider}>
-                <View style={styles.dividerLine} />
-                <Text style={styles.dividerText}>or continue with</Text>
-                <View style={styles.dividerLine} />
-              </View>
-
-              {/* Social Buttons */}
-              <View style={styles.socialRow}>
-                <TouchableOpacity style={styles.socialButton} activeOpacity={0.7}>
-                  <Ionicons name="logo-google" size={20} color="#DB4437" />
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.socialButton} activeOpacity={0.7}>
-                  <Ionicons name="logo-apple" size={20} color={COLORS.textDark} />
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.socialButton} activeOpacity={0.7}>
-                  <Ionicons name="logo-facebook" size={20} color="#1877F2" />
-                </TouchableOpacity>
-              </View>
+              </Pressable>
 
               {/* Login Link */}
               <View style={styles.loginLink}>
@@ -641,7 +624,6 @@ export default function RegisterScreen() {
                             {item.houseNumber}
                           </Text>
                         </View>
-                        {/* Status Badge */}
                         {isOccupied ? (
                           <View style={styles.occupiedBadge}>
                             <View style={styles.occupiedDot} />
@@ -711,7 +693,7 @@ const styles = StyleSheet.create({
     }),
   },
 
-  // Brand — logo image already includes "RESIIDO" brand text
+  // Brand
   brandSection: {
     alignItems: 'center',
     marginTop: 16,
@@ -831,56 +813,12 @@ const styles = StyleSheet.create({
     letterSpacing: 0.3,
   },
 
-  // Divider
-  divider: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: COLORS.border,
-  },
-  dividerText: {
-    marginHorizontal: 14,
-    color: COLORS.textMuted,
-    fontSize: 13,
-    fontWeight: '500',
-  },
-
-  // Social
-  socialRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 16,
-    marginBottom: 28,
-  },
-  socialButton: {
-    width: 56,
-    height: 56,
-    borderRadius: 16,
-    backgroundColor: COLORS.white,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    ...Platform.select({
-      ios: {
-        shadowColor: COLORS.cardShadow,
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.06,
-        shadowRadius: 6,
-      },
-      android: { elevation: 1 },
-    }),
-  },
-
   // Login Link
   loginLink: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
+    marginBottom: 20,
   },
   loginLinkText: {
     fontSize: 14,
@@ -889,6 +827,24 @@ const styles = StyleSheet.create({
   loginLinkAction: {
     fontSize: 14,
     fontWeight: '700',
+  },
+
+  // House Label Row
+  houseLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  availableCountBadge: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: COLORS.success,
+    backgroundColor: COLORS.successBg,
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    borderRadius: 12,
+    overflow: 'hidden',
   },
 
   // House Picker Modal
@@ -971,13 +927,13 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: 'transparent',
   },
+  houseItemContent: {
+    flex: 1,
+  },
   houseItemText: {
     fontSize: 15,
     fontWeight: '600',
     color: COLORS.textDark,
-  },
-  houseItemContent: {
-    flex: 1,
   },
   houseItemOccupied: {
     backgroundColor: COLORS.disabledBg,
@@ -1034,24 +990,6 @@ const styles = StyleSheet.create({
     letterSpacing: 0.3,
   },
 
-  // House Label Row
-  houseLabelRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 8,
-  },
-  availableCountBadge: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: COLORS.success,
-    backgroundColor: COLORS.successBg,
-    paddingHorizontal: 10,
-    paddingVertical: 3,
-    borderRadius: 12,
-    overflow: 'hidden',
-  },
-
   // Loading & Error States
   loadingContainer: {
     alignItems: 'center',
@@ -1091,7 +1029,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: COLORS.white,
   },
-
   emptySearch: {
     alignItems: 'center',
     paddingVertical: 40,
