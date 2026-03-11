@@ -26,6 +26,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@/context/AuthContext';
 import { UserRole } from '@/types';
+import { API_CONFIG } from '@/constants/config';
 import houseService, { House } from '@/services/houseService';
 
 const COLORS = {
@@ -131,6 +132,8 @@ export default function RegisterScreen() {
   const roleColor = selectedRole === 'resident' ? COLORS.residentColor : COLORS.managerColor;
 
   const handleRegister = async () => {
+    console.log('=== Create Account button pressed ===');
+    
     if (!name.trim()) {
       Alert.alert('Missing Name', 'Please enter your full name.');
       return;
@@ -163,13 +166,37 @@ export default function RegisterScreen() {
     setIsLoading(true);
     try {
       const role: UserRole = selectedRole === 'manager' ? 'MANAGER' : 'RESIDENT';
-      await register({
+      const payload = {
+        name: name.trim(),
         email: email.trim(),
         password,
-        name: name.trim(),
         role,
         ...(selectedRole === 'resident' ? { requestedHouseNumber: houseNumber } : {}),
+      };
+
+      console.log('Sending registration payload:', JSON.stringify(payload));
+
+      const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.REGISTER}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
       });
+
+      const responseText = await response.text();
+      console.log('Registration response:', response.status, responseText);
+
+      if (!response.ok) {
+        let errorMsg = `Registration failed (${response.status})`;
+        try {
+          const errorJson = JSON.parse(responseText);
+          errorMsg = errorJson.message || errorJson.error || errorMsg;
+        } catch (_e) {
+          if (responseText) errorMsg = responseText;
+        }
+        Alert.alert('Registration Failed', errorMsg);
+        return;
+      }
+
       Alert.alert('Success', 'Account created successfully!', [
         {
           text: 'Continue',
@@ -182,13 +209,11 @@ export default function RegisterScreen() {
         },
       ]);
     } catch (error: any) {
-      const message = error.message || 'Unable to create account. Please try again.';
-      // Check for common network errors
-      if (message.includes('Network request failed') || message.includes('Failed to fetch')) {
-        Alert.alert('Connection Error', 'Could not connect to the server. Please check your internet connection and make sure the backend is running.');
-      } else {
-        Alert.alert('Registration Failed', message);
-      }
+      console.log('Registration error:', error);
+      Alert.alert(
+        'Connection Error',
+        'Could not connect to the server. Please check:\n\n1. Backend is running on port 8080\n2. Phone & PC are on the same WiFi\n3. Firewall allows port 8080'
+      );
     } finally {
       setIsLoading(false);
     }

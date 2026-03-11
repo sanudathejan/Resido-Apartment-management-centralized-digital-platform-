@@ -62,7 +62,7 @@ class ApiService {
         try {
           const errorJson = JSON.parse(responseText);
           errorMessage = errorJson.message || errorJson.error || errorMessage;
-        } catch {
+        } catch (_e) {
           // If response is plain text, use it as the error message
           if (responseText) {
             errorMessage = responseText;
@@ -74,7 +74,7 @@ class ApiService {
       // Try to parse as JSON, return text if not JSON
       try {
         return JSON.parse(responseText) as T;
-      } catch {
+      } catch (_e) {
         return responseText as unknown as T;
       }
     } catch (error) {
