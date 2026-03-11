@@ -47,7 +47,7 @@ export const API_CONFIG = {
     VISITORS_BY_USER: (userId: number) => `/api/visitors/user/${userId}`,
     
     // Houses
-    HOUSES: '/api/houses',
+    HOUSES: '/api/houses/status',
     
     // Apartments (Manager)
     APARTMENTS: '/api/apartments',
