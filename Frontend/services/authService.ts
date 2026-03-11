@@ -9,7 +9,7 @@ import { User, LoginRequest, RegisterRequest, AuthResponse } from '@/types';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Demo mode flag - set to true when backend is not available
-const DEMO_MODE = true;
+const DEMO_MODE = false;
 
 // Demo users for testing
 const DEMO_USERS: User[] = [
@@ -101,14 +101,15 @@ class AuthService {
       }
 
       // Production mode - call API
-      const newUserData: Partial<User> = {
+      const payload = {
         name: userData.name,
         email: userData.email,
         password: userData.password,
         role: userData.role || 'RESIDENT',
+        ...(userData.requestedHouseNumber ? { requestedHouseNumber: userData.requestedHouseNumber } : {}),
       };
 
-      await apiService.post(API_CONFIG.ENDPOINTS.USERS, newUserData);
+      await apiService.post(API_CONFIG.ENDPOINTS.REGISTER, payload);
       
       return { message: 'Registration initiated' };
     } catch (error) {

@@ -72,6 +72,7 @@ export interface RegisterRequest {
   role?: UserRole;
   phone?: string;
   apartmentNumber?: string;
+  requestedHouseNumber?: string;
 }
 
 export interface AuthResponse {

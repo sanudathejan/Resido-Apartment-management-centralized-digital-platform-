@@ -168,7 +168,7 @@ export default function RegisterScreen() {
         password,
         name: name.trim(),
         role,
-        ...(selectedRole === 'resident' ? { houseNumber } : {}),
+        ...(selectedRole === 'resident' ? { requestedHouseNumber: houseNumber } : {}),
       });
       router.push({
         pathname: '/verify',
