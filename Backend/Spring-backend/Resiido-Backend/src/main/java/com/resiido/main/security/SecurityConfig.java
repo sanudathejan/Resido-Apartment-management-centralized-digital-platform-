@@ -39,6 +39,9 @@ public class SecurityConfig {
                         // Allow Login/Register
                         .requestMatchers("/api/auth/**").permitAll()
 
+                        // NEW: Allow Public House Status for the registration dropdown
+                        .requestMatchers("/api/houses/status").permitAll()
+
                         // Allow OPTIONS (Pre-flight checks) for everyone
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
