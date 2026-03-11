@@ -15,6 +15,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   login: (credentials: LoginRequest) => Promise<void>;
   register: (userData: RegisterRequest) => Promise<void>;
+  verifyRegistration: (email: string, code: string) => Promise<void>;
   logout: () => Promise<void>;
   updateUser: (userData: Partial<User>) => void;
 }
@@ -57,7 +58,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const register = async (userData: RegisterRequest) => {
     try {
-      const response = await authService.register(userData);
+      await authService.register(userData);
+      // Wait for PIN verification before setting user
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  const verifyRegistration = async (email: string, code: string) => {
+    try {
+      const response = await authService.verifyRegistration(email, code);
       setUser(response.user);
       await AsyncStorage.setItem(
         APP_CONFIG.STORAGE_KEYS.USER_DATA,
@@ -98,6 +108,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isAuthenticated: !!user,
         login,
         register,
+        verifyRegistration,
         logout,
         updateUser,
       }}

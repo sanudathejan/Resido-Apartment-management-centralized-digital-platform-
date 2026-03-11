@@ -93,32 +93,11 @@ class AuthService {
   /**
    * Register a new user
    */
-  async register(userData: RegisterRequest): Promise<AuthResponse> {
+  async register(userData: RegisterRequest): Promise<{ message: string }> {
     try {
-      // Demo mode - create user locally
+      // Demo mode
       if (DEMO_MODE) {
-        const newUser: User = {
-          id: Date.now(),
-          name: userData.name || userData.email.split('@')[0],
-          email: userData.email,
-          role: userData.role || 'RESIDENT',
-          phone: userData.phone,
-          apartmentNumber: 'B-' + Math.floor(Math.random() * 20 + 1),
-        };
-
-        // If registering as manager, add managed apartment
-        if (userData.role === 'MANAGER') {
-          newUser.managedApartment = {
-            id: 1,
-            name: 'PrimeLux Residence Colombo',
-            location: '23/A, Bakers street, Colombo 7',
-            address: '23/A, Bakers street, Colombo 7, Sri Lanka',
-            numberOfUnits: 64,
-          };
-        }
-
-        await this.saveUserData(newUser);
-        return { user: newUser, message: 'Registration successful', token: 'demo-token' };
+        return { message: 'Registration initiated' };
       }
 
       // Production mode - call API
@@ -129,12 +108,48 @@ class AuthService {
         role: userData.role || 'RESIDENT',
       };
 
-      const user = await apiService.post<User>(API_CONFIG.ENDPOINTS.USERS, newUserData);
-      await this.saveUserData(user);
+      await apiService.post(API_CONFIG.ENDPOINTS.USERS, newUserData);
       
-      return { user, message: 'Registration successful' };
+      return { message: 'Registration initiated' };
     } catch (error) {
       console.error('Registration error:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Verify an OTP for registration
+   */
+  async verifyRegistration(email: string, code: string): Promise<AuthResponse> {
+    try {
+      if (DEMO_MODE) {
+        if (code !== '12345') {
+          throw new Error('Invalid verification code. Use 12345 for demo.');
+        }
+        
+        let user = DEMO_USERS.find(u => u.email === email);
+        if (!user) {
+          user = {
+            id: Date.now(),
+            name: email.split('@')[0],
+            email: email,
+            role: 'RESIDENT',
+            apartmentNumber: 'B-' + Math.floor(Math.random() * 20 + 1),
+          };
+        }
+        
+        await this.saveUserData(user);
+        return { user, message: 'Verification successful', token: 'demo-token' };
+      }
+
+      // Production mode - call API
+      const response = await apiService.post<AuthResponse>(`${API_CONFIG.ENDPOINTS.USERS}/verify`, { email, code });
+      if (response.user) {
+         await this.saveUserData(response.user);
+      }
+      return response;
+    } catch (error) {
+      console.error('Verification error:', error);
       throw error;
     }
   }

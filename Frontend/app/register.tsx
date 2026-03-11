@@ -90,9 +90,10 @@ export default function RegisterScreen() {
         name: email.split('@')[0],
         role,
       });
-      Alert.alert('Account Created', 'Your account has been created successfully.', [
-        { text: 'Continue', onPress: () => router.replace('/(tabs)') },
-      ]);
+      router.push({
+        pathname: '/verify',
+        params: { email: email.trim() }
+      });
     } catch (error: any) {
       Alert.alert('Registration Failed', error.message || 'Unable to create account. Please try again.');
     } finally {
