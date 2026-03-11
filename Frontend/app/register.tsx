@@ -163,7 +163,9 @@ export default function RegisterScreen() {
       return;
     }
 
-    // Send registration request to backend (fire and forget)
+    // First call the API, then navigate on success
+    setIsLoading(true);
+
     const role: UserRole = selectedRole === 'manager' ? 'MANAGER' : 'RESIDENT';
     const payload = {
       name: name.trim(),
@@ -175,7 +177,6 @@ export default function RegisterScreen() {
 
     const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.REGISTER}`;
 
-    // Fire API call in background
     fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -184,32 +185,34 @@ export default function RegisterScreen() {
       .then(async (response) => {
         const text = await response.text();
         console.log('Registration response:', response.status, text);
+
         if (!response.ok) {
-          let errorMsg = 'Registration request failed on the server.';
+          let errorMsg = 'Registration failed';
           try {
             const json = JSON.parse(text);
             errorMsg = json.message || json.error || errorMsg;
           } catch (_e) {
             if (text) errorMsg = text;
           }
-          Alert.alert('Registration Issue', errorMsg);
+          Alert.alert('Registration Failed', errorMsg);
         } else {
-          console.log('Registration successful - verification code should be sent');
+          // API succeeded → go to verify page
+          router.push({
+            pathname: '/verify',
+            params: { email: email.trim() },
+          });
         }
       })
       .catch((error) => {
         console.log('Registration error:', error);
         Alert.alert(
           'Connection Error',
-          'Could not reach the server. The verification code may not have been sent. Please go back and try again.'
+          'Could not connect to the server. Please make sure the backend is running.'
         );
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
-
-    // Navigate to verify page immediately
-    router.push({
-      pathname: '/verify',
-      params: { email: email.trim() },
-    });
   };
 
   return (
