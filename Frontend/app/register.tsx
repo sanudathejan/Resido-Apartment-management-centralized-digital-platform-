@@ -5,7 +5,7 @@
  * Logo image already includes "RESIIDO" branding
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -26,6 +26,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@/context/AuthContext';
 import { UserRole } from '@/types';
+import houseService, { House } from '@/services/houseService';
 
 const COLORS = {
   background: '#F4F7FB',
@@ -42,27 +43,14 @@ const COLORS = {
   managerColor: '#7C3AED',
   residentBg: '#EFF6FF',
   managerBg: '#F5F3FF',
+  success: '#10B981',
+  successBg: '#ECFDF5',
+  occupiedRed: '#EF4444',
+  occupiedBg: '#FEF2F2',
+  disabledBg: '#F8FAFC',
 };
 
 type RegisterRole = 'resident' | 'manager';
-
-// Generate all 77 house numbers
-const generateHouseNumbers = (): string[] => {
-  const houses: string[] = [];
-  // Ground floor: G-01 to G-07
-  for (let unit = 1; unit <= 7; unit++) {
-    houses.push(`G-${String(unit).padStart(2, '0')}`);
-  }
-  // Floors 1–10: X-01 to X-07
-  for (let floor = 1; floor <= 10; floor++) {
-    for (let unit = 1; unit <= 7; unit++) {
-      houses.push(`${floor}-${String(unit).padStart(2, '0')}`);
-    }
-  }
-  return houses;
-};
-
-const ALL_HOUSE_NUMBERS = generateHouseNumbers();
 
 // Group house numbers by floor for section display
 const FLOOR_LABELS: Record<string, string> = {
@@ -96,12 +84,49 @@ export default function RegisterScreen() {
   const [selectedRole, setSelectedRole] = useState<RegisterRole>('resident');
   const [focusedField, setFocusedField] = useState<string | null>(null);
 
-  // Filtered house numbers based on search
-  const filteredHouseNumbers = useMemo(() => {
-    if (!houseSearchQuery.trim()) return ALL_HOUSE_NUMBERS;
+  // Houses from API
+  const [houses, setHouses] = useState<House[]>([]);
+  const [housesLoading, setHousesLoading] = useState(false);
+  const [housesError, setHousesError] = useState<string | null>(null);
+
+  // Fetch houses from backend
+  const fetchHouses = useCallback(async () => {
+    setHousesLoading(true);
+    setHousesError(null);
+    try {
+      const data = await houseService.getAllHouses();
+      // Sort houses: Ground floor first, then by floor number, then by unit number
+      const sorted = data.sort((a, b) => {
+        const [floorA, unitA] = a.houseNumber.split('-');
+        const [floorB, unitB] = b.houseNumber.split('-');
+        const floorNumA = floorA === 'G' ? -1 : parseInt(floorA);
+        const floorNumB = floorB === 'G' ? -1 : parseInt(floorB);
+        if (floorNumA !== floorNumB) return floorNumA - floorNumB;
+        return parseInt(unitA) - parseInt(unitB);
+      });
+      setHouses(sorted);
+    } catch (error: any) {
+      setHousesError('Failed to load houses. Please try again.');
+      console.error('Fetch houses error:', error);
+    } finally {
+      setHousesLoading(false);
+    }
+  }, []);
+
+  // Fetch houses when component mounts
+  useEffect(() => {
+    fetchHouses();
+  }, [fetchHouses]);
+
+  // Filtered houses based on search
+  const filteredHouses = useMemo(() => {
+    if (!houseSearchQuery.trim()) return houses;
     const q = houseSearchQuery.toLowerCase();
-    return ALL_HOUSE_NUMBERS.filter(h => h.toLowerCase().includes(q));
-  }, [houseSearchQuery]);
+    return houses.filter(h => h.houseNumber.toLowerCase().includes(q));
+  }, [houseSearchQuery, houses]);
+
+  // Count available houses
+  const availableCount = useMemo(() => houses.filter(h => !h.occupied).length, [houses]);
 
   const roleColor = selectedRole === 'resident' ? COLORS.residentColor : COLORS.managerColor;
 
@@ -268,7 +293,14 @@ export default function RegisterScreen() {
               {/* House Number — Resident only */}
               {selectedRole === 'resident' && (
                 <>
-                  <Text style={styles.inputLabel}>House Number</Text>
+                  <View style={styles.houseLabelRow}>
+                    <Text style={[styles.inputLabel, { marginBottom: 0 }]}>House Number</Text>
+                    {houses.length > 0 && (
+                      <Text style={styles.availableCountBadge}>
+                        {availableCount} available
+                      </Text>
+                    )}
+                  </View>
                   <TouchableOpacity
                     style={[
                       styles.inputContainer,
@@ -277,6 +309,9 @@ export default function RegisterScreen() {
                     onPress={() => {
                       setShowHousePicker(true);
                       setHouseSearchQuery('');
+                      if (houses.length === 0 && !housesLoading) {
+                        fetchHouses();
+                      }
                     }}
                     activeOpacity={0.7}
                   >
@@ -484,70 +519,116 @@ export default function RegisterScreen() {
             </View>
 
             {/* House Number List */}
-            <FlatList
-              data={filteredHouseNumbers}
-              keyExtractor={(item) => item}
-              showsVerticalScrollIndicator={false}
-              style={styles.modalList}
-              renderItem={({ item, index }) => {
-                const floorKey = item.split('-')[0];
-                const prevItem = index > 0 ? filteredHouseNumbers[index - 1] : null;
-                const prevFloorKey = prevItem ? prevItem.split('-')[0] : null;
-                const showFloorHeader = floorKey !== prevFloorKey;
+            {housesLoading ? (
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color={COLORS.residentColor} />
+                <Text style={styles.loadingText}>Loading houses...</Text>
+              </View>
+            ) : housesError ? (
+              <View style={styles.errorContainer}>
+                <Ionicons name="cloud-offline-outline" size={40} color={COLORS.error} />
+                <Text style={styles.errorText}>{housesError}</Text>
+                <TouchableOpacity
+                  style={styles.retryButton}
+                  onPress={fetchHouses}
+                  activeOpacity={0.7}
+                >
+                  <Ionicons name="refresh" size={18} color={COLORS.white} />
+                  <Text style={styles.retryButtonText}>Retry</Text>
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <FlatList
+                data={filteredHouses}
+                keyExtractor={(item) => item.id.toString()}
+                showsVerticalScrollIndicator={false}
+                style={styles.modalList}
+                renderItem={({ item, index }) => {
+                  const floorKey = item.houseNumber.split('-')[0];
+                  const prevItem = index > 0 ? filteredHouses[index - 1] : null;
+                  const prevFloorKey = prevItem ? prevItem.houseNumber.split('-')[0] : null;
+                  const showFloorHeader = floorKey !== prevFloorKey;
+                  const isOccupied = item.occupied;
+                  const isSelected = houseNumber === item.houseNumber;
 
-                return (
-                  <>
-                    {showFloorHeader && (
-                      <View style={styles.floorHeader}>
-                        <Text style={styles.floorHeaderText}>
-                          {FLOOR_LABELS[floorKey] || `Floor ${floorKey}`}
-                        </Text>
-                      </View>
-                    )}
-                    <TouchableOpacity
-                      style={[
-                        styles.houseItem,
-                        houseNumber === item && {
-                          backgroundColor: COLORS.residentBg,
-                          borderColor: COLORS.residentColor,
-                        },
-                      ]}
-                      onPress={() => {
-                        setHouseNumber(item);
-                        setShowHousePicker(false);
-                      }}
-                      activeOpacity={0.7}
-                    >
-                      <Ionicons
-                        name="home-outline"
-                        size={18}
-                        color={houseNumber === item ? COLORS.residentColor : COLORS.textMuted}
-                      />
-                      <Text
-                        style={[
-                          styles.houseItemText,
-                          houseNumber === item && {
-                            color: COLORS.residentColor,
-                            fontWeight: '700',
-                          },
-                        ]}
-                      >
-                        {item}
-                      </Text>
-                      {houseNumber === item && (
-                        <Ionicons name="checkmark-circle" size={20} color={COLORS.residentColor} />
+                  return (
+                    <>
+                      {showFloorHeader && (
+                        <View style={styles.floorHeader}>
+                          <Text style={styles.floorHeaderText}>
+                            {FLOOR_LABELS[floorKey] || `Floor ${floorKey}`}
+                          </Text>
+                        </View>
                       )}
-                    </TouchableOpacity>
-                  </>
-                );
-              }}
-              ListEmptyComponent={
-                <View style={styles.emptySearch}>
-                  <Ionicons name="search" size={32} color={COLORS.textMuted} />
-                  <Text style={styles.emptySearchText}>No matching house numbers</Text>
-                </View>
-              }
-            />
+                      <TouchableOpacity
+                        style={[
+                          styles.houseItem,
+                          isSelected && {
+                            backgroundColor: COLORS.residentBg,
+                            borderColor: COLORS.residentColor,
+                          },
+                          isOccupied && styles.houseItemOccupied,
+                        ]}
+                        onPress={() => {
+                          if (!isOccupied) {
+                            setHouseNumber(item.houseNumber);
+                            setShowHousePicker(false);
+                          }
+                        }}
+                        activeOpacity={isOccupied ? 1 : 0.7}
+                        disabled={isOccupied}
+                      >
+                        <Ionicons
+                          name={isOccupied ? 'lock-closed-outline' : 'home-outline'}
+                          size={18}
+                          color={
+                            isOccupied
+                              ? COLORS.occupiedRed
+                              : isSelected
+                              ? COLORS.residentColor
+                              : COLORS.textMuted
+                          }
+                        />
+                        <View style={styles.houseItemContent}>
+                          <Text
+                            style={[
+                              styles.houseItemText,
+                              isSelected && {
+                                color: COLORS.residentColor,
+                                fontWeight: '700',
+                              },
+                              isOccupied && styles.houseItemTextOccupied,
+                            ]}
+                          >
+                            {item.houseNumber}
+                          </Text>
+                        </View>
+                        {/* Status Badge */}
+                        {isOccupied ? (
+                          <View style={styles.occupiedBadge}>
+                            <View style={styles.occupiedDot} />
+                            <Text style={styles.occupiedBadgeText}>Occupied</Text>
+                          </View>
+                        ) : isSelected ? (
+                          <Ionicons name="checkmark-circle" size={20} color={COLORS.residentColor} />
+                        ) : (
+                          <View style={styles.availableBadge}>
+                            <View style={styles.availableDot} />
+                            <Text style={styles.availableBadgeText}>Available</Text>
+                          </View>
+                        )}
+                      </TouchableOpacity>
+                    </>
+                  );
+                }}
+                ListEmptyComponent={
+                  <View style={styles.emptySearch}>
+                    <Ionicons name="search" size={32} color={COLORS.textMuted} />
+                    <Text style={styles.emptySearchText}>No matching house numbers</Text>
+                  </View>
+                }
+              />
+            )}
           </View>
         </View>
       </Modal>
@@ -853,11 +934,126 @@ const styles = StyleSheet.create({
     borderColor: 'transparent',
   },
   houseItemText: {
-    flex: 1,
     fontSize: 15,
     fontWeight: '600',
     color: COLORS.textDark,
   },
+  houseItemContent: {
+    flex: 1,
+  },
+  houseItemOccupied: {
+    backgroundColor: COLORS.disabledBg,
+    opacity: 0.7,
+  },
+  houseItemTextOccupied: {
+    color: COLORS.textMuted,
+    textDecorationLine: 'line-through',
+  },
+
+  // Status Badges
+  occupiedBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.occupiedBg,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 20,
+    gap: 5,
+  },
+  occupiedDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: COLORS.occupiedRed,
+  },
+  occupiedBadgeText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: COLORS.occupiedRed,
+    textTransform: 'uppercase',
+    letterSpacing: 0.3,
+  },
+  availableBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.successBg,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 20,
+    gap: 5,
+  },
+  availableDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: COLORS.success,
+  },
+  availableBadgeText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: COLORS.success,
+    textTransform: 'uppercase',
+    letterSpacing: 0.3,
+  },
+
+  // House Label Row
+  houseLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  availableCountBadge: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: COLORS.success,
+    backgroundColor: COLORS.successBg,
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+
+  // Loading & Error States
+  loadingContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 60,
+    gap: 14,
+  },
+  loadingText: {
+    fontSize: 14,
+    color: COLORS.textMuted,
+    fontWeight: '500',
+  },
+  errorContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 40,
+    gap: 12,
+  },
+  errorText: {
+    fontSize: 14,
+    color: COLORS.error,
+    fontWeight: '500',
+    textAlign: 'center',
+  },
+  retryButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.residentColor,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 12,
+    gap: 8,
+    marginTop: 4,
+  },
+  retryButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: COLORS.white,
+  },
+
   emptySearch: {
     alignItems: 'center',
     paddingVertical: 40,

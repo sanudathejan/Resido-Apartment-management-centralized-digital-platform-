@@ -11,3 +11,4 @@ export { default as sosService } from './sosService';
 export { default as announcementService } from './announcementService';
 export { default as bookingService } from './bookingService';
 export { default as visitorService } from './visitorService';
+export { default as houseService } from './houseService';

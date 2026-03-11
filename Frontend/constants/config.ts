@@ -46,6 +46,9 @@ export const API_CONFIG = {
     VISITORS: '/api/visitors',
     VISITORS_BY_USER: (userId: number) => `/api/visitors/user/${userId}`,
     
+    // Houses
+    HOUSES: '/api/houses',
+    
     // Apartments (Manager)
     APARTMENTS: '/api/apartments',
     APARTMENT_BY_ID: (id: number) => `/api/apartments/${id}`,
