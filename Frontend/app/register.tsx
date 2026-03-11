@@ -129,7 +129,7 @@ export default function RegisterScreen() {
   const roleColor = selectedRole === 'resident' ? COLORS.residentColor : COLORS.managerColor;
 
   // ==========================================
-  // REGISTER HANDLER - Direct fetch to backend
+  // REGISTER HANDLER
   // ==========================================
   const handleRegister = () => {
     console.log('=== CREATE ACCOUNT PRESSED ===');
@@ -163,63 +163,11 @@ export default function RegisterScreen() {
       return;
     }
 
-    const role: UserRole = selectedRole === 'manager' ? 'MANAGER' : 'RESIDENT';
-    const payload = {
-      name: name.trim(),
-      email: email.trim(),
-      password,
-      role,
-      ...(selectedRole === 'resident' ? { requestedHouseNumber: houseNumber } : {}),
-    };
-
-    console.log('Payload:', JSON.stringify(payload));
-    setIsLoading(true);
-
-    const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.REGISTER}`;
-    console.log('POST to:', url);
-
-    fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    })
-      .then(async (response) => {
-        const text = await response.text();
-        console.log('Response:', response.status, text);
-
-        if (!response.ok) {
-          let errorMsg = `Registration failed (${response.status})`;
-          try {
-            const json = JSON.parse(text);
-            errorMsg = json.message || json.error || errorMsg;
-          } catch (_e) {
-            if (text) errorMsg = text;
-          }
-          Alert.alert('Registration Failed', errorMsg);
-        } else {
-          Alert.alert('Success', 'Account created successfully!', [
-            {
-              text: 'Continue',
-              onPress: () => {
-                router.push({
-                  pathname: '/verify',
-                  params: { email: email.trim() },
-                });
-              },
-            },
-          ]);
-        }
-      })
-      .catch((error) => {
-        console.log('Fetch error:', error);
-        Alert.alert(
-          'Connection Error',
-          'Could not connect to the server.\n\n1. Is your backend running?\n2. Are phone & PC on the same WiFi?\n3. Check firewall settings.'
-        );
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
+    // Navigate directly to verify page
+    router.push({
+      pathname: '/verify',
+      params: { email: email.trim() },
+    });
   };
 
   return (
