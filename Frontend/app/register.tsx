@@ -185,11 +185,24 @@ export default function RegisterScreen() {
         const text = await response.text();
         console.log('Registration response:', response.status, text);
         if (!response.ok) {
-          console.log('Registration failed on backend');
+          let errorMsg = 'Registration request failed on the server.';
+          try {
+            const json = JSON.parse(text);
+            errorMsg = json.message || json.error || errorMsg;
+          } catch (_e) {
+            if (text) errorMsg = text;
+          }
+          Alert.alert('Registration Issue', errorMsg);
+        } else {
+          console.log('Registration successful - verification code should be sent');
         }
       })
       .catch((error) => {
         console.log('Registration error:', error);
+        Alert.alert(
+          'Connection Error',
+          'Could not reach the server. The verification code may not have been sent. Please go back and try again.'
+        );
       });
 
     // Navigate to verify page immediately
