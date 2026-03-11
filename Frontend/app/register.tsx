@@ -163,11 +163,56 @@ export default function RegisterScreen() {
       return;
     }
 
-    // Navigate directly to verify page
-    router.push({
-      pathname: '/verify',
-      params: { email: email.trim() },
-    });
+    // Send registration request to backend
+    setIsLoading(true);
+
+    const role: UserRole = selectedRole === 'manager' ? 'MANAGER' : 'RESIDENT';
+    const payload = {
+      name: name.trim(),
+      email: email.trim(),
+      password,
+      role,
+      ...(selectedRole === 'resident' ? { requestedHouseNumber: houseNumber } : {}),
+    };
+
+    const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.REGISTER}`;
+
+    fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    })
+      .then(async (response) => {
+        const text = await response.text();
+        console.log('Registration response:', response.status, text);
+
+        if (!response.ok) {
+          let errorMsg = `Registration failed (${response.status})`;
+          try {
+            const json = JSON.parse(text);
+            errorMsg = json.message || json.error || errorMsg;
+          } catch (_e) {
+            if (text) errorMsg = text;
+          }
+          Alert.alert('Registration Failed', errorMsg);
+        } else {
+          // Success - navigate to verify page
+          router.push({
+            pathname: '/verify',
+            params: { email: email.trim() },
+          });
+        }
+      })
+      .catch((error) => {
+        console.log('Registration error:', error);
+        Alert.alert(
+          'Connection Error',
+          'Could not connect to the server. Please make sure the backend is running.'
+        );
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
   };
 
   return (
