@@ -18,6 +18,8 @@ import {
   TextInput,
   Image,
   ActivityIndicator,
+  Modal,
+  FlatList,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -44,10 +46,26 @@ const COLORS = {
 
 type RegisterRole = 'resident' | 'manager';
 
+const generateHouseNumbers = (): string[] => {
+  const houses: string[] = [];
+  for (let i = 1; i <= 7; i++) {
+    houses.push(`G-${i.toString().padStart(2, '0')}`);
+  }
+  for (let floor = 1; floor <= 10; floor++) {
+    for (let unit = 1; unit <= 7; unit++) {
+      houses.push(`${floor}-${unit.toString().padStart(2, '0')}`);
+    }
+  }
+  return houses;
+};
+
+const HOUSE_NUMBERS = generateHouseNumbers();
+
 export default function RegisterScreen() {
   const router = useRouter();
   const { register } = useAuth();
 
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -56,12 +74,22 @@ export default function RegisterScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedRole, setSelectedRole] = useState<RegisterRole>('resident');
   const [focusedField, setFocusedField] = useState<string | null>(null);
+  const [houseNumber, setHouseNumber] = useState('');
+  const [showHousePicker, setShowHousePicker] = useState(false);
 
   const roleColor = selectedRole === 'resident' ? COLORS.residentColor : COLORS.managerColor;
 
   const handleRegister = async () => {
+    if (!name.trim()) {
+      Alert.alert('Missing Name', 'Please enter your full name.');
+      return;
+    }
     if (!email.trim()) {
       Alert.alert('Missing Email', 'Please enter your email address.');
+      return;
+    }
+    if (selectedRole === 'resident' && !houseNumber) {
+      Alert.alert('Missing House Number', 'Please select your house number.');
       return;
     }
     if (!password) {
@@ -87,8 +115,9 @@ export default function RegisterScreen() {
       await register({
         email: email.trim(),
         password,
-        name: email.split('@')[0],
+        name: name.trim(),
         role,
+        ...(selectedRole === 'resident' && { apartmentNumber: houseNumber }),
       });
       router.push({
         pathname: '/verify',
@@ -189,6 +218,28 @@ export default function RegisterScreen() {
 
             {/* Form */}
             <View style={styles.form}>
+              {/* Full Name */}
+              <Text style={styles.inputLabel}>Full Name</Text>
+              <View
+                style={[
+                  styles.inputContainer,
+                  focusedField === 'name' && { borderColor: roleColor },
+                ]}
+              >
+                <Ionicons name="person-outline" size={18} color={COLORS.textMuted} style={styles.inputIcon} />
+                <TextInput
+                  style={styles.input}
+                  placeholder="John Smith"
+                  placeholderTextColor={COLORS.textMuted}
+                  value={name}
+                  onChangeText={setName}
+                  autoCapitalize="words"
+                  autoComplete="name"
+                  onFocus={() => setFocusedField('name')}
+                  onBlur={() => setFocusedField(null)}
+                />
+              </View>
+
               {/* Email */}
               <Text style={styles.inputLabel}>Email</Text>
               <View
@@ -211,6 +262,83 @@ export default function RegisterScreen() {
                   onBlur={() => setFocusedField(null)}
                 />
               </View>
+
+              {/* House Number — residents only */}
+              {selectedRole === 'resident' && (
+                <>
+                  <Text style={styles.inputLabel}>House Number</Text>
+                  <TouchableOpacity
+                    style={[
+                      styles.inputContainer,
+                      focusedField === 'house' && { borderColor: roleColor },
+                    ]}
+                    onPress={() => {
+                      setFocusedField('house');
+                      setShowHousePicker(true);
+                    }}
+                    activeOpacity={0.7}
+                  >
+                    <Ionicons name="home-outline" size={18} color={COLORS.textMuted} style={styles.inputIcon} />
+                    <Text style={[styles.input, !houseNumber && { color: COLORS.textMuted }]}>
+                      {houseNumber || 'Select house number'}
+                    </Text>
+                    <Ionicons name="chevron-down-outline" size={18} color={COLORS.textMuted} />
+                  </TouchableOpacity>
+
+                  {/* House Picker Modal */}
+                  <Modal
+                    visible={showHousePicker}
+                    transparent
+                    animationType="slide"
+                    onRequestClose={() => setShowHousePicker(false)}
+                  >
+                    <TouchableOpacity
+                      style={styles.modalOverlay}
+                      activeOpacity={1}
+                      onPress={() => setShowHousePicker(false)}
+                    >
+                      <View style={styles.pickerSheet}>
+                        <View style={styles.pickerHeader}>
+                          <Text style={styles.pickerTitle}>Select House Number</Text>
+                          <TouchableOpacity onPress={() => setShowHousePicker(false)}>
+                            <Ionicons name="close" size={22} color={COLORS.textDark} />
+                          </TouchableOpacity>
+                        </View>
+                        <FlatList
+                          data={HOUSE_NUMBERS}
+                          keyExtractor={(item) => item}
+                          showsVerticalScrollIndicator={false}
+                          renderItem={({ item }) => (
+                            <TouchableOpacity
+                              style={[
+                                styles.pickerItem,
+                                item === houseNumber && { backgroundColor: COLORS.residentBg },
+                              ]}
+                              onPress={() => {
+                                setHouseNumber(item);
+                                setShowHousePicker(false);
+                                setFocusedField(null);
+                              }}
+                            >
+                              <Text
+                                style={[
+                                  styles.pickerItemText,
+                                  item === houseNumber && { color: COLORS.residentColor, fontWeight: '700' },
+                                ]}
+                              >
+                                {item}
+                              </Text>
+                              {item === houseNumber && (
+                                <Ionicons name="checkmark" size={18} color={COLORS.residentColor} />
+                              )}
+                            </TouchableOpacity>
+                          )}
+                        />
+                      </View>
+                    </TouchableOpacity>
+                  </Modal>
+                </>
+              )}
 
               {/* Password */}
               <Text style={styles.inputLabel}>Password</Text>
@@ -556,5 +684,46 @@ const styles = StyleSheet.create({
   loginLinkAction: {
     fontSize: 14,
     fontWeight: '700',
+  },
+
+  // House Picker Modal
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.35)',
+    justifyContent: 'flex-end',
+  },
+  pickerSheet: {
+    backgroundColor: COLORS.white,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingBottom: 32,
+    maxHeight: '60%',
+  },
+  pickerHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
+  },
+  pickerTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: COLORS.textDark,
+  },
+  pickerItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
+  },
+  pickerItemText: {
+    fontSize: 15,
+    color: COLORS.textDark,
   },
 });
