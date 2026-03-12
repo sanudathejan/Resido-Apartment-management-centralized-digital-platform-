@@ -93,20 +93,7 @@ export default function TabLayout() {
         }}
       />
 
-      <Tabs.Screen
-        name="parking2/index" // This must match your new file path
-        options={{
-          title: 'Parking 2', // This fixes the "parking2/i..." text
-          tabBarLabel: 'Parking 2',
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons
-              name={focused ? "car-sport" : "car-sport-outline"}
-              size={24}
-              color={color}
-            />
-          ),
-        }}
-      />
+
       <Tabs.Screen
         name="payments/index" // Ensure your new file is in app/(tabs)/payments/index.tsx
         options={{

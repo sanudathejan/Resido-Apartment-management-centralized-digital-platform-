@@ -94,25 +94,14 @@ const FEATURE_CARDS: FeatureCard[] = [
     iconColor: '#DC2626',
     iconBg: '#FEF2F2',
   },
-/* Add this entry to your Quick Actions array */
-{
-  id: 'parking2',
-  title: 'Parking 2',
-  subtitle: 'Slot Management',
-  icon: 'car-sport', // Using a different car icon for distinction
-  color: '#7C3AED',  // A violet color to distinguish it from the first blue Parking icon
-  route: '/(tabs)/parking2', // This matches your new folder name
-},
-
-{
+  {
     icon: 'wallet',
     title: 'Payments',
     subtitle: 'Rent & Bills',
     route: '/(tabs)/payments',
     iconColor: '#059669',
     iconBg: '#ECFDF5',
-
-    },
+  },
 
 ];
 
@@ -161,17 +150,25 @@ export default function HomeScreen() {
   };
 
   const handleLogout = () => {
-    Alert.alert('Log out', 'Are you sure you want to log out?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Log out',
-        style: 'destructive',
-        onPress: () => {
-          logout();
-          router.replace('/welcome');
+    if (Platform.OS === 'web') {
+      const confirmLogout = window.confirm('Are you sure you want to log out?');
+      if (confirmLogout) {
+        logout();
+        router.replace('/welcome');
+      }
+    } else {
+      Alert.alert('Log out', 'Are you sure you want to log out?', [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Log out',
+          style: 'destructive',
+          onPress: () => {
+            logout();
+            router.replace('/welcome');
+          },
         },
-      },
-    ]);
+      ]);
+    }
   };
 
   const toggleViewMode = () => {
