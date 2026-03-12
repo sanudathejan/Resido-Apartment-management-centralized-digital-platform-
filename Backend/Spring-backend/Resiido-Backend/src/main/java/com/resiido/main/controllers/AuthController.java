@@ -38,7 +38,7 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody User user) {
         if (userRepository.findByEmail(user.getEmail()).isPresent()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email already exists");
+            return ResponseEntity.badRequest().body("Email already exists. Please use a different email or log in.");
         }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         String role = (user.getRole() != null && !user.getRole().isEmpty()) ? user.getRole().toUpperCase() : "RESIDENT";
@@ -50,7 +50,8 @@ public class AuthController {
         if ("RESIDENT".equals(role)) {
             String houseNum = user.getRequestedHouseNumber();
             if (houseNum == null || houseNum.isEmpty()) return ResponseEntity.badRequest().body("Residents must select a house number.");
-            House house = houseRepository.findByHouseNumber(houseNum).orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "House " + houseNum + " does not exist."));
+            House house = houseRepository.findByHouseNumber(houseNum).orElse(null);
+            if (house == null) return ResponseEntity.badRequest().body("House " + houseNum + " does not exist.");
             if (house.getResident() != null) return ResponseEntity.badRequest().body("House " + houseNum + " is already taken.");
             userRepository.save(user);
             emailService.sendVerificationCodeToManagers(user.getName(), "RESIDENT", houseNum, code);
