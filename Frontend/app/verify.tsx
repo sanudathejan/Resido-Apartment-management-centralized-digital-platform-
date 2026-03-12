@@ -107,7 +107,13 @@ export default function VerifyScreen() {
           }
 
           // Navigate to resident dashboard
-          router.replace('/(tabs)');
+          // Navigate to login page
+          if (Platform.OS === 'web') {
+            window.alert('Verification successful! Please log in.');
+          } else {
+            Alert.alert('Success', 'Verification successful! Please log in.');
+          }
+          router.replace('/login');
         }
       })
       .catch((error) => {
