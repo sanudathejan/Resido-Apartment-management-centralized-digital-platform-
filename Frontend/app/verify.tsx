@@ -40,6 +40,7 @@ export default function VerifyScreen() {
   const [code, setCode] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [focusedField, setFocusedField] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const isComplete = code.length === 5;
   const isValidCode = isComplete && /^\d+$/.test(code);
@@ -48,6 +49,7 @@ export default function VerifyScreen() {
     if (!isValidCode) return;
 
     setIsLoading(true);
+    setErrorMessage('');
 
     const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.VERIFY}`;
     const payload = {
@@ -67,14 +69,7 @@ export default function VerifyScreen() {
         console.log('Verify response:', response.status, text);
 
         if (!response.ok) {
-          let errorMsg = 'Verification failed';
-          try {
-            const json = JSON.parse(text);
-            errorMsg = json.message || json.error || errorMsg;
-          } catch (_e) {
-            if (text) errorMsg = text;
-          }
-          Alert.alert('Verification Failed', errorMsg);
+          setErrorMessage('Invalid Code. Please Try again');
         } else {
           // Parse the JSON response which contains token + user data
           try {
@@ -117,10 +112,7 @@ export default function VerifyScreen() {
       })
       .catch((error) => {
         console.log('Verify error:', error);
-        Alert.alert(
-          'Connection Error',
-          'Could not connect to the server. Please make sure the backend is running.'
-        );
+        setErrorMessage('Connection Error. Please make sure the backend is running.');
       })
       .finally(() => {
         setIsLoading(false);
@@ -165,6 +157,7 @@ export default function VerifyScreen() {
                 style={[
                   styles.inputContainer,
                   focusedField && { borderColor: COLORS.primary },
+                  errorMessage ? { borderColor: COLORS.error } : null,
                 ]}
               >
                 <Ionicons name="keypad-outline" size={18} color={COLORS.textMuted} style={styles.inputIcon} />
@@ -173,15 +166,22 @@ export default function VerifyScreen() {
                   placeholder="Enter 5-digit code"
                   placeholderTextColor={COLORS.textMuted}
                   value={code}
-                  onChangeText={(text) => setCode(text.replace(/[^0-9]/g, '').slice(0, 5))}
+                  onChangeText={(text) => {
+                    setCode(text.replace(/[^0-9]/g, '').slice(0, 5));
+                    setErrorMessage('');
+                  }}
                   keyboardType="numeric"
                   maxLength={5}
                   onFocus={() => setFocusedField(true)}
                   onBlur={() => setFocusedField(false)}
                 />
               </View>
-              {code.length > 0 && code.length < 5 && (
-                <Text style={styles.errorText}>OTP must be 5 digits</Text>
+              {errorMessage ? (
+                <Text style={styles.errorText}>{errorMessage}</Text>
+              ) : (
+                code.length > 0 && code.length < 5 && (
+                  <Text style={styles.errorText}>OTP must be 5 digits</Text>
+                )
               )}
 
               <Pressable

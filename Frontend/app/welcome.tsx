@@ -76,19 +76,7 @@ export default function WelcomeScreen() {
 
         {/* ── Bottom Buttons ────────────────────────────────────── */}
         <View style={styles.buttonSection}>
-          {/* If already logged in, show a continue button */}
-          {isAuthenticated && (
-            <TouchableOpacity
-              style={styles.continueButton}
-              onPress={() => router.replace('/(tabs)')}
-              activeOpacity={0.85}
-            >
-              <Ionicons name="arrow-forward-circle" size={20} color={COLORS.white} />
-              <Text style={styles.continueButtonText}>
-                Continue as {user?.name || 'User'}
-              </Text>
-            </TouchableOpacity>
-          )}
+
 
           <TouchableOpacity
             style={styles.registerButton}
@@ -170,29 +158,7 @@ const styles = StyleSheet.create({
     paddingBottom: Platform.OS === 'ios' ? 20 : 30,
     gap: 12,
   },
-  continueButton: {
-    backgroundColor: COLORS.green,
-    paddingVertical: 16,
-    borderRadius: 18,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    ...Platform.select({
-      ios: {
-        shadowColor: COLORS.green,
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.25,
-        shadowRadius: 10,
-      },
-      android: { elevation: 4 },
-    }),
-  },
-  continueButtonText: {
-    color: COLORS.white,
-    fontSize: 16,
-    fontWeight: '700',
-  },
+
   registerButton: {
     backgroundColor: COLORS.primary,
     paddingVertical: 17,
