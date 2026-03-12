@@ -71,19 +71,51 @@ class AuthService {
         return { user: demoUser, message: 'Demo login successful', token: 'demo-token' };
       }
 
-      // Production mode - call API
-      const users = await apiService.get<User[]>(API_CONFIG.ENDPOINTS.USERS);
-      
-      const user = users.find(
-        (u) => u.email === credentials.email && u.password === credentials.password
-      );
+      // Production mode - call login API endpoint
+      const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.LOGIN}`;
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: credentials.email,
+          password: credentials.password,
+        }),
+      });
 
-      if (user) {
-        await this.saveUserData(user);
-        return { user, message: 'Login successful', token: 'temp-token' };
+      const responseText = await response.text();
+
+      if (!response.ok) {
+        let errorMessage = 'Invalid email or password';
+        try {
+          const errorJson = JSON.parse(responseText);
+          errorMessage = errorJson.message || errorJson.error || errorMessage;
+        } catch (_e) {
+          if (responseText) errorMessage = responseText;
+        }
+        throw new Error(errorMessage);
       }
 
-      throw new Error('Invalid email or password');
+      // Parse the JSON response with token + user data
+      const json = JSON.parse(responseText);
+      const token = json.token;
+      const userData = json.user;
+
+      const user: User = {
+        id: userData.id,
+        name: userData.name,
+        email: userData.email,
+        role: userData.role,
+        apartmentNumber: userData.requestedHouseNumber || '',
+      };
+
+      // Store token and user data
+      if (token) {
+        await AsyncStorage.setItem(APP_CONFIG.STORAGE_KEYS.AUTH_TOKEN, token);
+        apiService.setToken(token);
+      }
+      await this.saveUserData(user);
+
+      return { user, message: 'Login successful', token };
     } catch (error) {
       console.error('Login error:', error);
       throw error;
@@ -143,12 +175,48 @@ class AuthService {
         return { user, message: 'Verification successful', token: 'demo-token' };
       }
 
-      // Production mode - call API
-      const response = await apiService.post<AuthResponse>(`${API_CONFIG.ENDPOINTS.USERS}/verify`, { email, code });
-      if (response.user) {
-         await this.saveUserData(response.user);
+      // Production mode - call verify-account API
+      const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.VERIFY}`;
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, code }),
+      });
+
+      const responseText = await response.text();
+
+      if (!response.ok) {
+        let errorMessage = 'Verification failed';
+        try {
+          const errorJson = JSON.parse(responseText);
+          errorMessage = errorJson.message || errorJson.error || errorMessage;
+        } catch (_e) {
+          if (responseText) errorMessage = responseText;
+        }
+        throw new Error(errorMessage);
       }
-      return response;
+
+      // Parse the JSON response with token + user data
+      const json = JSON.parse(responseText);
+      const token = json.token;
+      const userData = json.user;
+
+      const user: User = {
+        id: userData.id,
+        name: userData.name,
+        email: userData.email,
+        role: userData.role,
+        apartmentNumber: userData.requestedHouseNumber || '',
+      };
+
+      // Store token and user data
+      if (token) {
+        await AsyncStorage.setItem(APP_CONFIG.STORAGE_KEYS.AUTH_TOKEN, token);
+        apiService.setToken(token);
+      }
+      await this.saveUserData(user);
+
+      return { user, message: json.message || 'Verification successful', token };
     } catch (error) {
       console.error('Verification error:', error);
       throw error;

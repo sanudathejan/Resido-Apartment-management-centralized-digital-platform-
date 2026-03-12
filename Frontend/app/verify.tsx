@@ -14,7 +14,8 @@ import {
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { API_CONFIG } from '@/constants/config';
+import { API_CONFIG, APP_CONFIG } from '@/constants/config';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const COLORS = {
   background: '#F4F7FB',
@@ -26,12 +27,15 @@ const COLORS = {
   border: '#E2E8F0',
   error: '#EF4444',
   cardShadow: '#94A3B8',
+  success: '#10B981',
+  successBg: '#ECFDF5',
 };
 
 export default function VerifyScreen() {
   const router = useRouter();
-  const params = useLocalSearchParams<{ email: string }>();
+  const params = useLocalSearchParams<{ email: string; role?: string }>();
   const email = params.email || '';
+  const role = params.role || 'RESIDENT';
 
   const [code, setCode] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -72,7 +76,42 @@ export default function VerifyScreen() {
           }
           Alert.alert('Verification Failed', errorMsg);
         } else {
-          // Success → go to dashboard
+          // Parse the JSON response which contains token + user data
+          try {
+            const json = JSON.parse(text);
+            const token = json.token;
+            const userData = json.user;
+
+            if (token && userData) {
+              // Store auth token
+              await AsyncStorage.setItem(
+                APP_CONFIG.STORAGE_KEYS.AUTH_TOKEN,
+                token
+              );
+
+              // Build user object for local storage
+              const userToStore = {
+                id: userData.id,
+                name: userData.name,
+                email: userData.email,
+                role: userData.role,
+                apartmentNumber: userData.requestedHouseNumber || '',
+              };
+
+              // Store user data
+              await AsyncStorage.setItem(
+                APP_CONFIG.STORAGE_KEYS.USER_DATA,
+                JSON.stringify(userToStore)
+              );
+
+              console.log('User stored successfully:', userToStore);
+            }
+          } catch (parseError) {
+            console.log('Response parse info:', parseError);
+            // Even if parsing fails, still navigate forward
+          }
+
+          // Navigate to resident dashboard
           router.replace('/(tabs)');
         }
       })
@@ -112,6 +151,12 @@ export default function VerifyScreen() {
                   A 5-digit verification code has been sent to your manager's email. Please contact your manager and enter the code below to complete registration.
                 </Text>
               </View>
+              {email ? (
+                <View style={styles.emailCard}>
+                  <Ionicons name="mail-outline" size={16} color={COLORS.primary} />
+                  <Text style={styles.emailText}>Registering as: <Text style={styles.emailBold}>{email}</Text></Text>
+                </View>
+              ) : null}
             </View>
 
             <View style={styles.form}>
@@ -154,6 +199,13 @@ export default function VerifyScreen() {
                   <Text style={styles.verifyButtonText}>Verify & Continue</Text>
                 )}
               </Pressable>
+
+              <View style={styles.helpCard}>
+                <Ionicons name="help-circle-outline" size={18} color={COLORS.textLight} />
+                <Text style={styles.helpText}>
+                  Didn't receive a code? Contact your building manager to get the verification code.
+                </Text>
+              </View>
             </View>
           </View>
         </KeyboardAvoidingView>
@@ -221,6 +273,26 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     fontWeight: '500',
   },
+  emailCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    backgroundColor: COLORS.white,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  emailText: {
+    fontSize: 13,
+    color: COLORS.textLight,
+  },
+  emailBold: {
+    fontWeight: '700',
+    color: COLORS.textDark,
+  },
   form: {
     marginTop: 8,
   },
@@ -285,5 +357,22 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
     letterSpacing: 0.3,
+  },
+  helpCard: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 8,
+    marginTop: 24,
+    padding: 14,
+    backgroundColor: COLORS.white,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  helpText: {
+    flex: 1,
+    fontSize: 13,
+    color: COLORS.textLight,
+    lineHeight: 18,
   },
 });

@@ -64,17 +64,17 @@ public class AuthController {
 
     @PostMapping("/verify-account")
     @Transactional
-    public ResponseEntity<String> verifyAccount(@RequestBody Map<String, String> payload) {
+    public ResponseEntity<?> verifyAccount(@RequestBody Map<String, String> payload) {
         String email = payload.get("email");
         String code = payload.get("code");
         User user = userRepository.findByEmail(email).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
-        if (user.isVerified()) return ResponseEntity.badRequest().body("User is already verified.");
+        if (user.isVerified()) return ResponseEntity.badRequest().body(Map.of("message", "User is already verified."));
         if (code.equals(user.getVerificationCode())) {
             String successMessage;
             if ("RESIDENT".equals(user.getRole())) {
                 String houseNum = user.getRequestedHouseNumber();
                 House house = houseRepository.findByHouseNumber(houseNum).orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "House not found"));
-                if (house.getResident() != null) return ResponseEntity.badRequest().body("House was taken while you were waiting.");
+                if (house.getResident() != null) return ResponseEntity.badRequest().body(Map.of("message", "House was taken while you were waiting."));
                 house.setResident(user);
                 houseRepository.save(house);
                 String expectedSlot = "P-" + houseNum;
@@ -90,18 +90,44 @@ public class AuthController {
             user.setVerified(true);
             user.setVerificationCode(null);
             userRepository.save(user);
-            return ResponseEntity.ok(successMessage);
+
+            // Generate JWT token so the user is auto-logged-in after verification
+            String token = jwtUtil.generateToken(user.getEmail());
+
+            // Return JSON with token and user info
+            return ResponseEntity.ok(Map.of(
+                "message", successMessage,
+                "token", token,
+                "user", Map.of(
+                    "id", user.getId(),
+                    "name", user.getName(),
+                    "email", user.getEmail(),
+                    "role", user.getRole(),
+                    "requestedHouseNumber", user.getRequestedHouseNumber() != null ? user.getRequestedHouseNumber() : ""
+                )
+            ));
         } else {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Invalid Verification Code.");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", "Invalid Verification Code."));
         }
     }
 
     @PostMapping("/login")
-    public String login(@RequestBody AuthRequest authRequest) {
+    public ResponseEntity<?> login(@RequestBody AuthRequest authRequest) {
         User user = userRepository.findByEmail(authRequest.getEmail()).orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials"));
         if (!user.isVerified()) throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Account not verified.");
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authRequest.getEmail(), authRequest.getPassword()));
-        return jwtUtil.generateToken(authRequest.getEmail());
+        String token = jwtUtil.generateToken(authRequest.getEmail());
+
+        return ResponseEntity.ok(Map.of(
+            "token", token,
+            "user", Map.of(
+                "id", user.getId(),
+                "name", user.getName(),
+                "email", user.getEmail(),
+                "role", user.getRole(),
+                "requestedHouseNumber", user.getRequestedHouseNumber() != null ? user.getRequestedHouseNumber() : ""
+            )
+        ));
     }
 
     //DELETE USER (Safe Unlink)

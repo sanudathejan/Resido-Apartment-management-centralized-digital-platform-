@@ -196,10 +196,10 @@ export default function RegisterScreen() {
           }
           Alert.alert('Registration Failed', errorMsg);
         } else {
-          // API succeeded → go to verify page
+          // API succeeded → go to verify page with email and role
           router.push({
             pathname: '/verify',
-            params: { email: email.trim() },
+            params: { email: email.trim(), role: selectedRole === 'manager' ? 'MANAGER' : 'RESIDENT' },
           });
         }
       })
