@@ -60,6 +60,9 @@ export default function ParkingScreen() {
   const [parkingSlot, setParkingSlot] = useState<any>(null); // Replace any with your type
   const [loading, setLoading] = useState(false);
 
+  // Derive parking slot number from user's apartment number
+  const derivedSlotNumber = user?.apartmentNumber ? `P-${user.apartmentNumber}` : 'P-Unassigned';
+
 // Toggle State for the "Lend My Slot" switch
   const [isLending, setIsLending] = useState(false);
 
@@ -87,7 +90,7 @@ export default function ParkingScreen() {
         <View style={styles.slotDetails}>
             <View>
                 <Text style={styles.slotSubLabel}>ASSIGNED SLOT</Text>
-                <Text style={styles.slotMainTitle}>Slot P-A12</Text>
+                <Text style={styles.slotMainTitle}>Slot {derivedSlotNumber}</Text>
             </View>
             <View style={isLending ? styles.statusBadgeGreen : styles.statusBadgeMuted}>
                 <View style={isLending ? styles.dotGreen : styles.dotMuted} />
@@ -132,7 +135,7 @@ export default function ParkingScreen() {
         startTime="09:00 AM"
         endTime="12:00 PM"
         note="Need a spot for my guest's car."
-        onAccept={() => Alert.alert("Accepted", "Slot P-A12 is now booked.")}
+        onAccept={() => Alert.alert("Accepted", `Slot ${derivedSlotNumber} is now booked.`)}
         onDecline={() => Alert.alert("Denied", "Request has been removed.")}
       />
 

@@ -43,9 +43,7 @@ export const API_CONFIG = {
     BOOKINGS: '/api/bookings',
     BOOKINGS_BY_USER: (userId: number) => `/api/bookings/user/${userId}`,
     
-    // Visitors
-    VISITORS: '/api/visitors',
-    VISITORS_BY_USER: (userId: number) => `/api/visitors/user/${userId}`,
+
     
     // Houses
     HOUSES: '/api/houses/status',
@@ -112,7 +110,7 @@ export const FEATURES = {
   DARK_MODE_ENABLED: true,
   OTP_LOGIN_ENABLED: false,
   COMMON_AREA_BOOKING_ENABLED: true,
-  VISITOR_MANAGEMENT_ENABLED: true,
+
 };
 
 // API endpoint aliases for backward compatibility

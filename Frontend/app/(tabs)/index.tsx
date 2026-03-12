@@ -78,14 +78,7 @@ const FEATURE_CARDS: FeatureCard[] = [
     iconColor: '#EA580C',
     iconBg: '#FFF7ED',
   },
-  {
-    icon: 'people',
-    title: 'Visitors',
-    subtitle: 'Manage guests',
-    route: '/visitor-management',
-    iconColor: '#0891B2',
-    iconBg: '#ECFEFF',
-  },
+
   {
     icon: 'megaphone',
     title: 'Announcements',
