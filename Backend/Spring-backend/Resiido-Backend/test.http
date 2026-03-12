@@ -1,0 +1,9 @@
+// Forgot Password Request
+// Sends a password reset link to the user's registered email if the email exists in the system.
+
+POST http://localhost:8080/api/auth/forgot-password
+Content-Type: application/json
+
+{
+  "email": "registereduser@gmail.com"
+}
