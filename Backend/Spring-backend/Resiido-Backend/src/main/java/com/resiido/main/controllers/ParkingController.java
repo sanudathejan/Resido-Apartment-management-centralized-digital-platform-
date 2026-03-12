@@ -94,32 +94,6 @@ public class ParkingController {
         return requestRepository.findByRequester(currentUser);
     }
 
-    @PostMapping("/request")
-    public ResponseEntity<?> createParkingRequest(
-            @RequestBody ParkingRequestCreateDTO dto,
-            Authentication authentication) {
-
-        String email = authentication.getName();
-
-        User requester = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        ParkingSlot slot = parkingSlotRepository.findById(dto.getSlotId())
-                .orElseThrow(() -> new RuntimeException("Slot not found"));
-
-        ParkingRequest request = new ParkingRequest();
-
-        request.setRequester(requester);
-        request.setSlot(slot);
-        request.setStartTime(dto.getStartTime());
-        request.setEndTime(dto.getEndTime());
-        request.setVisitorVehicleNumber(dto.getVisitorVehicleNumber().toUpperCase());
-        request.setStatus("PENDING");
-
-        parkingRequestRepository.save(request);
-
-        return ResponseEntity.ok(request);
-    }
 
     // 7. DELETE REQUEST (Cancel/Reject)
     @DeleteMapping("/request/{id}")
