@@ -468,8 +468,8 @@ export default function RegisterScreen() {
                 />
                 <Text style={[styles.roleInfoText, { color: roleColor }]}>
                   {selectedRole === 'resident'
-                    ? 'Resident accounts can manage parking, payments, maintenance, and visitors.'
-                    : 'Manager accounts get access to building analytics, approvals, and resident management.'}
+                    ? 'Resident accounts can manage parking, payments, maintenance requests, and more.'
+                    : 'Manager accounts get access to apartment analytics, approvals, and resident management.'}
                 </Text>
               </View>
 

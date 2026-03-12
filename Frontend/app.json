@@ -8,11 +8,9 @@
     "scheme": "resiido",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": false,
-
     "ios": {
       "supportsTablet": true
     },
-
     "android": {
       "package": "com.resiido.mobile",
       "adaptiveIcon": {
@@ -24,12 +22,10 @@
       "edgeToEdgeEnabled": false,
       "predictiveBackGestureEnabled": false
     },
-
     "web": {
       "output": "static",
       "favicon": "./assets/images/favicon.png"
     },
-
     "plugins": [
       "expo-router",
       [
@@ -43,9 +39,9 @@
             "backgroundColor": "#000000"
           }
         }
-      ]
+      ],
+      "@react-native-community/datetimepicker"
     ],
-
     "experiments": {
       "typedRoutes": true
     }

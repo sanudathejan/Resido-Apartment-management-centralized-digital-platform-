@@ -93,7 +93,7 @@ export default function LoginScreen() {
 
     setIsLoading(true);
     try {
-      await login({ email: email.trim(), password });
+      await login({ email: email.trim(), password, role: selectedRole.toUpperCase() });
       router.replace('/(tabs)');
     } catch (error: any) {
       Alert.alert('Login Failed', error.message || 'Invalid credentials. Please try again.');
