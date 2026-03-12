@@ -121,4 +121,18 @@ public class ParkingController {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You cannot delete this request.");
         }
     }
+    // 8. OWNER: Get my parking slot details
+    @GetMapping("/my-slot")
+    public ParkingSlot getMySlot(Principal principal) {
+        User currentUser = getAuthenticatedUser(principal);
+        return slotRepository.findByOwner(currentUser)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No assigned slot found."));
+    }
+
+    // 9. OWNER: Check my approved requests (who is currently scheduled to use my slot)
+    @GetMapping("/my-slot/approved")
+    public List<ParkingRequest> getMyApprovedRequests(Principal principal) {
+        User currentUser = getAuthenticatedUser(principal);
+        return requestRepository.findBySlotOwnerAndStatus(currentUser, "APPROVED");
+    }
 }

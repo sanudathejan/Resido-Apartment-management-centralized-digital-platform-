@@ -89,6 +89,53 @@ export default function ParkingScreen() {
   const [isLoadingSlots, setIsLoadingSlots] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
+  // My Requests State
+  const [myRequests, setMyRequests] = useState<any[]>([]);
+  const [isLoadingRequests, setIsLoadingRequests] = useState(false);
+  const [isRequestsModalVisible, setIsRequestsModalVisible] = useState(false);
+  // Pending Requests State (Requests from others for MY slot)
+  const [pendingRequests, setPendingRequests] = useState<any[]>([]);
+  const [isPendingModalVisible, setIsPendingModalVisible] = useState(false);
+  const [isLoadingPending, setIsLoadingPending] = useState(false);
+  // Active/Approved Requests State
+  const [approvedLending, setApprovedLending] = useState<any[]>([]); // People using MY slot
+  const [approvedBorrowing, setApprovedBorrowing] = useState<any[]>([]); // Slots I am using
+
+  /* ─── INITIALIZATION ─── */
+  useEffect(() => {
+    fetchMyParkingStatus();
+    fetchActiveSchedules();
+  }, []);
+
+  const fetchMyParkingStatus = async () => {
+    try {
+      const token = await AsyncStorage.getItem(APP_CONFIG.STORAGE_KEYS.AUTH_TOKEN);
+      if (!token) return;
+
+      const url = `${API_CONFIG.BASE_URL}/api/parking/my-slot`; 
+      
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/json",
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        
+        // Save the slot info 
+        setParkingSlot(data);
+        
+        // Sync the toggle UI with the database
+        // Check both common Spring Boot serialization patterns just to be safe
+        setIsLending(data.availableForLending === true || data.isAvailableForLending === true); 
+      }
+    } catch (error) {
+      console.error("Failed to fetch initial parking status:", error);
+    }
+  };
 
   /* ─── UI HANDLERS ─── */
   const handleToggleLending = async (value: boolean) => {
@@ -121,8 +168,6 @@ export default function ParkingScreen() {
       if (!response.ok) {
         throw new Error("Failed to update parking status");
       }
-
-      console.log(`Parking availability set to: ${value}`);
     } catch (error) {
       console.error("Parking Update Error:", error);
 
@@ -248,6 +293,166 @@ export default function ParkingScreen() {
     }
   };
 
+  const fetchMyRequests = async () => {
+    setIsRequestsModalVisible(true); // Open modal immediately
+    setIsLoadingRequests(true);
+
+    try {
+      const token = await AsyncStorage.getItem(
+        APP_CONFIG.STORAGE_KEYS.AUTH_TOKEN,
+      );
+      if (!token) throw new Error("No auth token found");
+
+      const url = `${API_CONFIG.BASE_URL}/api/parking/my-requests`;
+
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/json",
+        },
+      });
+
+      if (!response.ok) throw new Error("Failed to fetch requests");
+
+      const data = await response.json();
+      setMyRequests(data);
+    } catch (error) {
+      console.error("Fetch requests error:", error);
+      Alert.alert("Error", "Could not load your requests.");
+      setMyRequests([]);
+      setIsRequestsModalVisible(false);
+    } finally {
+      setIsLoadingRequests(false);
+    }
+  };
+
+  const deleteRequest = async (requestId: number) => {
+    try {
+      const token = await AsyncStorage.getItem(
+        APP_CONFIG.STORAGE_KEYS.AUTH_TOKEN,
+      );
+      if (!token) throw new Error("No auth token found");
+
+      const url = `${API_CONFIG.BASE_URL}/api/parking/request/${requestId}`;
+
+      const response = await fetch(url, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed with status ${response.status}`);
+      }
+
+      // If successful, instantly remove it from the UI
+      setMyRequests((prev) => prev.filter((req) => req.id !== requestId));
+    } catch (error) {
+      console.error("Delete request error:", error);
+    }
+  };
+
+  const fetchPendingRequests = async () => {
+    setIsPendingModalVisible(true);
+    setIsLoadingPending(true);
+
+    try {
+      const token = await AsyncStorage.getItem(APP_CONFIG.STORAGE_KEYS.AUTH_TOKEN);
+      if (!token) throw new Error("No auth token found");
+
+      const url = `${API_CONFIG.BASE_URL}/api/parking/my-slot/pending`;
+
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/json",
+        },
+      });
+
+      if (!response.ok) throw new Error("Failed to fetch pending requests");
+
+      const data = await response.json();
+      setPendingRequests(data);
+    } catch (error) {
+      console.error("Fetch pending requests error:", error);
+      Alert.alert("Error", "Could not load pending requests for your slot.");
+      setPendingRequests([]);
+    } finally {
+      setIsLoadingPending(false);
+    }
+  };
+
+  const handleRequestAction = async (requestId: number, action: "APPROVED" | "DENIED") => {
+    try {
+      const token = await AsyncStorage.getItem(APP_CONFIG.STORAGE_KEYS.AUTH_TOKEN);
+      if (!token) throw new Error("No auth token found");
+
+      // Note the query parameter ?status= as defined in your Spring Boot controller
+      const url = `${API_CONFIG.BASE_URL}/api/parking/request/${requestId}?status=${action}`;
+
+      const response = await fetch(url, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) throw new Error(`Failed to ${action} request`);
+
+      // Optimistically remove the request from the list
+      setPendingRequests((prev) => prev.filter((req) => req.id !== requestId));
+      
+      // Give a tiny delay for the alert so it doesn't clash with the modal
+      setTimeout(() => {
+        Alert.alert("Success", `Request has been ${action.toLowerCase()}.`);
+      }, 100);
+
+    } catch (error) {
+      console.error(`Error processing ${action}:`, error);
+      Alert.alert("Error", "Could not process the request. Please try again.");
+    }
+  };
+
+  const fetchActiveSchedules = async () => {
+    try {
+      const token = await AsyncStorage.getItem(APP_CONFIG.STORAGE_KEYS.AUTH_TOKEN);
+      if (!token) return;
+
+      const headers = {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+      };
+
+      // 1. Fetch who is borrowing MY slot
+      const lendRes = await fetch(`${API_CONFIG.BASE_URL}/api/parking/my-slot/approved`, { headers });
+      if (lendRes.ok) {
+        const lendData = await lendRes.json();
+        const now = new Date();
+        // Only keep requests where the end time hasn't passed yet
+        const activeLending = lendData.filter((req: any) => new Date(req.endTime) > now);
+        setApprovedLending(activeLending);
+      }
+
+      // 2. Fetch slots I am borrowing
+      const borrowRes = await fetch(`${API_CONFIG.BASE_URL}/api/parking/my-requests`, { headers });
+      if (borrowRes.ok) {
+        const borrowData = await borrowRes.json();
+        const now = new Date();
+        // Only keep APPROVED requests where the end time hasn't passed yet
+        const activeBorrowing = borrowData.filter((req: any) => 
+          req.status === "APPROVED" && new Date(req.endTime) > now
+        );
+        setApprovedBorrowing(activeBorrowing);
+      }
+    } catch (error) {
+      console.error("Failed to fetch active schedules:", error);
+    }
+  };
+
   /* ─── RENDER: MY PARKING TAB ─── */
   const renderMyParkingTab = () => (
     <>
@@ -303,6 +508,40 @@ export default function ParkingScreen() {
           thumbColor={Platform.OS === "android" ? C.white : ""}
         />
       </View>
+      {/* 3. Manage Pending Requests */}
+      <View style={{ marginTop: 24 }}>
+        <TouchableOpacity
+          style={styles.searchButton} // Reusing your existing solid button style
+          onPress={fetchPendingRequests}
+          activeOpacity={0.8}
+        >
+          <Ionicons name="people" size={18} color={C.white} />
+          <Text style={styles.searchButtonText}>View Pending Requests</Text>
+        </TouchableOpacity>
+      </View>
+      {/* 4. Currently Approved Lends (People using my slot) */}
+      {approvedLending.length > 0 && (
+        <View style={{ marginTop: 32 }}>
+          <Text style={{ fontSize: 16, fontWeight: '600', color: C.textDark, marginBottom: 12 }}>
+            Scheduled Visitors
+          </Text>
+          {approvedLending.map((req, index) => (
+            <View key={index} style={[styles.availableSlotCard, shadow(1), { borderLeftWidth: 4, borderLeftColor: C.success }]}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                <View style={[styles.avatarSmall, { backgroundColor: '#ECFDF5' }]}>
+                  <Ionicons name="car" size={18} color={C.success} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.visitorName}>User #{req.requester?.id || "Unknown"} is using your slot</Text>
+                  <Text style={styles.visitorSub}>
+                    {new Date(req.startTime).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} • {new Date(req.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} to {new Date(req.endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </Text>
+                </View>
+              </View>
+            </View>
+          ))}
+        </View>
+      )}
     </>
   );
 
@@ -322,23 +561,41 @@ export default function ParkingScreen() {
       </TouchableOpacity>
       <View style={{ height: 16 }} /> {/* Spacer */}
       <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>PENDING REQUESTS</Text>
-        <View style={styles.countBadge}>
-          <Text style={styles.countText}>2 New</Text>
-        </View>
+        <Text style={styles.sectionTitle}>MY REQUESTS</Text>
       </View>
-      {/* Your RequestCards stay here... */}
-      <RequestCard
-        name="Resident ID: 405"
-        date="25 Feb 2026"
-        startTime="09:00 AM"
-        endTime="12:00 PM"
-        note="Need a spot for my guest's car."
-        onAccept={() =>
-          Alert.alert("Accepted", `Slot ${derivedSlotNumber} is now booked.`)
-        }
-        onDecline={() => Alert.alert("Denied", "Request has been removed.")}
-      />
+      <TouchableOpacity
+        style={[styles.searchButton, { backgroundColor: C.secondary }]} // Differentiated color
+        onPress={fetchMyRequests}
+        activeOpacity={0.8}
+      >
+        <Ionicons name="list" size={18} color={C.white} />
+        <Text style={styles.searchButtonText}>View My Requests</Text>
+      </TouchableOpacity>
+      {/* Approved Borrowings (Slots I am using) */}
+      {approvedBorrowing.length > 0 && (
+        <View style={{ marginTop: 32 }}>
+          <Text style={{ fontSize: 16, fontWeight: '600', color: C.textDark, marginBottom: 12 }}>
+            Your Upcoming Parking
+          </Text>
+          {approvedBorrowing.map((req, index) => (
+            <View key={index} style={[styles.availableSlotCard, shadow(1), { borderLeftWidth: 4, borderLeftColor: C.primary }]}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                <View style={[styles.avatarSmall, { backgroundColor: '#EFF6FF' }]}>
+                  <Ionicons name="location" size={18} color={C.primary} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.visitorName}>
+                    Slot #{req.slot?.slotNumber || "Unknown"} (Owner: User #{req.slot?.owner?.id || "?"})
+                  </Text>
+                  <Text style={styles.visitorSub}>
+                    {new Date(req.startTime).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} • {new Date(req.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} to {new Date(req.endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </Text>
+                </View>
+              </View>
+            </View>
+          ))}
+        </View>
+      )}
     </>
   );
 
@@ -552,6 +809,178 @@ export default function ParkingScreen() {
           </Pressable>
         </Pressable>
       </Modal>
+      {/* ─── NEW: MY REQUESTS MODAL ─── */}
+      <Modal
+        visible={isRequestsModalVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setIsRequestsModalVisible(false)}
+      >
+        <Pressable
+          style={styles.modalOverlay}
+          onPress={() => setIsRequestsModalVisible(false)}
+        >
+          <Pressable style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>My Requests</Text>
+              <TouchableOpacity
+                onPress={() => setIsRequestsModalVisible(false)}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              >
+                <Ionicons name="close-circle" size={26} color={C.textMuted} />
+              </TouchableOpacity>
+            </View>
+
+            {isLoadingRequests ? (
+              <View style={styles.modalLoading}>
+                <ActivityIndicator size="large" color={C.secondary} />
+                <Text style={styles.loadingText}>Loading requests...</Text>
+              </View>
+            ) : myRequests.length === 0 ? (
+              <View style={styles.emptyState}>
+                <Text style={styles.emptyStateText}>
+                  You don't have any active parking requests.
+                </Text>
+              </View>
+            ) : (
+              <ScrollView
+                showsVerticalScrollIndicator={false}
+                style={styles.modalScroll}
+              >
+                {myRequests.map((req, index) => (
+                  <View
+                    key={index}
+                    style={[styles.availableSlotCard, shadow(1)]}
+                  >
+                    <View style={styles.avatarSmall}>
+                      <Ionicons name="time" size={18} color={C.secondary} />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.visitorName}>
+                        Slot {req.slot?.slotNumber || "Unknown"}
+                      </Text>
+                      <Text style={styles.visitorSub}>
+                        {/* Formatting the dates for readability */}
+                        {new Date(req.startTime).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}{" "}
+                        -{" "}
+                        {new Date(req.endTime).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </Text>
+                      <Text
+                        style={[
+                          styles.visitorSub,
+                          {
+                            color:
+                              req.status === "APPROVED" ? C.success : C.warning,
+                            fontWeight: "700",
+                            marginTop: 2,
+                          },
+                        ]}
+                      >
+                        {req.status || "PENDING"}
+                      </Text>
+                    </View>
+
+                    {/* Delete Button */}
+                    <TouchableOpacity
+                      style={[
+                        styles.borrowBtn,
+                        { backgroundColor: "#FEF2F2", borderColor: "#FEE2E2" },
+                      ]}
+                      onPress={() => deleteRequest(req.id)}
+                    >
+                      <Text style={[styles.borrowBtnText, { color: C.error }]}>
+                        Cancel
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                ))}
+              </ScrollView>
+            )}
+          </Pressable>
+        </Pressable>
+      </Modal>
+      {/* ─── PENDING REQUESTS MODAL (For My Slot) ─── */}
+      <Modal
+        visible={isPendingModalVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setIsPendingModalVisible(false)}
+      >
+        <Pressable
+          style={styles.modalOverlay}
+          onPress={() => setIsPendingModalVisible(false)}
+        >
+          <Pressable style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Slot Requests</Text>
+              <TouchableOpacity
+                onPress={() => setIsPendingModalVisible(false)}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              >
+                <Ionicons name="close-circle" size={26} color={C.textMuted} />
+              </TouchableOpacity>
+            </View>
+
+            {isLoadingPending ? (
+              <View style={styles.modalLoading}>
+                <ActivityIndicator size="large" color={C.primary} />
+                <Text style={styles.loadingText}>Checking requests...</Text>
+              </View>
+            ) : pendingRequests.length === 0 ? (
+              <View style={styles.emptyState}>
+                <Text style={styles.emptyStateText}>
+                  No one has requested to borrow your slot yet.
+                </Text>
+              </View>
+            ) : (
+              <ScrollView showsVerticalScrollIndicator={false} style={styles.modalScroll}>
+                {pendingRequests.map((req, index) => (
+                  <View key={index} style={[styles.availableSlotCard, shadow(1), { flexDirection: 'column', alignItems: 'stretch' }]}>
+                    
+                    {/* Info Row */}
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+                      <View style={styles.avatarSmall}>
+                        <Ionicons name="person" size={18} color={C.primary} />
+                      </View>
+                      <View style={{ flex: 1 }}>
+                        {/* If you have the requester's name, swap 'User' for req.requester.name */}
+                        <Text style={styles.visitorName}>User #{req.requester?.id || "Unknown"}</Text>
+                        <Text style={styles.visitorSub}>
+                          {new Date(req.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {new Date(req.endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </Text>
+                      </View>
+                    </View>
+
+                    {/* Action Buttons Row */}
+                    <View style={{ flexDirection: 'row', gap: 10 }}>
+                      <TouchableOpacity
+                        style={[styles.borrowBtn, { flex: 1, alignItems: 'center', backgroundColor: '#FEF2F2', borderColor: '#FEE2E2' }]}
+                        onPress={() => handleRequestAction(req.id, "DENIED")}
+                      >
+                        <Text style={[styles.borrowBtnText, { color: C.error }]}>Decline</Text>
+                      </TouchableOpacity>
+                      
+                      <TouchableOpacity
+                        style={[styles.borrowBtn, { flex: 1, alignItems: 'center', backgroundColor: '#ECFDF5', borderColor: '#D1FAE5' }]}
+                        onPress={() => handleRequestAction(req.id, "APPROVED")}
+                      >
+                        <Text style={[styles.borrowBtnText, { color: C.success }]}>Accept</Text>
+                      </TouchableOpacity>
+                    </View>
+
+                  </View>
+                ))}
+              </ScrollView>
+            )}
+          </Pressable>
+        </Pressable>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -715,12 +1144,12 @@ const styles = StyleSheet.create({
   },
   // Time Picker Buttons
   timePickerButton: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: '#F1F5F9',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    backgroundColor: "#F1F5F9",
     borderWidth: 1,
-    borderColor: '#CBD5E1',
+    borderColor: "#CBD5E1",
     borderRadius: 12,
     padding: 14,
     marginTop: 8,
@@ -728,7 +1157,7 @@ const styles = StyleSheet.create({
   timePickerButtonText: {
     fontSize: 15,
     color: C.textDark,
-    fontWeight: '500',
+    fontWeight: "500",
   },
 
   // Tabs
