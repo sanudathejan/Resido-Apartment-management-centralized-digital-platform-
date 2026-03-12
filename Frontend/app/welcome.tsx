@@ -65,7 +65,6 @@ export default function WelcomeScreen() {
             { label: 'Parking', icon: 'car-sport-outline' as const },
             { label: 'Payments', icon: 'wallet-outline' as const },
             { label: 'Maintenance', icon: 'construct-outline' as const },
-            { label: 'Visitors', icon: 'people-outline' as const },
           ].map((f) => (
             <View key={f.label} style={styles.pill}>
               <Ionicons name={f.icon} size={14} color={COLORS.primary} />
