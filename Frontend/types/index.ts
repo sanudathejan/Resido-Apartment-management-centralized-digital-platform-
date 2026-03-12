@@ -131,17 +131,7 @@ export interface ParkingRequest {
   reason?: string;
 }
 
-export interface VisitorEntry {
-  id: number;
-  visitorName: string;
-  visitorPhone?: string;
-  vehicleNumber?: string;
-  purpose: string;
-  resident: User;
-  entryTime: string;
-  exitTime?: string;
-  status: 'PENDING' | 'CHECKED_IN' | 'CHECKED_OUT';
-}
+
 
 // SOS types
 export interface SosAlert {
@@ -190,7 +180,6 @@ export interface DashboardStats {
   pendingPayments: number;
   activeMaintenanceRequests: number;
   unreadAnnouncements: number;
-  upcomingVisitors: number;
 }
 
 // Error types

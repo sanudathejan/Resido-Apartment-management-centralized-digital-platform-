@@ -70,13 +70,7 @@ export default function RootLayout() {
                 title: 'Manager Dashboard'
               }}
             />
-            <Stack.Screen
-              name="visitor-management"
-              options={{
-                headerShown: false,
-                title: 'Visitor Management'
-              }}
-            />
+
           </Stack>
           <StatusBar style="auto" />
         </ThemeProvider>
