@@ -56,10 +56,9 @@ const shadow = (elevation: number) => ({
 
 export default function ParkingScreen() {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState<'parking' | 'visitors'>('parking');// define a state variable called activeTab. This is what remembers which button you last clicked.
+  const [activeTab, setActiveTab] = useState<'my_parking' | 'requests'>('my_parking');
   const [parkingSlot, setParkingSlot] = useState<any>(null); // Replace any with your type
   const [loading, setLoading] = useState(false);
-  const [showVisitorModal, setShowVisitorModal] = useState(false);
 
 // Toggle State for the "Lend My Slot" switch
   const [isLending, setIsLending] = useState(false);
@@ -70,8 +69,8 @@ export default function ParkingScreen() {
     // Add logic here to update the backend via parkingService
   };
 
-/* ─── RENDER: PARKING TAB ─── */
-  const renderParkingTab = () => (
+/* ─── RENDER: MY PARKING TAB ─── */
+  const renderMyParkingTab = () => (
     <>
       {/* 1. Slot Visual Card: Displays current assignment status */}
       <View style={[styles.card, shadow(2)]}>
@@ -100,21 +99,26 @@ export default function ParkingScreen() {
       </View>
 
       {/* 2. Lending Management: Switch to allow others to use the slot */}
-            <View style={[styles.toggleCard, shadow(2)]}>
-              <View style={{ flex: 1 }}>
-                  <Text style={styles.cardTitle}>Lend My Slot</Text>
-                  <Text style={styles.cardSubtitle}>
-                      Mark your slot as free for other residents to use temporarily while you're away.
-                  </Text>
-              </View>
-              <Switch
-                  value={isLending}
-                  onValueChange={handleToggleLending}
-                  trackColor={{ false: '#CBD5E1', true: '#2563EB' }}
-                  thumbColor={Platform.OS === 'android' ? C.white : ''}
-              />
-            </View>
-      {/* 3. Pending Requests: Now passing specific names, dates, and times */}
+      <View style={[styles.toggleCard, shadow(2)]}>
+        <View style={{ flex: 1 }}>
+            <Text style={styles.cardTitle}>Lend My Slot</Text>
+            <Text style={styles.cardSubtitle}>
+                Mark your slot as free for other residents to use temporarily while you're away.
+            </Text>
+        </View>
+        <Switch
+            value={isLending}
+            onValueChange={handleToggleLending}
+            trackColor={{ false: '#CBD5E1', true: '#2563EB' }}
+            thumbColor={Platform.OS === 'android' ? C.white : ''}
+        />
+      </View>
+    </>
+  );
+
+/* ─── RENDER: REQUESTS TAB ─── */
+  const renderRequestsTab = () => (
+    <>
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>PENDING REQUESTS</Text>
         <View style={styles.countBadge}>
@@ -123,7 +127,7 @@ export default function ParkingScreen() {
       </View>
 
       <RequestCard
-        name="Resident ID: 405" // Pass 'name' prop here
+        name="Resident ID: 405" 
         date="25 Feb 2026"
         startTime="09:00 AM"
         endTime="12:00 PM"
@@ -133,7 +137,7 @@ export default function ParkingScreen() {
       />
 
       <RequestCard
-        name="Resident ID: 112" // Pass 'name' prop here
+        name="Resident ID: 112" 
         date="26 Feb 2026"
         startTime="06:00 PM"
         endTime="10:00 PM"
@@ -141,79 +145,30 @@ export default function ParkingScreen() {
         onAccept={() => {}}
         onDecline={() => {}}
       />
-
-
-                </>
-              );
-
-/* ─── RENDER: VISITORS TAB ─── */
-  const renderVisitorsTab = () => (
-    <>
-      {/* Primary Action: Register new entry */}
-      <TouchableOpacity
-        style={[styles.registerButton, shadow(2)]}
-        onPress={() => setShowVisitorModal(true)}
-      >
-        <Ionicons name="person-add" size={20} color={C.white} />
-        <Text style={styles.registerButtonText}>Register New Visitor</Text>
-      </TouchableOpacity>
-
-      <Text style={styles.sectionTitle}>Visitor History</Text>
-
-      {/* Visitor Detail Card: Shows contact, vehicle, and timestamp info */}
-      <View style={[styles.visitorCard, shadow(1)]}>
-          <View style={styles.visitorRow}>
-              <View style={styles.avatar}>
-                <Text style={styles.avatarText}>JS</Text>
-              </View>
-              <View style={{ flex: 1 }}>
-                  <Text style={styles.visitorName}>John Smith</Text>
-                  <Text style={styles.visitorSub}>Family visit</Text>
-              </View>
-              <View style={styles.statusIn}>
-                <Text style={styles.statusInText}>• Checked In</Text>
-              </View>
-          </View>
-
-          <View style={styles.detailsBox}>
-              <View style={styles.detailItem}>
-                <Ionicons name="call-outline" size={14} color={C.textLight} />
-                <Text style={styles.detailText}>+94 77 123 4567</Text>
-              </View>
-              <View style={styles.detailItem}>
-                <Ionicons name="car-outline" size={14} color={C.textLight} />
-                <Text style={styles.detailText}>XYZ-5678</Text>
-              </View>
-              <View style={styles.detailItem}>
-                <Ionicons name="time-outline" size={14} color={C.textLight} />
-                <Text style={styles.detailText}>2/19/2026, 5:13:19 PM</Text>
-              </View>
-          </View>
-      </View>
     </>
   );
 
-return (
+  return (
     <SafeAreaView style={styles.container} edges={['top']}>
         {/* Header Section */}
         <View style={styles.header}>
-            <Text style={styles.headerTitle}>Parking & Visitors</Text>
-            <Text style={styles.headerSubtitle}>Manage parking and visitor entries</Text>
+            <Text style={styles.headerTitle}>Parking</Text>
+            <Text style={styles.headerSubtitle}>Manage your parking space and requests</Text>
         </View>
 
         {/* Custom Tab Switcher */}
         <View style={styles.tabContainer}>
             <TabButton
-                active={activeTab === 'parking'}
+                active={activeTab === 'my_parking'}
                 label="My Parking"
                 icon="car"
-                onPress={() => setActiveTab('parking')}
+                onPress={() => setActiveTab('my_parking')}
             />
             <TabButton
-                active={activeTab === 'visitors'}
-                label="Visitors"
-                icon="people"
-                onPress={() => setActiveTab('visitors')}
+                active={activeTab === 'requests'}
+                label="Requests"
+                icon="list"
+                onPress={() => setActiveTab('requests')}
             />
         </View>
 
@@ -221,7 +176,7 @@ return (
             contentContainerStyle={styles.scrollContent}
             showsVerticalScrollIndicator={false}
         >
-            {activeTab === 'parking' ? renderParkingTab() : renderVisitorsTab()}
+            {activeTab === 'my_parking' ? renderMyParkingTab() : renderRequestsTab()}
         </ScrollView>
     </SafeAreaView>
   );
@@ -322,6 +277,18 @@ card: {
   },
   dotGreen: { width: 6, height: 6, borderRadius: 3, backgroundColor: C.success, marginRight: 6 },
   statusTextGreen: { color: C.success, fontSize: 12, fontWeight: '700' },
+
+  // Status Badges (Muted/Private)
+  statusBadgeMuted: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F1F5F9',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 12
+  },
+  dotMuted: { width: 6, height: 6, borderRadius: 3, backgroundColor: C.textMuted, marginRight: 6 },
+  statusTextMuted: { color: C.textMuted, fontSize: 12, fontWeight: '700' },
 
   // Lending Toggle Card
   toggleCard: {
