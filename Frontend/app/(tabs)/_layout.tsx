@@ -47,7 +47,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="announcements/index"
         options={{
-          title: "Notifications",
+          title: "Alerts",
           tabBarIcon: ({ color, focused }) => (
             <View style={focused ? styles.activeIconContainer : undefined}>
               <Ionicons
@@ -97,8 +97,8 @@ export default function TabLayout() {
       <Tabs.Screen
         name="payments/index" // Ensure your new file is in app/(tabs)/payments/index.tsx
         options={{
-          title: 'Payments2',
-          tabBarLabel: 'Payments2',
+          title: 'Payments',
+          tabBarLabel: 'Payments',
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
               name={focused ? "wallet" : "wallet-outline"}
@@ -146,7 +146,7 @@ const styles = StyleSheet.create({
     }),
   },
   tabBarLabel: {
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: "600",
     marginTop: 2,
   },
