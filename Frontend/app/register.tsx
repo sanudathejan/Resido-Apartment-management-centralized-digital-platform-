@@ -11,7 +11,6 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  Pressable,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -28,6 +27,15 @@ import { Ionicons } from '@expo/vector-icons';
 import { UserRole } from '@/types';
 import { API_CONFIG } from '@/constants/config';
 import houseService, { House } from '@/services/houseService';
+
+// Cross-platform alert helper (Alert.alert is a no-op on web)
+const showAlert = (title: string, message: string) => {
+  if (Platform.OS === 'web') {
+    window.alert(`${title}\n\n${message}`);
+  } else {
+    Alert.alert(title, message);
+  }
+};
 
 const COLORS = {
   background: '#F4F7FB',
@@ -131,35 +139,35 @@ export default function RegisterScreen() {
   // ==========================================
   // REGISTER HANDLER
   // ==========================================
-  const handleRegister = () => {
+  const handleRegister = async () => {
     console.log('=== CREATE ACCOUNT PRESSED ===');
 
     if (!name.trim()) {
-      Alert.alert('Missing Name', 'Please enter your full name.');
+      showAlert('Missing Name', 'Please enter your full name.');
       return;
     }
     if (selectedRole === 'resident' && !houseNumber) {
-      Alert.alert('Missing House Number', 'Please select your house number.');
+      showAlert('Missing House Number', 'Please select your house number.');
       return;
     }
     if (!email.trim()) {
-      Alert.alert('Missing Email', 'Please enter your email address.');
+      showAlert('Missing Email', 'Please enter your email address.');
       return;
     }
     if (!password) {
-      Alert.alert('Missing Password', 'Please enter a password.');
+      showAlert('Missing Password', 'Please enter a password.');
       return;
     }
     if (!confirmPassword) {
-      Alert.alert('Missing Confirmation', 'Please confirm your password.');
+      showAlert('Missing Confirmation', 'Please confirm your password.');
       return;
     }
     if (password !== confirmPassword) {
-      Alert.alert('Mismatch', 'Passwords do not match.');
+      showAlert('Mismatch', 'Passwords do not match.');
       return;
     }
     if (password.length < 4 || password.length > 12) {
-      Alert.alert('Invalid Password', 'Password must be 4-12 characters.');
+      showAlert('Invalid Password', 'Password must be 4-12 characters.');
       return;
     }
 
@@ -176,43 +184,45 @@ export default function RegisterScreen() {
     };
 
     const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.REGISTER}`;
+    console.log('Registering with URL:', url);
+    console.log('Payload:', JSON.stringify(payload));
 
-    fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    })
-      .then(async (response) => {
-        const text = await response.text();
-        console.log('Registration response:', response.status, text);
-
-        if (!response.ok) {
-          let errorMsg = 'Registration failed';
-          try {
-            const json = JSON.parse(text);
-            errorMsg = json.message || json.error || errorMsg;
-          } catch (_e) {
-            if (text) errorMsg = text;
-          }
-          Alert.alert('Registration Failed', errorMsg);
-        } else {
-          // API succeeded → go to verify page with email and role
-          router.push({
-            pathname: '/verify',
-            params: { email: email.trim(), role: selectedRole === 'manager' ? 'MANAGER' : 'RESIDENT' },
-          });
-        }
-      })
-      .catch((error) => {
-        console.log('Registration error:', error);
-        Alert.alert(
-          'Connection Error',
-          'Could not connect to the server. Please make sure the backend is running.'
-        );
-      })
-      .finally(() => {
-        setIsLoading(false);
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
       });
+
+      const text = await response.text();
+      console.log('Registration response:', response.status, text);
+
+      if (!response.ok) {
+        let errorMsg = 'Registration failed';
+        try {
+          const json = JSON.parse(text);
+          errorMsg = json.message || json.error || errorMsg;
+        } catch (_e) {
+          if (text) errorMsg = text;
+        }
+        showAlert('Registration Failed', errorMsg);
+      } else {
+        // API succeeded → go to verify page with email and role
+        console.log('Registration successful! Navigating to verify...');
+        router.push({
+          pathname: '/verify',
+          params: { email: email.trim(), role: selectedRole === 'manager' ? 'MANAGER' : 'RESIDENT' },
+        });
+      }
+    } catch (error: any) {
+      console.log('Registration error:', error);
+      showAlert(
+        'Connection Error',
+        'Could not connect to the server. Please make sure the backend is running.\n\nURL: ' + url
+      );
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -464,22 +474,22 @@ export default function RegisterScreen() {
               </View>
 
               {/* Register Button */}
-              <Pressable
-                style={({ pressed }) => [
+              <TouchableOpacity
+                style={[
                   styles.registerButton,
                   { backgroundColor: roleColor },
                   isLoading && styles.registerButtonDisabled,
-                  pressed && { opacity: 0.85 },
                 ]}
                 onPress={handleRegister}
                 disabled={isLoading}
+                activeOpacity={0.85}
               >
                 {isLoading ? (
                   <ActivityIndicator color={COLORS.white} size="small" />
                 ) : (
                   <Text style={styles.registerButtonText}>Create Account</Text>
                 )}
-              </Pressable>
+              </TouchableOpacity>
 
               {/* Login Link */}
               <View style={styles.loginLink}>
