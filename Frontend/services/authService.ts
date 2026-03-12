@@ -96,16 +96,31 @@ class AuthService {
       }
 
       // Parse the JSON response with token + user data
-      const json = JSON.parse(responseText);
-      const token = json.token;
-      const userData = json.user;
+      let token: string;
+      let userData: any;
+
+      if (responseText.startsWith('eyJ')) {
+        // Backend returns raw JWT token string
+        token = responseText;
+        // Fetch user profile
+        const meResponse = await fetch(`${API_CONFIG.BASE_URL}/api/users/me`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!meResponse.ok) throw new Error('Failed to fetch user profile using token');
+        userData = await meResponse.json();
+      } else {
+        // Backend returns proper JSON
+        const json = JSON.parse(responseText);
+        token = json.token;
+        userData = json.user;
+      }
 
       const user: User = {
         id: userData.id,
         name: userData.name,
         email: userData.email,
         role: userData.role,
-        apartmentNumber: userData.requestedHouseNumber || '',
+        apartmentNumber: userData.requestedHouseNumber || userData.apartmentNumber || '',
       };
 
       // Store token and user data
@@ -197,16 +212,30 @@ class AuthService {
       }
 
       // Parse the JSON response with token + user data
-      const json = JSON.parse(responseText);
-      const token = json.token;
-      const userData = json.user;
+      let token: string;
+      let userData: any;
+      let successMessage = 'Verification successful';
+
+      if (responseText.startsWith('eyJ')) {
+        token = responseText;
+        const meResponse = await fetch(`${API_CONFIG.BASE_URL}/api/users/me`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!meResponse.ok) throw new Error('Failed to retrieve user profile after verification');
+        userData = await meResponse.json();
+      } else {
+        const json = JSON.parse(responseText);
+        token = json.token;
+        userData = json.user;
+        if (json.message) successMessage = json.message;
+      }
 
       const user: User = {
         id: userData.id,
         name: userData.name,
         email: userData.email,
         role: userData.role,
-        apartmentNumber: userData.requestedHouseNumber || '',
+        apartmentNumber: userData.requestedHouseNumber || userData.apartmentNumber || '',
       };
 
       // Store token and user data
@@ -216,7 +245,7 @@ class AuthService {
       }
       await this.saveUserData(user);
 
-      return { user, message: json.message || 'Verification successful', token };
+      return { user, message: successMessage, token };
     } catch (error) {
       console.error('Verification error:', error);
       throw error;
