@@ -5,7 +5,7 @@
  * Logo image already includes "RESIIDO" branding
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -21,44 +21,45 @@ import {
   Animated,
   Easing,
   ActivityIndicator,
-} from 'react-native';
-import { useRouter } from 'expo-router';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
-import { useAuth } from '@/context/AuthContext';
-import { API_CONFIG } from '@/constants/config';
+} from "react-native";
+import { useRouter } from "expo-router";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
+import { useAuth } from "@/context/AuthContext";
+import { API_CONFIG } from "@/constants/config";
 
 const COLORS = {
-  background: '#F4F7FB',
-  primary: '#2563EB',
-  primaryLight: '#EFF6FF',
-  textDark: '#1E293B',
-  textLight: '#64748B',
-  textMuted: '#94A3B8',
-  white: '#FFFFFF',
-  border: '#E2E8F0',
-  error: '#EF4444',
-  cardShadow: '#94A3B8',
-  residentColor: '#2563EB',
-  managerColor: '#7C3AED',
-  residentBg: '#EFF6FF',
-  managerBg: '#F5F3FF',
+  background: "#F4F7FB",
+  primary: "#2563EB",
+  primaryLight: "#EFF6FF",
+  textDark: "#1E293B",
+  textLight: "#64748B",
+  textMuted: "#94A3B8",
+  white: "#FFFFFF",
+  border: "#E2E8F0",
+  error: "#EF4444",
+  cardShadow: "#94A3B8",
+  residentColor: "#2563EB",
+  managerColor: "#7C3AED",
+  residentBg: "#EFF6FF",
+  managerBg: "#F5F3FF",
 };
 
-type LoginRole = 'resident' | 'manager';
+type LoginRole = "resident" | "manager";
 
 export default function LoginScreen() {
   const router = useRouter();
   const { login } = useAuth();
 
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedRole, setSelectedRole] = useState<LoginRole>('resident');
+  const [selectedRole, setSelectedRole] = useState<LoginRole>("resident");
   const [focusedField, setFocusedField] = useState<string | null>(null);
 
-  const roleColor = selectedRole === 'resident' ? COLORS.residentColor : COLORS.managerColor;
+  const roleColor =
+    selectedRole === "resident" ? COLORS.residentColor : COLORS.managerColor;
 
   // Slide-down animation for brand
   const slideAnim = useRef(new Animated.Value(-30)).current;
@@ -83,20 +84,33 @@ export default function LoginScreen() {
 
   const handleLogin = async () => {
     if (!email.trim()) {
-      Alert.alert('Missing Email', 'Please enter your email address.');
+      Alert.alert("Missing Email", "Please enter your email address.");
       return;
     }
     if (!password) {
-      Alert.alert('Missing Password', 'Please enter your password.');
+      Alert.alert("Missing Password", "Please enter your password.");
       return;
     }
 
     setIsLoading(true);
     try {
-      await login({ email: email.trim(), password, role: selectedRole.toUpperCase() });
-      router.replace('/(tabs)');
+      await login({
+        email: email.trim(),
+        password,
+        role: selectedRole.toUpperCase(),
+      });
+
+      // Route based on the role they selected
+      if (selectedRole === "manager") {
+        router.replace("/(manager)"); // Routes to your new manager directory
+      } else {
+        router.replace("/(tabs)"); // Routes to the existing resident tabs
+      }
     } catch (error: any) {
-      Alert.alert('Login Failed', error.message || 'Invalid credentials. Please try again.');
+      Alert.alert(
+        "Login Failed",
+        error.message || "Invalid credentials. Please try again.",
+      );
     } finally {
       setIsLoading(false);
     }
@@ -106,7 +120,7 @@ export default function LoginScreen() {
     <View style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
         <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
           style={styles.keyboardView}
         >
           <ScrollView
@@ -134,7 +148,7 @@ export default function LoginScreen() {
               ]}
             >
               <Image
-                source={require('../assets/images/ResiiDo_logo_nobg.png')}
+                source={require("../assets/images/ResiiDo_logo_nobg.png")}
                 style={styles.logo}
                 resizeMode="contain"
               />
@@ -146,23 +160,30 @@ export default function LoginScreen() {
               <TouchableOpacity
                 style={[
                   styles.roleTab,
-                  selectedRole === 'resident' && {
+                  selectedRole === "resident" && {
                     backgroundColor: COLORS.residentBg,
                     borderColor: COLORS.residentColor,
                   },
                 ]}
-                onPress={() => setSelectedRole('resident')}
+                onPress={() => setSelectedRole("resident")}
                 activeOpacity={0.7}
               >
                 <Ionicons
                   name="home-outline"
                   size={18}
-                  color={selectedRole === 'resident' ? COLORS.residentColor : COLORS.textMuted}
+                  color={
+                    selectedRole === "resident"
+                      ? COLORS.residentColor
+                      : COLORS.textMuted
+                  }
                 />
                 <Text
                   style={[
                     styles.roleTabText,
-                    selectedRole === 'resident' && { color: COLORS.residentColor, fontWeight: '700' },
+                    selectedRole === "resident" && {
+                      color: COLORS.residentColor,
+                      fontWeight: "700",
+                    },
                   ]}
                 >
                   Resident
@@ -172,23 +193,30 @@ export default function LoginScreen() {
               <TouchableOpacity
                 style={[
                   styles.roleTab,
-                  selectedRole === 'manager' && {
+                  selectedRole === "manager" && {
                     backgroundColor: COLORS.managerBg,
                     borderColor: COLORS.managerColor,
                   },
                 ]}
-                onPress={() => setSelectedRole('manager')}
+                onPress={() => setSelectedRole("manager")}
                 activeOpacity={0.7}
               >
                 <Ionicons
                   name="briefcase-outline"
                   size={18}
-                  color={selectedRole === 'manager' ? COLORS.managerColor : COLORS.textMuted}
+                  color={
+                    selectedRole === "manager"
+                      ? COLORS.managerColor
+                      : COLORS.textMuted
+                  }
                 />
                 <Text
                   style={[
                     styles.roleTabText,
-                    selectedRole === 'manager' && { color: COLORS.managerColor, fontWeight: '700' },
+                    selectedRole === "manager" && {
+                      color: COLORS.managerColor,
+                      fontWeight: "700",
+                    },
                   ]}
                 >
                   Manager
@@ -203,10 +231,15 @@ export default function LoginScreen() {
               <View
                 style={[
                   styles.inputContainer,
-                  focusedField === 'email' && { borderColor: roleColor },
+                  focusedField === "email" && { borderColor: roleColor },
                 ]}
               >
-                <Ionicons name="mail-outline" size={18} color={COLORS.textMuted} style={styles.inputIcon} />
+                <Ionicons
+                  name="mail-outline"
+                  size={18}
+                  color={COLORS.textMuted}
+                  style={styles.inputIcon}
+                />
                 <TextInput
                   style={styles.input}
                   placeholder="you@example.com"
@@ -216,7 +249,7 @@ export default function LoginScreen() {
                   keyboardType="email-address"
                   autoCapitalize="none"
                   autoComplete="email"
-                  onFocus={() => setFocusedField('email')}
+                  onFocus={() => setFocusedField("email")}
                   onBlur={() => setFocusedField(null)}
                 />
               </View>
@@ -226,10 +259,15 @@ export default function LoginScreen() {
               <View
                 style={[
                   styles.inputContainer,
-                  focusedField === 'password' && { borderColor: roleColor },
+                  focusedField === "password" && { borderColor: roleColor },
                 ]}
               >
-                <Ionicons name="lock-closed-outline" size={18} color={COLORS.textMuted} style={styles.inputIcon} />
+                <Ionicons
+                  name="lock-closed-outline"
+                  size={18}
+                  color={COLORS.textMuted}
+                  style={styles.inputIcon}
+                />
                 <TextInput
                   style={styles.input}
                   placeholder="Enter your password"
@@ -237,7 +275,7 @@ export default function LoginScreen() {
                   value={password}
                   onChangeText={setPassword}
                   secureTextEntry={!showPassword}
-                  onFocus={() => setFocusedField('password')}
+                  onFocus={() => setFocusedField("password")}
                   onBlur={() => setFocusedField(null)}
                 />
                 <TouchableOpacity
@@ -245,7 +283,7 @@ export default function LoginScreen() {
                   onPress={() => setShowPassword(!showPassword)}
                 >
                   <Ionicons
-                    name={showPassword ? 'eye-off-outline' : 'eye-outline'}
+                    name={showPassword ? "eye-off-outline" : "eye-outline"}
                     size={20}
                     color={COLORS.textMuted}
                   />
@@ -254,7 +292,9 @@ export default function LoginScreen() {
 
               {/* Forgot Password */}
               <TouchableOpacity style={styles.forgotButton} activeOpacity={0.7}>
-                <Text style={[styles.forgotText, { color: roleColor }]}>Forgot password?</Text>
+                <Text style={[styles.forgotText, { color: roleColor }]}>
+                  Forgot password?
+                </Text>
               </TouchableOpacity>
 
               {/* Login Button */}
@@ -277,9 +317,18 @@ export default function LoginScreen() {
 
               {/* Register Link */}
               <View style={styles.registerLink}>
-                <Text style={styles.registerLinkText}>Don't have an account? </Text>
-                <TouchableOpacity onPress={() => router.push('/register')} activeOpacity={0.7}>
-                  <Text style={[styles.registerLinkAction, { color: roleColor }]}>Sign up</Text>
+                <Text style={styles.registerLinkText}>
+                  Don't have an account?{" "}
+                </Text>
+                <TouchableOpacity
+                  onPress={() => router.push("/register")}
+                  activeOpacity={0.7}
+                >
+                  <Text
+                    style={[styles.registerLinkAction, { color: roleColor }]}
+                  >
+                    Sign up
+                  </Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -313,8 +362,8 @@ const styles = StyleSheet.create({
     height: 42,
     borderRadius: 14,
     backgroundColor: COLORS.white,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     marginTop: 8,
     ...Platform.select({
       ios: {
@@ -329,7 +378,7 @@ const styles = StyleSheet.create({
 
   // Brand
   brandSection: {
-    alignItems: 'center',
+    alignItems: "center",
     marginTop: 24,
     marginBottom: 28,
   },
@@ -343,20 +392,20 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: COLORS.textLight,
     marginTop: 4,
-    fontWeight: '500',
+    fontWeight: "500",
   },
 
   // Role Selector
   roleSelector: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 12,
     marginBottom: 28,
   },
   roleTab: {
     flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     gap: 8,
     paddingVertical: 14,
     borderRadius: 16,
@@ -366,7 +415,7 @@ const styles = StyleSheet.create({
   },
   roleTabText: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: "600",
     color: COLORS.textMuted,
   },
 
@@ -374,14 +423,14 @@ const styles = StyleSheet.create({
   form: {},
   inputLabel: {
     fontSize: 13,
-    fontWeight: '600',
+    fontWeight: "600",
     color: COLORS.textDark,
     marginBottom: 8,
     letterSpacing: 0.2,
   },
   inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     backgroundColor: COLORS.white,
     borderRadius: 16,
     borderWidth: 1.5,
@@ -405,26 +454,26 @@ const styles = StyleSheet.create({
 
   // Forgot
   forgotButton: {
-    alignSelf: 'flex-end',
+    alignSelf: "flex-end",
     marginBottom: 24,
     marginTop: -4,
   },
   forgotText: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: "600",
   },
 
   // Login Button
   loginButton: {
     borderRadius: 16,
     paddingVertical: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     marginBottom: 28,
     minHeight: 52,
     ...Platform.select({
       ios: {
-        shadowColor: '#2563EB',
+        shadowColor: "#2563EB",
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.2,
         shadowRadius: 10,
@@ -438,15 +487,15 @@ const styles = StyleSheet.create({
   loginButtonText: {
     color: COLORS.white,
     fontSize: 16,
-    fontWeight: '700',
+    fontWeight: "700",
     letterSpacing: 0.3,
   },
 
   // Register Link
   registerLink: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
   },
   registerLinkText: {
     fontSize: 14,
@@ -454,6 +503,6 @@ const styles = StyleSheet.create({
   },
   registerLinkAction: {
     fontSize: 14,
-    fontWeight: '700',
+    fontWeight: "700",
   },
 });
