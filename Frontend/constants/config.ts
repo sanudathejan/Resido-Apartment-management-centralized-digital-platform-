@@ -4,7 +4,7 @@
 
 // API Configuration
 export const API_CONFIG = {
-  BASE_URL: 'http://192.168.1.79:8080', // Android emulator localhost
+  BASE_URL: 'http://192.168.1.3:8080', // Android emulator localhost
   // BASE_URL: 'http://localhost:8080', // iOS simulator or web
   // BASE_URL: "http://localhost:8080", // Physical device - your machine's IP
 

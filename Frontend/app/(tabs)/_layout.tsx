@@ -70,12 +70,13 @@ export default function TabLayout() {
       />
 
       <Tabs.Screen
-        name="profile/index"
+        name="payments/index" // Ensure your new file is in app/(tabs)/payments/index.tsx
         options={{
-          title: "Profile",
+          title: "Payments",
+          tabBarLabel: "Payments",
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
-              name={focused ? "person" : "person-outline"}
+              name={focused ? "wallet" : "wallet-outline"}
               size={24} // 24 or 28 are standard, reliable sizes
               color={color}
             />
@@ -84,13 +85,12 @@ export default function TabLayout() {
       />
 
       <Tabs.Screen
-        name="payments/index" // Ensure your new file is in app/(tabs)/payments/index.tsx
+        name="profile/index"
         options={{
-          title: "Payments",
-          tabBarLabel: "Payments",
+          title: "Profile",
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
-              name={focused ? "wallet" : "wallet-outline"}
+              name={focused ? "person" : "person-outline"}
               size={24} // 24 or 28 are standard, reliable sizes
               color={color}
             />
@@ -156,5 +156,5 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 14,
-  }
+  },
 });
