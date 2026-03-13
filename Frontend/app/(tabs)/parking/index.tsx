@@ -401,7 +401,17 @@ export default function ParkingScreen() {
         },
       });
 
-      if (!response.ok) throw new Error(`Failed to ${action} request`);
+      if (!response.ok) {
+        // Try to parse the Spring Boot error JSON
+        const errorData = await response.json().catch(() => null);
+        
+        // Extract the specific message we wrote in the Java controller
+        const errorMessage = errorData?.message || "Failed to process the request. Please try again.";
+        
+        // Show the specific error to the user!
+        Alert.alert("Time Conflict", errorMessage);
+        throw new Error(errorMessage);
+      }
 
       // Optimistically remove the request from the list
       setPendingRequests((prev) => prev.filter((req) => req.id !== requestId));
