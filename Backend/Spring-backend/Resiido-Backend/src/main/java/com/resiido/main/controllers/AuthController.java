@@ -148,9 +148,12 @@ public class AuthController {
         if (req.getEmail() == null || req.getEmail().trim().isEmpty()) {
             return ResponseEntity.badRequest().body("Email is required");
         }
+
         System.out.println("### FORGOT PASSWORD HIT FROM MY CURRENT APP ###");
         System.out.println("EMAIL RECEIVED: " + req.getEmail());
+
         passwordResetService.sendResetLink(req.getEmail());
+
         return ResponseEntity.ok("Reset link sent if email exists.");
     }
 
@@ -158,9 +161,12 @@ public class AuthController {
     public ResponseEntity<String> resetPassword(@Valid @RequestBody ResetPasswordRequest req) {
         System.out.println("AUTH CONTROLLER /reset-password HIT");
         System.out.println("REQ TOKEN: " + req.getToken());
+
         passwordResetService.resetPassword(req.getToken(), req.getNewPassword());
+
         return ResponseEntity.ok("Password updated successfully.");
     }
+
 
     @DeleteMapping("/delete/{id}")
     @Transactional

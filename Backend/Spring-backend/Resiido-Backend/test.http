@@ -4,3 +4,15 @@ Content-Type: application/json
 {
   "email": "exampleresidence1@gmail.com"
 }
+
+###
+
+### Reset Password
+POST http://localhost:8080/api/auth/reset-password
+Content-Type: application/json
+
+{
+  "token": "64db3e7d-1701-48dd-a8dc-9d91caf57df4",
+  "newPassword": "NewPassword123"
+}
+

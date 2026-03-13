@@ -11,6 +11,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -37,8 +38,8 @@ public class PasswordResetService {
     }
 
     // SEND EMAIL
+    @Transactional
     public void sendResetLink(String email) {
-
         User user = userRepository.findByEmail(email).orElse(null);
         if (user == null) return;
 
@@ -56,7 +57,6 @@ public class PasswordResetService {
         System.out.println("RESET TOKEN SAVED FOR: " + email);
         System.out.println("RESET TOKEN: " + token);
 
-
         String link = baseUrl + "/reset-password?token=" + token;
 
         SimpleMailMessage message = new SimpleMailMessage();
@@ -73,6 +73,7 @@ public class PasswordResetService {
 
         mailSender.send(message);
     }
+
 
     // RESET PASSWORD USING TOKEN
     public void resetPassword(String token, String newPassword) {
