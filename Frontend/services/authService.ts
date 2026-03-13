@@ -83,7 +83,6 @@ class AuthService {
 
       // Production mode - call login API endpoint
       const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.LOGIN}`;
-      console.log('ATTEMPTING TO FETCH:', url);
       const response = await fetch(url, {
         method: "POST",
         headers: {
@@ -139,6 +138,12 @@ class AuthService {
         apartmentNumber:
           userData.requestedHouseNumber || userData.apartmentNumber || "",
       };
+
+      // Ensure the user's actual role matches the login portal they are using
+      if (credentials.role && credentials.role !== user.role) {
+        const expectedRole = credentials.role.toLowerCase();
+        throw new Error(`Access denied. User is not a ${expectedRole}.`);
+      }
 
       // Store token and user data
       if (token) {

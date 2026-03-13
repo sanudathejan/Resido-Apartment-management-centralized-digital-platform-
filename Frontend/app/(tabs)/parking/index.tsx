@@ -100,6 +100,9 @@ export default function ParkingScreen() {
   // Active/Approved Requests State
   const [approvedLending, setApprovedLending] = useState<any[]>([]); // People using MY slot
   const [approvedBorrowing, setApprovedBorrowing] = useState<any[]>([]); // Slots I am using
+  //for calender
+  const [startMode, setStartMode] = useState<"date" | "time">("date"); // for Android chaining
+  const [endMode, setEndMode] = useState<"date" | "time">("date");
 
   /* ─── INITIALIZATION ─── */
   useEffect(() => {
@@ -109,11 +112,13 @@ export default function ParkingScreen() {
 
   const fetchMyParkingStatus = async () => {
     try {
-      const token = await AsyncStorage.getItem(APP_CONFIG.STORAGE_KEYS.AUTH_TOKEN);
+      const token = await AsyncStorage.getItem(
+        APP_CONFIG.STORAGE_KEYS.AUTH_TOKEN,
+      );
       if (!token) return;
 
-      const url = `${API_CONFIG.BASE_URL}/api/parking/my-slot`; 
-      
+      const url = `${API_CONFIG.BASE_URL}/api/parking/my-slot`;
+
       const response = await fetch(url, {
         method: "GET",
         headers: {
@@ -124,13 +129,16 @@ export default function ParkingScreen() {
 
       if (response.ok) {
         const data = await response.json();
-        
-        // Save the slot info 
+
+        // Save the slot info
         setParkingSlot(data);
-        
+
         // Sync the toggle UI with the database
         // Check both common Spring Boot serialization patterns just to be safe
-        setIsLending(data.availableForLending === true || data.isAvailableForLending === true); 
+        setIsLending(
+          data.availableForLending === true ||
+            data.isAvailableForLending === true,
+        );
       }
     } catch (error) {
       console.error("Failed to fetch initial parking status:", error);
@@ -360,7 +368,9 @@ export default function ParkingScreen() {
     setIsLoadingPending(true);
 
     try {
-      const token = await AsyncStorage.getItem(APP_CONFIG.STORAGE_KEYS.AUTH_TOKEN);
+      const token = await AsyncStorage.getItem(
+        APP_CONFIG.STORAGE_KEYS.AUTH_TOKEN,
+      );
       if (!token) throw new Error("No auth token found");
 
       const url = `${API_CONFIG.BASE_URL}/api/parking/my-slot/pending`;
@@ -386,9 +396,14 @@ export default function ParkingScreen() {
     }
   };
 
-  const handleRequestAction = async (requestId: number, action: "APPROVED" | "DENIED") => {
+  const handleRequestAction = async (
+    requestId: number,
+    action: "APPROVED" | "DENIED",
+  ) => {
     try {
-      const token = await AsyncStorage.getItem(APP_CONFIG.STORAGE_KEYS.AUTH_TOKEN);
+      const token = await AsyncStorage.getItem(
+        APP_CONFIG.STORAGE_KEYS.AUTH_TOKEN,
+      );
       if (!token) throw new Error("No auth token found");
 
       // Note the query parameter ?status= as defined in your Spring Boot controller
@@ -404,10 +419,12 @@ export default function ParkingScreen() {
       if (!response.ok) {
         // Try to parse the Spring Boot error JSON
         const errorData = await response.json().catch(() => null);
-        
+
         // Extract the specific message we wrote in the Java controller
-        const errorMessage = errorData?.message || "Failed to process the request. Please try again.";
-        
+        const errorMessage =
+          errorData?.message ||
+          "Failed to process the request. Please try again.";
+
         // Show the specific error to the user!
         Alert.alert("Time Conflict", errorMessage);
         throw new Error(errorMessage);
@@ -415,12 +432,11 @@ export default function ParkingScreen() {
 
       // Optimistically remove the request from the list
       setPendingRequests((prev) => prev.filter((req) => req.id !== requestId));
-      
+
       // Give a tiny delay for the alert so it doesn't clash with the modal
       setTimeout(() => {
         Alert.alert("Success", `Request has been ${action.toLowerCase()}.`);
       }, 100);
-
     } catch (error) {
       console.error(`Error processing ${action}:`, error);
       Alert.alert("Error", "Could not process the request. Please try again.");
@@ -429,7 +445,9 @@ export default function ParkingScreen() {
 
   const fetchActiveSchedules = async () => {
     try {
-      const token = await AsyncStorage.getItem(APP_CONFIG.STORAGE_KEYS.AUTH_TOKEN);
+      const token = await AsyncStorage.getItem(
+        APP_CONFIG.STORAGE_KEYS.AUTH_TOKEN,
+      );
       if (!token) return;
 
       const headers = {
@@ -438,23 +456,32 @@ export default function ParkingScreen() {
       };
 
       // 1. Fetch who is borrowing MY slot
-      const lendRes = await fetch(`${API_CONFIG.BASE_URL}/api/parking/my-slot/approved`, { headers });
+      const lendRes = await fetch(
+        `${API_CONFIG.BASE_URL}/api/parking/my-slot/approved`,
+        { headers },
+      );
       if (lendRes.ok) {
         const lendData = await lendRes.json();
         const now = new Date();
         // Only keep requests where the end time hasn't passed yet
-        const activeLending = lendData.filter((req: any) => new Date(req.endTime) > now);
+        const activeLending = lendData.filter(
+          (req: any) => new Date(req.endTime) > now,
+        );
         setApprovedLending(activeLending);
       }
 
       // 2. Fetch slots I am borrowing
-      const borrowRes = await fetch(`${API_CONFIG.BASE_URL}/api/parking/my-requests`, { headers });
+      const borrowRes = await fetch(
+        `${API_CONFIG.BASE_URL}/api/parking/my-requests`,
+        { headers },
+      );
       if (borrowRes.ok) {
         const borrowData = await borrowRes.json();
         const now = new Date();
         // Only keep APPROVED requests where the end time hasn't passed yet
-        const activeBorrowing = borrowData.filter((req: any) => 
-          req.status === "APPROVED" && new Date(req.endTime) > now
+        const activeBorrowing = borrowData.filter(
+          (req: any) =>
+            req.status === "APPROVED" && new Date(req.endTime) > now,
         );
         setApprovedBorrowing(activeBorrowing);
       }
@@ -521,7 +548,7 @@ export default function ParkingScreen() {
       {/* 3. Manage Pending Requests */}
       <View style={{ marginTop: 24 }}>
         <TouchableOpacity
-          style={styles.searchButton} // Reusing your existing solid button style
+          style={styles.searchButton}
           onPress={fetchPendingRequests}
           activeOpacity={0.8}
         >
@@ -532,19 +559,52 @@ export default function ParkingScreen() {
       {/* 4. Currently Approved Lends (People using my slot) */}
       {approvedLending.length > 0 && (
         <View style={{ marginTop: 32 }}>
-          <Text style={{ fontSize: 16, fontWeight: '600', color: C.textDark, marginBottom: 12 }}>
+          <Text
+            style={{
+              fontSize: 16,
+              fontWeight: "600",
+              color: C.textDark,
+              marginBottom: 12,
+            }}
+          >
             Scheduled Visitors
           </Text>
           {approvedLending.map((req, index) => (
-            <View key={index} style={[styles.availableSlotCard, shadow(1), { borderLeftWidth: 4, borderLeftColor: C.success }]}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-                <View style={[styles.avatarSmall, { backgroundColor: '#ECFDF5' }]}>
+            <View
+              key={index}
+              style={[
+                styles.availableSlotCard,
+                shadow(1),
+                { borderLeftWidth: 4, borderLeftColor: C.success },
+              ]}
+            >
+              <View
+                style={{ flexDirection: "row", alignItems: "center", gap: 12 }}
+              >
+                <View
+                  style={[styles.avatarSmall, { backgroundColor: "#ECFDF5" }]}
+                >
                   <Ionicons name="car" size={18} color={C.success} />
                 </View>
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.visitorName}>User #{req.requester?.id || "Unknown"} is using your slot</Text>
+                  <Text style={styles.visitorName}>
+                    User #{req.requester?.id || "Unknown"} is using your slot
+                  </Text>
                   <Text style={styles.visitorSub}>
-                    {new Date(req.startTime).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} • {new Date(req.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} to {new Date(req.endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    {new Date(req.startTime).toLocaleDateString(undefined, {
+                      month: "short",
+                      day: "numeric",
+                    })}{" "}
+                    •{" "}
+                    {new Date(req.startTime).toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}{" "}
+                    to{" "}
+                    {new Date(req.endTime).toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
                   </Text>
                 </View>
               </View>
@@ -569,7 +629,8 @@ export default function ParkingScreen() {
         <Ionicons name="search" size={18} color={C.white} />
         <Text style={styles.searchButtonText}>Find Available Slots</Text>
       </TouchableOpacity>
-      <View style={{ height: 16 }} /> {/* Spacer */}
+      <View style={{ height: 16 }} />
+      {/* Spacer */}
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>MY REQUESTS</Text>
       </View>
@@ -584,21 +645,53 @@ export default function ParkingScreen() {
       {/* Approved Borrowings (Slots I am using) */}
       {approvedBorrowing.length > 0 && (
         <View style={{ marginTop: 32 }}>
-          <Text style={{ fontSize: 16, fontWeight: '600', color: C.textDark, marginBottom: 12 }}>
+          <Text
+            style={{
+              fontSize: 16,
+              fontWeight: "600",
+              color: C.textDark,
+              marginBottom: 12,
+            }}
+          >
             Your Upcoming Parking
           </Text>
           {approvedBorrowing.map((req, index) => (
-            <View key={index} style={[styles.availableSlotCard, shadow(1), { borderLeftWidth: 4, borderLeftColor: C.primary }]}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-                <View style={[styles.avatarSmall, { backgroundColor: '#EFF6FF' }]}>
+            <View
+              key={index}
+              style={[
+                styles.availableSlotCard,
+                shadow(1),
+                { borderLeftWidth: 4, borderLeftColor: C.primary },
+              ]}
+            >
+              <View
+                style={{ flexDirection: "row", alignItems: "center", gap: 12 }}
+              >
+                <View
+                  style={[styles.avatarSmall, { backgroundColor: "#EFF6FF" }]}
+                >
                   <Ionicons name="location" size={18} color={C.primary} />
                 </View>
                 <View style={{ flex: 1 }}>
                   <Text style={styles.visitorName}>
-                    Slot #{req.slot?.slotNumber || "Unknown"} (Owner: User #{req.slot?.owner?.id || "?"})
+                    Slot #{req.slot?.slotNumber || "Unknown"} (Owner: User #
+                    {req.slot?.owner?.id || "?"})
                   </Text>
                   <Text style={styles.visitorSub}>
-                    {new Date(req.startTime).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} • {new Date(req.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} to {new Date(req.endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    {new Date(req.startTime).toLocaleDateString(undefined, {
+                      month: "short",
+                      day: "numeric",
+                    })}{" "}
+                    •{" "}
+                    {new Date(req.startTime).toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}{" "}
+                    to{" "}
+                    {new Date(req.endTime).toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
                   </Text>
                 </View>
               </View>
@@ -647,14 +740,12 @@ export default function ParkingScreen() {
         visible={isModalVisible}
         transparent={true}
         animationType="fade"
-        onRequestClose={() => setIsModalVisible(false)} // Handles Android back button
+        onRequestClose={() => setIsModalVisible(false)}
       >
-        {/* Pressable background to close modal when clicking outside */}
         <Pressable
           style={styles.modalOverlay}
           onPress={() => setIsModalVisible(false)}
         >
-          {/* The actual white popup box (Pressable stops the tap from closing the modal if they click inside) */}
           <Pressable style={styles.modalContent}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Available Slots</Text>
@@ -731,7 +822,6 @@ export default function ParkingScreen() {
               Borrowing Slot {selectedSlotForBorrow?.slotNumber || "Unknown"}
             </Text>
 
-            {/* Start Time Picker Button */}
             <View style={{ marginTop: 20 }}>
               <Text style={styles.detailText}>Start Time</Text>
               <TouchableOpacity
@@ -748,7 +838,6 @@ export default function ParkingScreen() {
               </TouchableOpacity>
             </View>
 
-            {/* End Time Picker Button */}
             <View style={{ marginTop: 15, marginBottom: 24 }}>
               <Text style={styles.detailText}>End Time</Text>
               <TouchableOpacity
@@ -765,15 +854,38 @@ export default function ParkingScreen() {
               </TouchableOpacity>
             </View>
 
-            {/* Hidden DateTimePickers (They pop up natively when triggered) */}
             {showStartPicker && (
               <DateTimePicker
                 value={borrowStartTime}
-                mode="datetime"
+                // iOS gets 'datetime', Android gets dynamic mode ('date' then 'time')
+                mode={Platform.OS === "ios" ? "datetime" : startMode}
                 display="default"
                 onChange={(event, selectedDate) => {
-                  setShowStartPicker(Platform.OS === "ios"); // Keep open on iOS, close on Android
-                  if (selectedDate) setBorrowStartTime(selectedDate);
+                  // 1. Handle Cancel button
+                  if (event.type === "dismissed") {
+                    setShowStartPicker(false);
+                    setStartMode("date"); // Reset for next time
+                    return;
+                  }
+
+                  // 2. Update the time
+                  const currentDate = selectedDate || borrowStartTime;
+                  setBorrowStartTime(currentDate);
+
+                  // 3. Platform specific behavior
+                  if (Platform.OS === "android") {
+                    if (startMode === "date") {
+                      // They just picked the date, now show the time!
+                      setStartMode("time");
+                    } else {
+                      // They finished picking the time, we are done.
+                      setShowStartPicker(false);
+                      setStartMode("date"); // Reset for next time
+                    }
+                  } else {
+                    // iOS doesn't auto-close the same way.
+                    setShowStartPicker(false);
+                  }
                 }}
               />
             )}
@@ -781,17 +893,39 @@ export default function ParkingScreen() {
             {showEndPicker && (
               <DateTimePicker
                 value={borrowEndTime}
-                mode="datetime"
+                mode={Platform.OS === "ios" ? "datetime" : endMode}
                 display="default"
                 minimumDate={borrowStartTime}
                 onChange={(event, selectedDate) => {
-                  setShowEndPicker(Platform.OS === "ios");
-                  if (selectedDate) setBorrowEndTime(selectedDate);
+                  // 1. Handle Cancel button
+                  if (event.type === "dismissed") {
+                    setShowEndPicker(false);
+                    setEndMode("date"); // Reset for next time
+                    return;
+                  }
+
+                  // 2. Update the time
+                  const currentDate = selectedDate || borrowEndTime;
+                  setBorrowEndTime(currentDate);
+
+                  // 3. Platform specific behavior for Android chaining
+                  if (Platform.OS === "android") {
+                    if (endMode === "date") {
+                      // They just picked the date, now show the time!
+                      setEndMode("time");
+                    } else {
+                      // They finished picking the time, we are done.
+                      setShowEndPicker(false);
+                      setEndMode("date"); // Reset for next time
+                    }
+                  } else {
+                    // Optional: close on iOS
+                    setShowEndPicker(false);
+                  }
                 }}
               />
             )}
 
-            {/* Submit Button */}
             <TouchableOpacity
               style={[
                 styles.registerButton,
@@ -870,7 +1004,6 @@ export default function ParkingScreen() {
                         Slot {req.slot?.slotNumber || "Unknown"}
                       </Text>
                       <Text style={styles.visitorSub}>
-                        {/* Formatting the dates for readability */}
                         {new Date(req.startTime).toLocaleTimeString([], {
                           hour: "2-digit",
                           minute: "2-digit",
@@ -896,7 +1029,6 @@ export default function ParkingScreen() {
                       </Text>
                     </View>
 
-                    {/* Delete Button */}
                     <TouchableOpacity
                       style={[
                         styles.borrowBtn,
@@ -949,41 +1081,87 @@ export default function ParkingScreen() {
                 </Text>
               </View>
             ) : (
-              <ScrollView showsVerticalScrollIndicator={false} style={styles.modalScroll}>
+              <ScrollView
+                showsVerticalScrollIndicator={false}
+                style={styles.modalScroll}
+              >
                 {pendingRequests.map((req, index) => (
-                  <View key={index} style={[styles.availableSlotCard, shadow(1), { flexDirection: 'column', alignItems: 'stretch' }]}>
-                    
-                    {/* Info Row */}
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+                  <View
+                    key={index}
+                    style={[
+                      styles.availableSlotCard,
+                      shadow(1),
+                      { flexDirection: "column", alignItems: "stretch" },
+                    ]}
+                  >
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        gap: 12,
+                        marginBottom: 12,
+                      }}
+                    >
                       <View style={styles.avatarSmall}>
                         <Ionicons name="person" size={18} color={C.primary} />
                       </View>
                       <View style={{ flex: 1 }}>
-                        {/* If you have the requester's name, swap 'User' for req.requester.name */}
-                        <Text style={styles.visitorName}>User #{req.requester?.id || "Unknown"}</Text>
+                        <Text style={styles.visitorName}>
+                          User #{req.requester?.id || "Unknown"}
+                        </Text>
                         <Text style={styles.visitorSub}>
-                          {new Date(req.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {new Date(req.endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          {new Date(req.startTime).toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}{" "}
+                          -{" "}
+                          {new Date(req.endTime).toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
                         </Text>
                       </View>
                     </View>
 
-                    {/* Action Buttons Row */}
-                    <View style={{ flexDirection: 'row', gap: 10 }}>
+                    <View style={{ flexDirection: "row", gap: 10 }}>
                       <TouchableOpacity
-                        style={[styles.borrowBtn, { flex: 1, alignItems: 'center', backgroundColor: '#FEF2F2', borderColor: '#FEE2E2' }]}
+                        style={[
+                          styles.borrowBtn,
+                          {
+                            flex: 1,
+                            alignItems: "center",
+                            backgroundColor: "#FEF2F2",
+                            borderColor: "#FEE2E2",
+                          },
+                        ]}
                         onPress={() => handleRequestAction(req.id, "DENIED")}
                       >
-                        <Text style={[styles.borrowBtnText, { color: C.error }]}>Decline</Text>
+                        <Text
+                          style={[styles.borrowBtnText, { color: C.error }]}
+                        >
+                          Decline
+                        </Text>
                       </TouchableOpacity>
-                      
+
                       <TouchableOpacity
-                        style={[styles.borrowBtn, { flex: 1, alignItems: 'center', backgroundColor: '#ECFDF5', borderColor: '#D1FAE5' }]}
+                        style={[
+                          styles.borrowBtn,
+                          {
+                            flex: 1,
+                            alignItems: "center",
+                            backgroundColor: "#ECFDF5",
+                            borderColor: "#D1FAE5",
+                          },
+                        ]}
                         onPress={() => handleRequestAction(req.id, "APPROVED")}
                       >
-                        <Text style={[styles.borrowBtnText, { color: C.success }]}>Accept</Text>
+                        <Text
+                          style={[styles.borrowBtnText, { color: C.success }]}
+                        >
+                          Accept
+                        </Text>
                       </TouchableOpacity>
                     </View>
-
                   </View>
                 ))}
               </ScrollView>
