@@ -58,10 +58,29 @@ public class ParkingController {
     // 3. BORROWER: Request a spot
     @PostMapping("/request")
     public ParkingRequest createRequest(Principal principal, @RequestBody ParkingRequest request) {
+        System.out.println("PARKING REQUEST ENDPOINT HIT");
+
+        if (principal == null) {
+            System.out.println("PRINCIPAL IS NULL");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not authenticated");
+        }
+
+        System.out.println("PRINCIPAL: " + principal.getName());
+
         User requester = getAuthenticatedUser(principal);
 
         ParkingSlot targetSlot = slotRepository.findById(request.getSlot().getId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Target slot not found"));
+
+        System.out.println("TARGET SLOT ID: " + targetSlot.getId());
+
+        if (targetSlot.getOwner() == null) {
+            System.out.println("TARGET SLOT OWNER IS NULL");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Parking slot has no owner assigned");
+        }
+
+        System.out.println("TARGET SLOT OWNER ID: " + targetSlot.getOwner().getId());
+        System.out.println("REQUESTER ID: " + requester.getId());
 
         if (targetSlot.getOwner().getId().equals(requester.getId())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Self-requesting is not allowed.");
@@ -71,8 +90,12 @@ public class ParkingController {
         request.setStatus("PENDING");
         request.setSlot(targetSlot);
 
-        return requestRepository.save(request);
+        ParkingRequest savedRequest = requestRepository.save(request);
+        System.out.println("PARKING REQUEST SAVED WITH ID: " + savedRequest.getId());
+
+        return savedRequest;
     }
+
 
     // 4. OWNER: Approve or Deny
     @PutMapping("/request/{requestId}")
