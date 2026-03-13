@@ -2,7 +2,7 @@
  * Base API service for Resiido
  */
 
-import { API_CONFIG } from '@/constants/config';
+import { API_CONFIG } from "@/constants/config";
 
 class ApiService {
   private baseUrl: string;
@@ -18,11 +18,11 @@ class ApiService {
 
   private getHeaders(): HeadersInit {
     const headers: HeadersInit = {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     };
 
     if (this.token) {
-      headers['Authorization'] = `Bearer ${this.token}`;
+      headers["Authorization"] = `Bearer ${this.token}`;
     }
 
     return headers;
@@ -31,7 +31,7 @@ class ApiService {
   async get<T>(endpoint: string): Promise<T> {
     try {
       const response = await fetch(`${this.baseUrl}${endpoint}`, {
-        method: 'GET',
+        method: "GET",
         headers: this.getHeaders(),
       });
 
@@ -41,7 +41,7 @@ class ApiService {
 
       return await response.json();
     } catch (error) {
-      console.error('API GET Error:', error);
+      console.error("API GET Error:", error);
       throw error;
     }
   }
@@ -49,7 +49,7 @@ class ApiService {
   async post<T>(endpoint: string, data: any): Promise<T> {
     try {
       const response = await fetch(`${this.baseUrl}${endpoint}`, {
-        method: 'POST',
+        method: "POST",
         headers: this.getHeaders(),
         body: JSON.stringify(data),
       });
@@ -78,7 +78,7 @@ class ApiService {
         return responseText as unknown as T;
       }
     } catch (error) {
-      console.error('API POST Error:', error);
+      console.error("API POST Error:", error);
       throw error;
     }
   }
@@ -86,18 +86,32 @@ class ApiService {
   async put<T>(endpoint: string, data: any): Promise<T> {
     try {
       const response = await fetch(`${this.baseUrl}${endpoint}`, {
-        method: 'PUT',
+        method: "PUT",
         headers: this.getHeaders(),
         body: JSON.stringify(data),
       });
 
+      const responseText = await response.text();
+
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        throw new Error(
+          `HTTP error! status: ${response.status} - ${responseText}`,
+        );
       }
 
-      return await response.json();
+      // If the backend returns void/empty (like our profile-picture endpoint), just return null
+      if (!responseText) {
+        return null as unknown as T;
+      }
+
+      // Otherwise, try to parse it as JSON
+      try {
+        return JSON.parse(responseText) as T;
+      } catch (_e) {
+        return responseText as unknown as T;
+      }
     } catch (error) {
-      console.error('API PUT Error:', error);
+      console.error("API PUT Error:", error);
       throw error;
     }
   }
@@ -105,7 +119,7 @@ class ApiService {
   async delete<T>(endpoint: string): Promise<T> {
     try {
       const response = await fetch(`${this.baseUrl}${endpoint}`, {
-        method: 'DELETE',
+        method: "DELETE",
         headers: this.getHeaders(),
       });
 
@@ -115,7 +129,7 @@ class ApiService {
 
       return await response.json();
     } catch (error) {
-      console.error('API DELETE Error:', error);
+      console.error("API DELETE Error:", error);
       throw error;
     }
   }
