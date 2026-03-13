@@ -27,4 +27,12 @@ public class NotificationService {
     public List<Notification> getUserNotifications(Long userId) {
         return notificationRepository.findByUserIdOrderByCreatedAtDesc(userId);
     }
+
+    public void sendSosNotifications(User user) {
+        createNotification(
+                user,
+                "SOS Alert Triggered",
+                "Emergency SOS alert has been triggered."
+        );
+    }
 }
