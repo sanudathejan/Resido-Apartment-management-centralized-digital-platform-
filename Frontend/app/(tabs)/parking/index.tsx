@@ -13,6 +13,7 @@ import {
   RefreshControl,
   TouchableOpacity,
   Modal,
+  Button,
   Alert,
   Platform,
   TextInput,
@@ -854,40 +855,57 @@ export default function ParkingScreen() {
               </TouchableOpacity>
             </View>
 
-            {showStartPicker && (
+            {/* ANDROID: Uses the native popup dialog */}
+            {Platform.OS === "android" && showStartPicker && (
               <DateTimePicker
                 value={borrowStartTime}
-                // iOS gets 'datetime', Android gets dynamic mode ('date' then 'time')
-                mode={Platform.OS === "ios" ? "datetime" : startMode}
+                mode={startMode}
                 display="default"
                 onChange={(event, selectedDate) => {
-                  // 1. Handle Cancel button
                   if (event.type === "dismissed") {
                     setShowStartPicker(false);
-                    setStartMode("date"); // Reset for next time
+                    setStartMode("date");
                     return;
                   }
-
-                  // 2. Update the time
                   const currentDate = selectedDate || borrowStartTime;
                   setBorrowStartTime(currentDate);
 
-                  // 3. Platform specific behavior
-                  if (Platform.OS === "android") {
-                    if (startMode === "date") {
-                      // They just picked the date, now show the time!
-                      setStartMode("time");
-                    } else {
-                      // They finished picking the time, we are done.
-                      setShowStartPicker(false);
-                      setStartMode("date"); // Reset for next time
-                    }
+                  if (startMode === "date") {
+                    setStartMode("time");
                   } else {
-                    // iOS doesn't auto-close the same way.
                     setShowStartPicker(false);
+                    setStartMode("date");
                   }
                 }}
               />
+            )}
+
+            {/* IOS: Wraps the picker in a slide-up Modal */}
+            {Platform.OS === "ios" && (
+              <Modal
+                visible={showStartPicker}
+                transparent={true}
+                animationType="slide"
+              >
+                <View style={styles.iosModalOverlay}>
+                  <View style={styles.iosPickerContainer}>
+                    <DateTimePicker
+                      value={borrowStartTime}
+                      mode="datetime"
+                      display="spinner"
+                      onChange={(event, selectedDate) => {
+                        const currentDate = selectedDate || borrowStartTime;
+                        setBorrowStartTime(currentDate);
+                      }}
+                    />
+                    {/* iOS needs a Done button to close the modal */}
+                    <Button
+                      title="Done"
+                      onPress={() => setShowStartPicker(false)}
+                    />
+                  </View>
+                </View>
+              </Modal>
             )}
 
             {showEndPicker && (
@@ -1579,4 +1597,16 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   registerButtonText: { color: C.white, fontWeight: "700", marginLeft: 8 },
+  iosModalOverlay: {
+    flex: 1,
+    justifyContent: "flex-end",
+    backgroundColor: "rgba(0, 0, 0, 0.4)", // Darkens the background
+  },
+  iosPickerContainer: {
+    backgroundColor: "white",
+    paddingBottom: 30, // Extra padding for iPhones with the bottom home indicator
+    paddingTop: 10,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+  },
 });
