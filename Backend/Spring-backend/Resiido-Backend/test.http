@@ -16,3 +16,57 @@ Content-Type: application/json
   "newPassword": "NewPassword123"
 }
 
+### Login Borrower
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "exampleresidence1@gmail.com",
+  "password": "NewPassword123"
+}
+
+###
+
+### Send Parking Request
+POST http://localhost:8080/api/parking/request
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJvd25lcjJAZ21haWwuY29tIiwiaWF0IjoxNzczNDQ0OTM0LCJleHAiOjE3NzM0ODA5MzR9.P1VVfqWFS_M2O8gVnH9GAvBScYFikguDjrn4NkfWpjU
+Content-Type: application/json
+
+{
+  "slot": {
+    "id": 2
+  },
+  "visitorVehicleNumber": "CAA-5678"
+}
+
+### Login Owner
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "owner1@gmail.com",
+  "password": "123456"
+}
+
+### Register Owner
+POST http://localhost:8080/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Owner User",
+  "email": "owner2@gmail.com",
+  "password": "Owner12345",
+  "role": "RESIDENT",
+  "requestedHouseNumber": "G-01"
+}
+
+### Login Owner
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "owner2@gmail.com",
+  "password": "Owner12345"
+}
+
+
