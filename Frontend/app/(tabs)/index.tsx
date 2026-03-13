@@ -50,35 +50,10 @@ type FeatureCard = {
   route: string;
   iconColor: string;
   iconBg: string;
+  cardBg?: string;
 };
 
-const FEATURE_CARDS: FeatureCard[] = [
-  {
-    icon: 'car-sport',
-    title: 'Parking',
-    subtitle: 'Manage slots',
-    route: '/(tabs)/parking',
-    iconColor: '#2563EB',
-    iconBg: '#EFF6FF',
-  },
-  {
-    icon: 'fitness',
-    title: 'Facilities',
-    subtitle: 'Book amenities',
-    route: '/common-area',
-    iconColor: '#7C3AED',
-    iconBg: '#F5F3FF',
-  },
-
-  {
-    icon: 'construct',
-    title: 'Maintenance',
-    subtitle: 'Request repairs',
-    route: '/maintenance',
-    iconColor: '#EA580C',
-    iconBg: '#FFF7ED',
-  },
-
+const QUICK_ACTIONS: FeatureCard[] = [
   {
     icon: 'megaphone',
     title: 'Announcements',
@@ -88,6 +63,14 @@ const FEATURE_CARDS: FeatureCard[] = [
     iconBg: '#FEF2F2',
   },
   {
+    icon: 'car-sport',
+    title: 'Parking',
+    subtitle: 'Manage slots',
+    route: '/(tabs)/parking',
+    iconColor: '#2563EB',
+    iconBg: '#EFF6FF',
+  },
+  {
     icon: 'wallet',
     title: 'Payments',
     subtitle: 'Rent & Bills',
@@ -95,7 +78,34 @@ const FEATURE_CARDS: FeatureCard[] = [
     iconColor: '#059669',
     iconBg: '#ECFDF5',
   },
+  {
+    icon: 'alert',
+    title: 'SOS Alert',
+    subtitle: 'Emergency',
+    route: 'ACTION_SOS', // Special string we will intercept
+    iconColor: COLORS.sosRedDark,
+    iconBg: '#ffffff',
+    cardBg: '#FECACA', // The light red background for the whole card
+  }
+];
 
+const SERVICES_ACTIONS: FeatureCard[] = [
+  {
+    icon: 'fitness',
+    title: 'Facilities',
+    subtitle: 'Book amenities',
+    route: '/common-area',
+    iconColor: '#7C3AED',
+    iconBg: '#F5F3FF',
+  },
+  {
+    icon: 'construct',
+    title: 'Maintenance',
+    subtitle: 'Request repairs',
+    route: '/maintenance',
+    iconColor: '#EA580C',
+    iconBg: '#FFF7ED',
+  },
 ];
 
 function getGreeting(): string {
@@ -123,7 +133,7 @@ export default function HomeScreen() {
   const handleSOS = () => {
     Alert.alert(
       'Emergency Alert',
-      'This will immediately alert security, neighbors, and building management. Continue?',
+      'This will immediately alert same floor neighbors, and building management. Continue?',
       [
         { text: 'Cancel', style: 'cancel' },
         {
@@ -168,6 +178,32 @@ export default function HomeScreen() {
     setViewMode(viewMode === 'RESIDENT' ? 'MANAGER' : 'RESIDENT');
   };
 
+const renderCard = (card: FeatureCard) => (
+    <TouchableOpacity
+      key={card.title}
+      // Apply the custom cardBg if it exists, otherwise keep it white
+      style={[
+        styles.featureCard, 
+        card.cardBg ? { backgroundColor: card.cardBg } : null
+      ]}
+      onPress={() => {
+        // Intercept the SOS action!
+        if (card.route === 'ACTION_SOS') {
+          handleSOS();
+        } else {
+          router.push(card.route as any);
+        }
+      }}
+      activeOpacity={0.7}
+    >
+      <View style={[styles.featureIconContainer, { backgroundColor: card.iconBg }]}>
+        <Ionicons name={card.icon} size={22} color={card.iconColor} />
+      </View>
+      <Text style={styles.featureTitle}>{card.title}</Text>
+      <Text style={styles.featureSubtitle}>{card.subtitle}</Text>
+    </TouchableOpacity>
+  );
+
   // Manager Dashboard View
   const ManagerDashboard = () => (
     <>
@@ -202,7 +238,7 @@ export default function HomeScreen() {
       </View>
 
       {/* Feature Grid */}
-      <Text style={styles.sectionTitle}>Quick Actions</Text>
+      {/* <Text style={styles.sectionTitle}></Text>
       <View style={styles.featureGrid}>
         {FEATURE_CARDS.map((card, index) => (
           <TouchableOpacity
@@ -218,29 +254,23 @@ export default function HomeScreen() {
             <Text style={styles.featureSubtitle}>{card.subtitle}</Text>
           </TouchableOpacity>
         ))}
-      </View>
+      </View> */}
     </>
   );
 
-  // Resident Dashboard View
+
   const ResidentDashboard = () => (
     <>
       <Text style={styles.sectionTitle}>Quick Actions</Text>
       <View style={styles.featureGrid}>
-        {FEATURE_CARDS.map((card, index) => (
-          <TouchableOpacity
-            key={card.title}
-            style={styles.featureCard}
-            onPress={() => router.push(card.route as any)}
-            activeOpacity={0.7}
-          >
-            <View style={[styles.featureIconContainer, { backgroundColor: card.iconBg }]}>
-              <Ionicons name={card.icon} size={22} color={card.iconColor} />
-            </View>
-            <Text style={styles.featureTitle}>{card.title}</Text>
-            <Text style={styles.featureSubtitle}>{card.subtitle}</Text>
-          </TouchableOpacity>
-        ))}
+        {QUICK_ACTIONS.map(renderCard)}
+      </View>
+
+      <View style={styles.separator} />
+
+      <Text style={styles.sectionTitle}>Services</Text>
+      <View style={styles.featureGrid}>
+        {SERVICES_ACTIONS.map(renderCard)}
       </View>
     </>
   );
@@ -295,7 +325,7 @@ export default function HomeScreen() {
           )}
 
           {/* Dashboard Content */}
-          {viewMode === 'RESIDENT' ? <ResidentDashboard /> : <ManagerDashboard />}
+           {viewMode === 'RESIDENT' ? <ResidentDashboard /> : <ManagerDashboard />}
 
           {/* Logout */}
           <TouchableOpacity style={styles.logoutButton} onPress={handleLogout} activeOpacity={0.7}>
@@ -304,7 +334,7 @@ export default function HomeScreen() {
           </TouchableOpacity>
         </ScrollView>
 
-        {/* SOS Floating Button */}
+        {/* SOS Floating Button
         <TouchableOpacity
           style={styles.sosButton}
           onPress={handleSOS}
@@ -314,7 +344,7 @@ export default function HomeScreen() {
             <Ionicons name="alert" size={20} color={COLORS.white} />
             <Text style={styles.sosLabel}>SOS</Text>
           </View>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </SafeAreaView>
     </View>
   );
@@ -610,5 +640,12 @@ const styles = StyleSheet.create({
     color: COLORS.white,
     letterSpacing: 1,
     marginTop: 1,
+  },
+  // Separator
+  separator: {
+    height: 3,
+    backgroundColor: '#333333',
+    marginVertical: 18,
+    width: '100%',
   },
 });
