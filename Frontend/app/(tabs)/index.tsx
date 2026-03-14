@@ -2,7 +2,7 @@
  * Home Dashboard Screen
  * Modern 2026 light theme - premium minimal UI
  * Supports both Resident and Manager views
- * Feature cards in compact 2-column grid
+ * Compact 2-column feature grid
  */
 
 import React, { useState } from 'react';
@@ -25,12 +25,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@/context/AuthContext';
 
 const { width } = Dimensions.get('window');
-const CARD_GAP = 12;
-const CARD_WIDTH = (width - 48 - CARD_GAP) / 2; // 24px padding each side
 
 // Design tokens
 const COLORS = {
-  background: '#F4F7FB',
+  background: '#D8F3DC',
   primary: '#2563EB',
   primaryLight: '#EFF6FF',
   sosRed: '#EF4444',
@@ -52,9 +50,18 @@ type FeatureCard = {
   route: string;
   iconColor: string;
   iconBg: string;
+  cardBg?: string;
 };
 
-const FEATURE_CARDS: FeatureCard[] = [
+const QUICK_ACTIONS: FeatureCard[] = [
+  {
+    icon: 'megaphone',
+    title: 'Announcements',
+    subtitle: 'Latest updates',
+    route: '/(tabs)/announcements',
+    iconColor: '#DC2626',
+    iconBg: '#FEF2F2',
+  },
   {
     icon: 'car-sport',
     title: 'Parking',
@@ -64,6 +71,26 @@ const FEATURE_CARDS: FeatureCard[] = [
     iconBg: '#EFF6FF',
   },
   {
+    icon: 'wallet',
+    title: 'Payments',
+    subtitle: 'Rent & Bills',
+    route: '/(tabs)/payments',
+    iconColor: '#059669',
+    iconBg: '#ECFDF5',
+  },
+  {
+    icon: 'alert',
+    title: 'SOS Alert',
+    subtitle: 'Emergency',
+    route: 'ACTION_SOS', // Special string we will intercept
+    iconColor: COLORS.sosRedDark,
+    iconBg: '#ffffff',
+    cardBg: '#FECACA', // The light red background for the whole card
+  }
+];
+
+const SERVICES_ACTIONS: FeatureCard[] = [
+  {
     icon: 'fitness',
     title: 'Facilities',
     subtitle: 'Book amenities',
@@ -72,36 +99,12 @@ const FEATURE_CARDS: FeatureCard[] = [
     iconBg: '#F5F3FF',
   },
   {
-    icon: 'wallet',
-    title: 'Payments',
-    subtitle: 'Rent & bills',
-    route: '/(tabs)/rent',
-    iconColor: '#059669',
-    iconBg: '#ECFDF5',
-  },
-  {
     icon: 'construct',
     title: 'Maintenance',
     subtitle: 'Request repairs',
     route: '/maintenance',
     iconColor: '#EA580C',
     iconBg: '#FFF7ED',
-  },
-  {
-    icon: 'people',
-    title: 'Visitors',
-    subtitle: 'Manage guests',
-    route: '/visitor-management',
-    iconColor: '#0891B2',
-    iconBg: '#ECFEFF',
-  },
-  {
-    icon: 'megaphone',
-    title: 'Announcements',
-    subtitle: 'Latest updates',
-    route: '/(tabs)/announcements',
-    iconColor: '#DC2626',
-    iconBg: '#FEF2F2',
   },
 ];
 
@@ -130,7 +133,7 @@ export default function HomeScreen() {
   const handleSOS = () => {
     Alert.alert(
       'Emergency Alert',
-      'This will immediately alert security, neighbors, and building management. Continue?',
+      'This will immediately alert same floor neighbors, and building management. Continue?',
       [
         { text: 'Cancel', style: 'cancel' },
         {
@@ -150,40 +153,54 @@ export default function HomeScreen() {
   };
 
   const handleLogout = () => {
-    Alert.alert('Log out', 'Are you sure you want to log out?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Log out',
-        style: 'destructive',
-        onPress: () => {
-          logout();
-          router.replace('/welcome');
+    if (Platform.OS === 'web') {
+      const confirmLogout = window.confirm('Are you sure you want to log out?');
+      if (confirmLogout) {
+        logout();
+        router.replace('/welcome');
+      }
+    } else {
+      Alert.alert('Log out', 'Are you sure you want to log out?', [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Log out',
+          style: 'destructive',
+          onPress: () => {
+            logout();
+            router.replace('/welcome');
+          },
         },
-      },
-    ]);
+      ]);
+    }
   };
 
   const toggleViewMode = () => {
     setViewMode(viewMode === 'RESIDENT' ? 'MANAGER' : 'RESIDENT');
   };
 
-  const renderFeatureCard = (card: FeatureCard, index: number) => (
+const renderCard = (card: FeatureCard) => (
     <TouchableOpacity
       key={card.title}
+      // Apply the custom cardBg if it exists, otherwise keep it white
       style={[
-        styles.featureCard,
-        index % 2 === 0 ? { marginRight: CARD_GAP / 2 } : { marginLeft: CARD_GAP / 2 },
+        styles.featureCard, 
+        card.cardBg ? { backgroundColor: card.cardBg } : null
       ]}
-      onPress={() => router.push(card.route as any)}
+      onPress={() => {
+        // Intercept the SOS action!
+        if (card.route === 'ACTION_SOS') {
+          handleSOS();
+        } else {
+          router.push(card.route as any);
+        }
+      }}
       activeOpacity={0.7}
     >
       <View style={[styles.featureIconContainer, { backgroundColor: card.iconBg }]}>
         <Ionicons name={card.icon} size={22} color={card.iconColor} />
       </View>
-      <View style={styles.featureTextContainer}>
-        <Text style={styles.featureTitle}>{card.title}</Text>
-        <Text style={styles.featureSubtitle}>{card.subtitle}</Text>
-      </View>
+      <Text style={styles.featureTitle}>{card.title}</Text>
+      <Text style={styles.featureSubtitle}>{card.subtitle}</Text>
     </TouchableOpacity>
   );
 
@@ -221,20 +238,39 @@ export default function HomeScreen() {
       </View>
 
       {/* Feature Grid */}
-      <Text style={styles.sectionTitle}>Quick Actions</Text>
+      {/* <Text style={styles.sectionTitle}></Text>
       <View style={styles.featureGrid}>
-        {FEATURE_CARDS.map((card, index) => renderFeatureCard(card, index))}
-      </View>
+        {FEATURE_CARDS.map((card, index) => (
+          <TouchableOpacity
+            key={card.title}
+            style={styles.featureCard}
+            onPress={() => router.push(card.route as any)}
+            activeOpacity={0.7}
+          >
+            <View style={[styles.featureIconContainer, { backgroundColor: card.iconBg }]}>
+              <Ionicons name={card.icon} size={22} color={card.iconColor} />
+            </View>
+            <Text style={styles.featureTitle}>{card.title}</Text>
+            <Text style={styles.featureSubtitle}>{card.subtitle}</Text>
+          </TouchableOpacity>
+        ))}
+      </View> */}
     </>
   );
 
-  // Resident Dashboard View
+
   const ResidentDashboard = () => (
     <>
-      {/* Feature Grid */}
       <Text style={styles.sectionTitle}>Quick Actions</Text>
       <View style={styles.featureGrid}>
-        {FEATURE_CARDS.map((card, index) => renderFeatureCard(card, index))}
+        {QUICK_ACTIONS.map(renderCard)}
+      </View>
+
+      <View style={styles.separator} />
+
+      <Text style={styles.sectionTitle}>Services</Text>
+      <View style={styles.featureGrid}>
+        {SERVICES_ACTIONS.map(renderCard)}
       </View>
     </>
   );
@@ -289,7 +325,7 @@ export default function HomeScreen() {
           )}
 
           {/* Dashboard Content */}
-          {viewMode === 'RESIDENT' ? <ResidentDashboard /> : <ManagerDashboard />}
+           {viewMode === 'RESIDENT' ? <ResidentDashboard /> : <ManagerDashboard />}
 
           {/* Logout */}
           <TouchableOpacity style={styles.logoutButton} onPress={handleLogout} activeOpacity={0.7}>
@@ -298,7 +334,7 @@ export default function HomeScreen() {
           </TouchableOpacity>
         </ScrollView>
 
-        {/* SOS Floating Button */}
+        {/* SOS Floating Button
         <TouchableOpacity
           style={styles.sosButton}
           onPress={handleSOS}
@@ -308,7 +344,7 @@ export default function HomeScreen() {
             <Ionicons name="alert" size={20} color={COLORS.white} />
             <Text style={styles.sosLabel}>SOS</Text>
           </View>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </SafeAreaView>
     </View>
   );
@@ -323,7 +359,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingTop: 8,
     paddingBottom: Platform.select({ ios: 120, android: 100, web: 30 }),
   },
@@ -427,19 +463,22 @@ const styles = StyleSheet.create({
     letterSpacing: -0.3,
   },
 
-  // Feature Grid — compact 2-column cards with icon + text side by side
+  /*
+   * Feature Grid — 2 columns using percentage width
+   * Using 48% width with space-between ensures two cards per row
+   * regardless of screen/container width
+   */
   featureGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
+    justifyContent: 'space-between',
   },
   featureCard: {
-    width: CARD_WIDTH,
-    flexDirection: 'row',
-    alignItems: 'center',
+    width: '48%',
     backgroundColor: COLORS.white,
     borderRadius: 18,
-    padding: 14,
-    marginBottom: CARD_GAP,
+    padding: 16,
+    marginBottom: 12,
     ...Platform.select({
       ios: {
         shadowColor: COLORS.cardShadow,
@@ -448,6 +487,9 @@ const styles = StyleSheet.create({
         shadowRadius: 10,
       },
       android: { elevation: 2 },
+      web: {
+        boxShadow: '0 2px 8px rgba(148,163,184,0.12)',
+      },
     }),
   },
   featureIconContainer: {
@@ -456,10 +498,7 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 12,
-  },
-  featureTextContainer: {
-    flex: 1,
+    marginBottom: 10,
   },
   featureTitle: {
     fontSize: 14,
@@ -574,7 +613,7 @@ const styles = StyleSheet.create({
   // SOS Button
   sosButton: {
     position: 'absolute',
-    bottom: Platform.select({ ios: 100, android: 80, web: 16 }),
+    bottom: Platform.select({ ios: 100, android: 80, web: 80 }),
     right: 20,
     zIndex: 100,
   },
@@ -601,5 +640,12 @@ const styles = StyleSheet.create({
     color: COLORS.white,
     letterSpacing: 1,
     marginTop: 1,
+  },
+  // Separator
+  separator: {
+    height: 3,
+    backgroundColor: '#333333',
+    marginVertical: 18,
+    width: '100%',
   },
 });

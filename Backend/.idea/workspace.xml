@@ -5,19 +5,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="38179f06-fa56-46b0-b0aa-8da74a2fb6a3" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Spring-backend/Resiido-Backend/src/main/java/com/resiido/main/controllers/ParkingController.java" beforeDir="false" afterPath="$PROJECT_DIR$/Spring-backend/Resiido-Backend/src/main/java/com/resiido/main/controllers/ParkingController.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
-  </component>
-  <component name="FileTemplateManagerImpl">
-    <option name="RECENT_TEMPLATES">
-      <list>
-        <option value="Class" />
-      </list>
-    </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
@@ -30,47 +26,27 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;HTTP Request.test | Forgot password.executor&quot;: &quot;Run&quot;,
-    &quot;HTTP Request.test | Login after reset.executor&quot;: &quot;Run&quot;,
-    &quot;HTTP Request.test | Register.executor&quot;: &quot;Run&quot;,
-    &quot;HTTP Request.test | Request password reset code.executor&quot;: &quot;Run&quot;,
-    &quot;HTTP Request.test | Reset password.executor&quot;: &quot;Run&quot;,
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RequestMappingsPanelOrder0&quot;: &quot;0&quot;,
-    &quot;RequestMappingsPanelOrder1&quot;: &quot;1&quot;,
-    &quot;RequestMappingsPanelWidth0&quot;: &quot;75&quot;,
-    &quot;RequestMappingsPanelWidth1&quot;: &quot;75&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;Spring Boot.ResiidoApplication.executor&quot;: &quot;Run&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;Vidupa-(backend)&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/LENOVO/OneDrive/Desktop/sdgp group project/resiido/Resido-Apartment-management-centralized-digital-platform-/Backend&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RequestMappingsPanelOrder0": "0",
+    "RequestMappingsPanelOrder1": "1",
+    "RequestMappingsPanelWidth0": "75",
+    "RequestMappingsPanelWidth1": "75",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "Spring Boot.ResiidoApplication.executor": "Run",
+    "git-widget-placeholder": "Vidupa-(backend)",
+    "last_opened_file_path": "C:/Users/LENOVO/OneDrive/Desktop/sdgp group project/resiido/Resido-Apartment-management-centralized-digital-platform-/Backend",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
-  <component name="RunManager" selected="Spring Boot.ResiidoApplication">
-    <configuration name="test | Forgot password" type="HttpClient.HttpRequestRunConfigurationType" factoryName="HTTP Request" temporary="true" nameIsGenerated="true" path="$PROJECT_DIR$/Spring-backend/test.http" executionIdentifier="Forgot password" index="144" runType="Run single request">
-      <method v="2" />
-    </configuration>
-    <configuration name="test | Login after reset" type="HttpClient.HttpRequestRunConfigurationType" factoryName="HTTP Request" temporary="true" nameIsGenerated="true" path="$PROJECT_DIR$/Spring-backend/test.http" executionIdentifier="Login after reset" index="146" runType="Run single request">
-      <method v="2" />
-    </configuration>
-    <configuration name="test | Register" type="HttpClient.HttpRequestRunConfigurationType" factoryName="HTTP Request" temporary="true" nameIsGenerated="true" path="$PROJECT_DIR$/Spring-backend/Resiido-Backend/test.http" executionIdentifier="Register" runType="Run single request">
-      <method v="2" />
-    </configuration>
-    <configuration name="test | Request password reset code" type="HttpClient.HttpRequestRunConfigurationType" factoryName="HTTP Request" temporary="true" nameIsGenerated="true" path="$PROJECT_DIR$/Spring-backend/test.http" executionIdentifier="Request password reset code" index="144" runType="Run single request">
-      <method v="2" />
-    </configuration>
-    <configuration name="test | Reset password" type="HttpClient.HttpRequestRunConfigurationType" factoryName="HTTP Request" temporary="true" nameIsGenerated="true" path="$PROJECT_DIR$/Spring-backend/test.http" executionIdentifier="Reset password" index="145" runType="Run single request">
-      <method v="2" />
-    </configuration>
+}]]></component>
+  <component name="RunManager">
     <configuration name="ResiidoApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
       <envs>
         <env name="JWT_KEY" value=" 5367566B59703373367639792F423F4528482B4D6251655468576D5A71347437" />
@@ -81,15 +57,6 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <recent_temporary>
-      <list>
-        <item itemvalue="HTTP Request.test | Forgot password" />
-        <item itemvalue="HTTP Request.test | Reset password" />
-        <item itemvalue="HTTP Request.test | Login after reset" />
-        <item itemvalue="HTTP Request.test | Request password reset code" />
-        <item itemvalue="HTTP Request.test | Register" />
-      </list>
-    </recent_temporary>
   </component>
   <component name="SharedIndexes">
     <attachedChunks>
@@ -107,11 +74,8 @@
       <option name="presentableId" value="Default" />
       <updated>1770459297988</updated>
       <workItem from="1770459299655" duration="966000" />
-      <workItem from="1771234346219" duration="12000" />
-      <workItem from="1772737354254" duration="14634000" />
-      <workItem from="1772902586848" duration="3308000" />
-      <workItem from="1772906719289" duration="6562000" />
-      <workItem from="1773034569170" duration="1304000" />
+      <workItem from="1773036279797" duration="1956000" />
+      <workItem from="1773038653126" duration="2013000" />
     </task>
     <servers />
   </component>

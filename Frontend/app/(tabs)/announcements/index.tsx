@@ -20,7 +20,7 @@ import { announcementService } from '@/services';
 import { Announcement } from '@/types';
 
 const C = {
-  bg: '#F4F7FB',
+  bg: '#D8F3DC',
   primary: '#2563EB',
   primaryLight: '#EFF6FF',
   white: '#FFFFFF',

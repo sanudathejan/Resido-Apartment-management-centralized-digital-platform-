@@ -24,7 +24,7 @@ public class CommonAreaBookingController {
     private UserRepository userRepository;
 
     // HARDCODED AREAS
-    private final Set<String> VALID_AREAS = Set.of("Rooftop", "Swimming Pool");
+    private final Set<String> VALID_AREAS = Set.of("Rooftop", "Swimming Pool", "Fitness Center", "Party hall", "BBQ area");
 
     private User getAuthenticatedUser(Principal principal) {
         return userRepository.findByEmail(principal.getName())

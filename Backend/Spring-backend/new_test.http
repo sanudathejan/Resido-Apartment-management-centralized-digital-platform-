@@ -1,0 +1,460 @@
+### ==========================================
+### PHASE 1: MANAGER SETUP
+### ==========================================
+
+### 1. Register a New Manager
+POST http://localhost:8080/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Alice Admin",
+  "email": "manager@resiido.com",
+  "password": "password123",
+  "role": "MANAGER"
+}
+
+
+### 2. Verify the Manager Account
+# Replace '12345' with the actual code from the database.
+POST http://localhost:8080/api/auth/verify-account
+Content-Type: application/json
+
+{
+  "email": "manager@resiido.com",
+  "code": "45379"
+}
+
+### 3. Login as Manager
+# Copy the long JWT string from the response and set it as your {{manager_token}}
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "manager@resiido.com",
+  "password": "password123"
+}
+
+
+
+### ==========================================
+### PUBLIC REGISTRATION ENDPOINTS
+### ==========================================
+
+### Get all houses and their occupancy status (No Token Required)
+GET http://localhost:8080/api/houses/status
+
+### ==========================================
+### PHASE 2: RESIDENT SETUP & ASSET LINKING
+### ==========================================
+
+### 4. Register a New Resident (Requests House 1-05)
+# Note: House "1-05" MUST exist in the database before running this!
+POST http://localhost:8080/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Bob Resident",
+  "email": "bob@resiido.com",
+  "password": "password123",
+  "role": "RESIDENT",
+  "requestedHouseNumber": "1-05"
+}
+
+
+### 5. Verify the Resident Account
+# Replace '67890' with Bob's actual code.
+# Notice: Your code automatically assigns House '1-05' and Parking 'P-1-05' during this step!
+POST http://localhost:8080/api/auth/verify-account
+Content-Type: application/json
+
+{
+  "email": "bob@resiido.com",
+  "code": "04205"
+}
+
+### 6. Login as Resident
+# Copy the long JWT string from the response and set it as your {{resident_token}}
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "bob@resiido.com",
+  "password": "password123"
+}
+
+
+//Additional resident login
+
+### 5. Login as Gina
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "gina@resident.com",
+  "password": "password123"
+}
+
+
+
+### 7. Optional Check: Verify Safe Delete Authorization
+# Try deleting Bob using Bob's token (Should succeed - Self Delete)
+# OR Try deleting Bob using the Manager's token (Should succeed - Manager Override)
+DELETE http://localhost:8080/api/auth/delete/11
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJib2JAcmVzaWlkby5jb20iLCJpYXQiOjE3NzE1Nzg5NDMsImV4cCI6MTc3MTYxNDk0M30.kO-woM4mbODPfGIeKEHjWBY_yWlVFrH6bTeEC81YAew
+
+
+
+
+
+
+### ==========================================
+### MAINTENANCE FEATURE TESTS
+### ==========================================
+
+### 1. Resident Creates a Maintenance Request
+# Notice we don't pass the status or resident ID. The controller handles that!
+POST http://localhost:8080/api/maintenance
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJib2JAcmVzaWlkby5jb20iLCJpYXQiOjE3NzE1ODA1MTAsImV4cCI6MTc3MTYxNjUxMH0.0lLRFelDXeQ2oKTFoSU5rb6213Z9EFApSMEnYb-vULM
+
+{
+  "title": "Leaking Kitchen Sink",
+  "description": "There is a puddle forming under the kitchen sink. Looks like a loose pipe."
+}
+
+### ---------------------------------------------------
+
+### 2. Resident Creates a Second Request (So we can test deleting one later)
+POST http://localhost:8080/api/maintenance
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJib2JAcmVzaWlkby5jb20iLCJpYXQiOjE3NzE1ODA1MTAsImV4cCI6MTc3MTYxNjUxMH0.0lLRFelDXeQ2oKTFoSU5rb6213Z9EFApSMEnYb-vULM
+
+{
+  "title": "Broken AC",
+  "description": "The AC in the living room is blowing warm air."
+}
+
+### ---------------------------------------------------
+
+### 3. Resident Views Their Requests
+# Should return a list of ONLY the resident's requests (both Leaking Sink and Broken AC).
+GET http://localhost:8080/api/maintenance
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJib2JAcmVzaWlkby5jb20iLCJpYXQiOjE3NzE1ODA1MTAsImV4cCI6MTc3MTYxNjUxMH0.0lLRFelDXeQ2oKTFoSU5rb6213Z9EFApSMEnYb-vULM
+
+### ---------------------------------------------------
+
+### 4. Manager Views ALL Requests
+# Should return everyone's requests. If you have multiple residents, the manager sees them all here.
+GET http://localhost:8080/api/maintenance
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYW5hZ2VyQHJlc2lpZG8uY29tIiwiaWF0IjoxNzcxNTc4NzkxLCJleHAiOjE3NzE2MTQ3OTF9.6wvjtUS2yb9Tm2cfRxOckxuTAqa8BKJ_poUYrZhenRs
+
+### ---------------------------------------------------
+
+### 5. Manager Updates the Status
+# Note: Content-Type is text/plain because your controller expects a raw String, not JSON.
+# Change '1' to the actual ID of the "Leaking Kitchen Sink" request.
+PUT http://localhost:8080/api/maintenance/4/status
+Content-Type: text/plain
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYW5hZ2VyQHJlc2lpZG8uY29tIiwiaWF0IjoxNzcxNTc4NzkxLCJleHAiOjE3NzE2MTQ3OTF9.6wvjtUS2yb9Tm2cfRxOckxuTAqa8BKJ_poUYrZhenRs
+
+IN_PROGRESS
+
+### ---------------------------------------------------
+
+### 6. Resident Cancels/Deletes a Request
+# Change '2' to the actual ID of the "Broken AC" request.
+# Since the resident owns this request, it should delete successfully.
+DELETE http://localhost:8080/api/maintenance/3
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJib2JAcmVzaWlkby5jb20iLCJpYXQiOjE3NzE1ODA1MTAsImV4cCI6MTc3MTYxNjUxMH0.0lLRFelDXeQ2oKTFoSU5rb6213Z9EFApSMEnYb-vULM
+
+### ---------------------------------------------------
+
+### 7. Manager Deletes a Request (Override)
+# Manager deletes the remaining "Leaking Kitchen Sink" request.
+DELETE http://localhost:8080/api/maintenance/4
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYW5hZ2VyQHJlc2lpZG8uY29tIiwiaWF0IjoxNzcxNTc4NzkxLCJleHAiOjE3NzE2MTQ3OTF9.6wvjtUS2yb9Tm2cfRxOckxuTAqa8BKJ_poUYrZhenRs
+
+
+
+
+
+### ==========================================
+### SOS ALERT FEATURE TESTS
+### ==========================================
+
+### 1. Resident Triggers an SOS
+# No JSON body is needed because the controller builds the alert automatically!
+POST http://localhost:8080/api/sos
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJib2JAcmVzaWlkby5jb20iLCJpYXQiOjE3NzE2NjI0MDAsImV4cCI6MTc3MTY5ODQwMH0.MzOHntlXeMlAmPg6RYr5yOKHH6F_EJPZ0R1ZJ-2w7DE
+
+
+### ---------------------------------------------------
+
+### 2. View Active Alerts (Manager checks the dashboard)
+# Should return a list containing the newly created SOS alert.
+GET http://localhost:8080/api/sos/active
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYW5hZ2VyQHJlc2lpZG8uY29tIiwiaWF0IjoxNzcxNjYyMzMxLCJleHAiOjE3NzE2OTgzMzF9.TFuvkIwS2xe8SZuCSh6Ik7LcRq6WI5cJtjN8kZSYrTc
+
+### ---------------------------------------------------
+
+### 3. View Resident's SOS History
+# Should show all alerts ever triggered by this resident.
+GET http://localhost:8080/api/sos/my-history
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJib2JAcmVzaWlkby5jb20iLCJpYXQiOjE3NzE2NjI0MDAsImV4cCI6MTc3MTY5ODQwMH0.MzOHntlXeMlAmPg6RYr5yOKHH6F_EJPZ0R1ZJ-2w7DE
+
+
+### ---------------------------------------------------
+
+### 4. Manager Clears the Alert
+# Change '1' to the actual ID of the SOS alert.
+# The response should show the alert with "isActive": false.
+PUT http://localhost:8080/api/sos/8/clear
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYW5hZ2VyQHJlc2lpZG8uY29tIiwiaWF0IjoxNzcxNjYyMzMxLCJleHAiOjE3NzE2OTgzMzF9.TFuvkIwS2xe8SZuCSh6Ik7LcRq6WI5cJtjN8kZSYrTc
+
+### ---------------------------------------------------
+
+### 5. Verify the Alert was Cleared
+# The active list should now be empty [].
+GET http://localhost:8080/api/sos/active
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYW5hZ2VyQHJlc2lpZG8uY29tIiwiaWF0IjoxNzcxNjYyMzMxLCJleHAiOjE3NzE2OTgzMzF9.TFuvkIwS2xe8SZuCSh6Ik7LcRq6WI5cJtjN8kZSYrTc
+
+### ---------------------------------------------------
+
+### 6. Resident Triggers Another SOS & Clears It Themselves (Self-Clear Test)
+POST http://localhost:8080/api/sos
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJib2JAcmVzaWlkby5jb20iLCJpYXQiOjE3NzE2NjI0MDAsImV4cCI6MTc3MTY5ODQwMH0.MzOHntlXeMlAmPg6RYr5yOKHH6F_EJPZ0R1ZJ-2w7DE
+
+
+### -> Run this immediately after to clear their own alert
+### (Change '2' to the new ID)
+PUT http://localhost:8080/api/sos/9/clear
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJib2JAcmVzaWlkby5jb20iLCJpYXQiOjE3NzE2NjI0MDAsImV4cCI6MTc3MTY5ODQwMH0.MzOHntlXeMlAmPg6RYr5yOKHH6F_EJPZ0R1ZJ-2w7DE
+
+
+
+
+### ==========================================
+### COMMON AREA BOOKING TESTS
+### ==========================================
+
+### 1. Resident Requests the Rooftop
+POST http://localhost:8080/api/common-area/book
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJib2JAcmVzaWlkby5jb20iLCJpYXQiOjE3NzE2NjI0MDAsImV4cCI6MTc3MTY5ODQwMH0.MzOHntlXeMlAmPg6RYr5yOKHH6F_EJPZ0R1ZJ-2w7DE
+
+{
+  "areaName": "Rooftop",
+  "startTime": "2026-03-01T18:00:00",
+  "endTime": "2026-03-01T22:00:00"
+}
+
+### ---------------------------------------------------
+
+### 2. Resident Requests the Swimming Pool
+POST http://localhost:8080/api/common-area/book
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJib2JAcmVzaWlkby5jb20iLCJpYXQiOjE3NzE2NjI0MDAsImV4cCI6MTc3MTY5ODQwMH0.MzOHntlXeMlAmPg6RYr5yOKHH6F_EJPZ0R1ZJ-2w7DE
+
+{
+  "areaName": "Swimming Pool",
+  "startTime": "2026-03-02T08:00:00",
+  "endTime": "2026-03-02T10:00:00"
+}
+
+### ---------------------------------------------------
+
+### 3. Resident Checks Their Booking History
+# Should show both requests with status "PENDING"
+GET http://localhost:8080/api/common-area/my-bookings
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJib2JAcmVzaWlkby5jb20iLCJpYXQiOjE3NzE2NjI0MDAsImV4cCI6MTc3MTY5ODQwMH0.MzOHntlXeMlAmPg6RYr5yOKHH6F_EJPZ0R1ZJ-2w7DE
+
+### ---------------------------------------------------
+
+### 4. Manager Checks Pending Requests
+# Manager should see both the Rooftop and Pool requests waiting for approval.
+GET http://localhost:8080/api/common-area/pending
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYW5hZ2VyQHJlc2lpZG8uY29tIiwiaWF0IjoxNzcxNjYyMzMxLCJleHAiOjE3NzE2OTgzMzF9.TFuvkIwS2xe8SZuCSh6Ik7LcRq6WI5cJtjN8kZSYrTc
+
+### ---------------------------------------------------
+
+### 5. Manager Approves the Rooftop Booking
+# Replace '1' with the actual ID of the Rooftop booking
+PUT http://localhost:8080/api/common-area/request/3?status=APPROVED
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYW5hZ2VyQHJlc2lpZG8uY29tIiwiaWF0IjoxNzcxNjYyMzMxLCJleHAiOjE3NzE2OTgzMzF9.TFuvkIwS2xe8SZuCSh6Ik7LcRq6WI5cJtjN8kZSYrTc
+
+### ---------------------------------------------------
+
+### 6. Manager Rejects the Swimming Pool Booking
+# Replace '2' with the actual ID of the Swimming Pool booking
+PUT http://localhost:8080/api/common-area/request/4?status=REJECTED
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYW5hZ2VyQHJlc2lpZG8uY29tIiwiaWF0IjoxNzcxNjYyMzMxLCJleHAiOjE3NzE2OTgzMzF9.TFuvkIwS2xe8SZuCSh6Ik7LcRq6WI5cJtjN8kZSYrTc
+
+### ---------------------------------------------------
+
+### 7. View Public Calendar for Rooftop
+# Anyone (Resident or Manager) checks the Rooftop calendar to see occupied slots.
+# This should return the approved Rooftop booking from Step 5.
+GET http://localhost:8080/api/common-area/calendar?area=Rooftop
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJnaW5hQHJlc2lkZW50LmNvbSIsImlhdCI6MTc3MTY2Mzk5MywiZXhwIjoxNzcxNjk5OTkzfQ.x2X1U6LHgE-tKlukdzzmCBRR4LVxQ8wmCXhejKniH_A
+
+### ---------------------------------------------------
+
+### 8. View Public Calendar for Swimming Pool
+# This should return empty [] because the pool request was REJECTED.
+GET http://localhost:8080/api/common-area/calendar?area=Swimming Pool
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJnaW5hQHJlc2lkZW50LmNvbSIsImlhdCI6MTc3MTY2Mzk5MywiZXhwIjoxNzcxNjk5OTkzfQ.x2X1U6LHgE-tKlukdzzmCBRR4LVxQ8wmCXhejKniH_A
+
+### ---------------------------------------------------
+
+### 9. Resident Cancels Their Approved Rooftop Booking
+# Change '1' to the actual ID.
+DELETE http://localhost:8080/api/common-area/4
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJib2JAcmVzaWlkby5jb20iLCJpYXQiOjE3NzE2NjI0MDAsImV4cCI6MTc3MTY5ODQwMH0.MzOHntlXeMlAmPg6RYr5yOKHH6F_EJPZ0R1ZJ-2w7DE
+
+
+
+
+
+### ==========================================
+### PARKING REQUEST TESTS (PEER-TO-PEER)
+### ==========================================
+
+### 1. OWNER (Resident): Make my slot available for lending
+# Bob decides he doesn't need his spot this weekend.
+PUT http://localhost:8080/api/parking/my-slot/availability?available=true
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJib2JAcmVzaWlkby5jb20iLCJpYXQiOjE3NzE2NjQ3MzMsImV4cCI6MTc3MTcwMDczM30.ExfIxoJt7WD-0Cs50Dw6H9AMJj3ch3ByTOWY0wuKcrg
+
+### ---------------------------------------------------
+
+### 2. BORROWER (Manager): View all available slots
+# Alice checks what slots are free. She should see Bob's slot here!
+# Note the "id" of the parking slot in the response (likely 1).
+GET http://localhost:8080/api/parking/available
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYW5hZ2VyQHJlc2lpZG8uY29tIiwiaWF0IjoxNzcxNjY0Njg1LCJleHAiOjE3NzE3MDA2ODV9.BY3G0-IQU7aoXGjiy5onxIjJWZsw95tqcnw3V1uNrfQ
+
+### ---------------------------------------------------
+
+### 3. BORROWER (Manager): Request the available slot
+# Replace '1' inside the slot object with the actual Parking Slot ID from Step 2.
+POST http://localhost:8080/api/parking/request
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYW5hZ2VyQHJlc2lpZG8uY29tIiwiaWF0IjoxNzcxNjY0Njg1LCJleHAiOjE3NzE3MDA2ODV9.BY3G0-IQU7aoXGjiy5onxIjJWZsw95tqcnw3V1uNrfQ
+
+{
+  "slot": { "id": 12 },
+  "startTime": "2026-03-05T10:00:00",
+  "endTime": "2026-03-05T18:00:00"
+}
+
+### ---------------------------------------------------
+
+### 4. BORROWER (Manager): Check my outgoing requests
+# Alice verifies her request is in the system (Status: PENDING)
+GET http://localhost:8080/api/parking/my-requests
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYW5hZ2VyQHJlc2lpZG8uY29tIiwiaWF0IjoxNzcxNjY0Njg1LCJleHAiOjE3NzE3MDA2ODV9.BY3G0-IQU7aoXGjiy5onxIjJWZsw95tqcnw3V1uNrfQ
+
+### ---------------------------------------------------
+
+### 5. OWNER (Resident): View pending requests for my slot
+# Bob sees that Alice wants to borrow his spot.
+GET http://localhost:8080/api/parking/my-slot/pending
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJib2JAcmVzaWlkby5jb20iLCJpYXQiOjE3NzE2NjQ3MzMsImV4cCI6MTc3MTcwMDczM30.ExfIxoJt7WD-0Cs50Dw6H9AMJj3ch3ByTOWY0wuKcrg
+
+### ---------------------------------------------------
+
+### 6. OWNER (Resident): Approve the request
+# Replace '1' with the actual Parking REQUEST ID from Step 5.
+PUT http://localhost:8080/api/parking/request/2?status=APPROVED
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJib2JAcmVzaWlkby5jb20iLCJpYXQiOjE3NzE2NjQ3MzMsImV4cCI6MTc3MTcwMDczM30.ExfIxoJt7WD-0Cs50Dw6H9AMJj3ch3ByTOWY0wuKcrg
+
+### ---------------------------------------------------
+
+### 7. OWNER (Resident): Try to cancel the APPROVED request (Should FAIL)
+# Bob tries to back out after approving. Your code should block this with a 403 Forbidden!
+DELETE http://localhost:8080/api/parking/request/2
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJib2JAcmVzaWlkby5jb20iLCJpYXQiOjE3NzE2NjQ3MzMsImV4cCI6MTc3MTcwMDczM30.ExfIxoJt7WD-0Cs50Dw6H9AMJj3ch3ByTOWY0wuKcrg
+
+### ---------------------------------------------------
+
+### 8. BORROWER (Manager): Cancel the request (Should SUCCEED)
+# Alice realizes she doesn't need it anymore and cancels. Your code allows borrowers to cancel anytime.
+DELETE http://localhost:8080/api/parking/request/2
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYW5hZ2VyQHJlc2lpZG8uY29tIiwiaWF0IjoxNzcxNjY0Njg1LCJleHAiOjE3NzE3MDA2ODV9.BY3G0-IQU7aoXGjiy5onxIjJWZsw95tqcnw3V1uNrfQ
+
+### ---------------------------------------------------
+
+### 9. OWNER (Resident): Turn off availability
+# Bob returns and marks his spot as unavailable again.
+PUT http://localhost:8080/api/parking/my-slot/availability?available=false
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJib2JAcmVzaWlkby5jb20iLCJpYXQiOjE3NzE2NjQ3MzMsImV4cCI6MTc3MTcwMDczM30.ExfIxoJt7WD-0Cs50Dw6H9AMJj3ch3ByTOWY0wuKcrg
+
+### BORROWER tries to approve their own request on someone else's slot (Should FAIL with 403)
+PUT http://localhost:8080/api/parking/request/3?status=APPROVED
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYW5hZ2VyQHJlc2lpZG8uY29tIiwiaWF0IjoxNzcxNjY0Njg1LCJleHAiOjE3NzE3MDA2ODV9.BY3G0-IQU7aoXGjiy5onxIjJWZsw95tqcnw3V1uNrfQ
+
+
+
+
+
+
+### ==========================================
+### NOTICES FEATURE TESTS (BULLETIN BOARD)
+### ==========================================
+
+### 1. MANAGER: Posts a new notice
+POST http://localhost:8080/api/notices
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYW5hZ2VyQHJlc2lpZG8uY29tIiwiaWF0IjoxNzcxNjY0Njg1LCJleHAiOjE3NzE3MDA2ODV9.BY3G0-IQU7aoXGjiy5onxIjJWZsw95tqcnw3V1uNrfQ
+
+{
+  "title": "Water Shutoff Notice",
+  "content": "Water will be shut off for maintenance tomorrow between 10 AM and 2 PM. Please plan accordingly."
+}
+
+### ---------------------------------------------------
+
+### 2. SECURITY TEST - RESIDENT: Tries to post a notice (Should FAIL with 403 Forbidden)
+# Your getAuthenticatedManager() method should block this!
+POST http://localhost:8080/api/notices
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJib2JAcmVzaWlkby5jb20iLCJpYXQiOjE3NzE2NjQ3MzMsImV4cCI6MTc3MTcwMDczM30.ExfIxoJt7WD-0Cs50Dw6H9AMJj3ch3ByTOWY0wuKcrg
+
+{
+  "title": "Party at my place!",
+  "content": "Everyone is invited to House 1-05 tonight!"
+}
+
+### ---------------------------------------------------
+
+### 3. MANAGER: Posts a second notice (To test sorting)
+POST http://localhost:8080/api/notices
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYW5hZ2VyQHJlc2lpZG8uY29tIiwiaWF0IjoxNzcxNjY0Njg1LCJleHAiOjE3NzE3MDA2ODV9.BY3G0-IQU7aoXGjiy5onxIjJWZsw95tqcnw3V1uNrfQ
+
+{
+  "title": "Elevator Maintenance Complete",
+  "content": "The main elevator in Building A is now fully operational again. Thank you for your patience."
+}
+
+### ---------------------------------------------------
+
+### 4. RESIDENT (or ANYONE): Views all notices
+# This should return a list of BOTH notices.
+# IMPORTANT: The "Elevator" notice should be FIRST in the list because of your OrderByPostedAtDesc query!
+GET http://localhost:8080/api/notices
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJib2JAcmVzaWlkby5jb20iLCJpYXQiOjE3NzE2NjQ3MzMsImV4cCI6MTc3MTcwMDczM30.ExfIxoJt7WD-0Cs50Dw6H9AMJj3ch3ByTOWY0wuKcrg
+
+### ---------------------------------------------------
+
+### 5. SECURITY TEST - RESIDENT: Tries to delete a notice (Should FAIL with 403 Forbidden)
+# Change '1' to the ID of the Water Shutoff Notice.
+# Your code should block Bob from deleting Alice's official notice.
+DELETE http://localhost:8080/api/notices/3
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJib2JAcmVzaWlkby5jb20iLCJpYXQiOjE3NzE2NjQ3MzMsImV4cCI6MTc3MTcwMDczM30.ExfIxoJt7WD-0Cs50Dw6H9AMJj3ch3ByTOWY0wuKcrg
+
+### ---------------------------------------------------
+
+### 6. MANAGER: Deletes the notice (Should SUCCEED)
+# Change '1' to the actual ID. Manager cleans up the old notice.
+DELETE http://localhost:8080/api/notices/3
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYW5hZ2VyQHJlc2lpZG8uY29tIiwiaWF0IjoxNzcxNjY0Njg1LCJleHAiOjE3NzE3MDA2ODV9.BY3G0-IQU7aoXGjiy5onxIjJWZsw95tqcnw3V1uNrfQ
