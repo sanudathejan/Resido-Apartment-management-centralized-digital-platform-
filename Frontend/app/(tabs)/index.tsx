@@ -5,7 +5,7 @@
  * Compact 2-column feature grid
  */
 
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -18,30 +18,29 @@ import {
   Alert,
   Switch,
   Platform,
-  Image,
-} from "react-native";
-import { useRouter } from "expo-router";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
-import { useAuth } from "@/context/AuthContext";
+} from 'react-native';
+import { useRouter } from 'expo-router';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
+import { useAuth } from '@/context/AuthContext';
 
-const { width } = Dimensions.get("window");
+const { width } = Dimensions.get('window');
 
 // Design tokens
 const COLORS = {
-  background: "#D8F3DC",
-  primary: "#2563EB",
-  primaryLight: "#EFF6FF",
-  sosRed: "#EF4444",
-  sosRedDark: "#DC2626",
-  textDark: "#1E293B",
-  textLight: "#64748B",
-  textMuted: "#94A3B8",
-  white: "#FFFFFF",
-  cardShadow: "#94A3B8",
-  border: "#E2E8F0",
-  green: "#10B981",
-  avatarBg: "#DBEAFE",
+  background: '#D8F3DC',
+  primary: '#2563EB',
+  primaryLight: '#EFF6FF',
+  sosRed: '#EF4444',
+  sosRedDark: '#DC2626',
+  textDark: '#1E293B',
+  textLight: '#64748B',
+  textMuted: '#94A3B8',
+  white: '#FFFFFF',
+  cardShadow: '#94A3B8',
+  border: '#E2E8F0',
+  green: '#10B981',
+  avatarBg: '#DBEAFE',
 };
 
 type FeatureCard = {
@@ -56,120 +55,119 @@ type FeatureCard = {
 
 const QUICK_ACTIONS: FeatureCard[] = [
   {
-    icon: "megaphone",
-    title: "Announcements",
-    subtitle: "Latest updates",
-    route: "/(tabs)/announcements",
-    iconColor: "#DC2626",
-    iconBg: "#FEF2F2",
+    icon: 'megaphone',
+    title: 'Announcements',
+    subtitle: 'Latest updates',
+    route: '/(tabs)/announcements',
+    iconColor: '#DC2626',
+    iconBg: '#FEF2F2',
   },
   {
-    icon: "car-sport",
-    title: "Parking",
-    subtitle: "Manage slots",
-    route: "/(tabs)/parking",
-    iconColor: "#2563EB",
-    iconBg: "#EFF6FF",
+    icon: 'car-sport',
+    title: 'Parking',
+    subtitle: 'Manage slots',
+    route: '/(tabs)/parking',
+    iconColor: '#2563EB',
+    iconBg: '#EFF6FF',
   },
   {
-    icon: "wallet",
-    title: "Payments",
-    subtitle: "Rent & Bills",
-    route: "/(tabs)/payments",
-    iconColor: "#059669",
-    iconBg: "#ECFDF5",
+    icon: 'wallet',
+    title: 'Payments',
+    subtitle: 'Rent & Bills',
+    route: '/(tabs)/payments',
+    iconColor: '#059669',
+    iconBg: '#ECFDF5',
   },
   {
-    icon: "alert",
-    title: "SOS Alert",
-    subtitle: "Emergency",
-    route: "ACTION_SOS", // Special string we will intercept
+    icon: 'alert',
+    title: 'SOS Alert',
+    subtitle: 'Emergency',
+    route: 'ACTION_SOS', // Special string we will intercept
     iconColor: COLORS.sosRedDark,
-    iconBg: "#ffffff",
-    cardBg: "#FECACA", // The light red background for the whole card
-  },
+    iconBg: '#ffffff',
+    cardBg: '#FECACA', // The light red background for the whole card
+  }
 ];
 
 const SERVICES_ACTIONS: FeatureCard[] = [
   {
-    icon: "fitness",
-    title: "Facilities",
-    subtitle: "Book amenities",
-    route: "/common-area",
-    iconColor: "#7C3AED",
-    iconBg: "#F5F3FF",
+    icon: 'fitness',
+    title: 'Facilities',
+    subtitle: 'Book amenities',
+    route: '/common-area',
+    iconColor: '#7C3AED',
+    iconBg: '#F5F3FF',
   },
   {
-    icon: "construct",
-    title: "Maintenance",
-    subtitle: "Request repairs",
-    route: "/maintenance",
-    iconColor: "#EA580C",
-    iconBg: "#FFF7ED",
+    icon: 'construct',
+    title: 'Maintenance',
+    subtitle: 'Request repairs',
+    route: '/maintenance',
+    iconColor: '#EA580C',
+    iconBg: '#FFF7ED',
   },
 ];
 
 function getGreeting(): string {
   const hour = new Date().getHours();
-  if (hour < 12) return "Good Morning";
-  if (hour < 17) return "Good Afternoon";
-  return "Good Evening";
+  if (hour < 12) return 'Good Morning';
+  if (hour < 17) return 'Good Afternoon';
+  return 'Good Evening';
 }
 
 export default function HomeScreen() {
   const router = useRouter();
   const { user, logout } = useAuth();
 
-  const [viewMode, setViewMode] = useState<"RESIDENT" | "MANAGER">(
-    user?.role === "MANAGER" ? "MANAGER" : "RESIDENT",
+  const [viewMode, setViewMode] = useState<'RESIDENT' | 'MANAGER'>(
+    user?.role === 'MANAGER' ? 'MANAGER' : 'RESIDENT'
   );
 
-  const userName = user?.name || "John Resident";
-  const apartmentNo = user?.apartmentNumber || "A-101";
+  const userName = user?.name || 'John Resident';
+  const apartmentNo = user?.apartmentNumber || 'A-101';
 
-  const apartmentName = user?.managedApartment?.name || "PrimeLux Residence";
-  const apartmentLocation =
-    user?.managedApartment?.location || "23/A, Bakers street, Colombo 7";
+  const apartmentName = user?.managedApartment?.name || 'PrimeLux Residence';
+  const apartmentLocation = user?.managedApartment?.location || '23/A, Bakers street, Colombo 7';
   const numberOfResidences = user?.managedApartment?.numberOfUnits || 64;
 
   const handleSOS = () => {
     Alert.alert(
-      "Emergency Alert",
-      "This will immediately alert same floor neighbors, and building management. Continue?",
+      'Emergency Alert',
+      'This will immediately alert same floor neighbors, and building management. Continue?',
       [
-        { text: "Cancel", style: "cancel" },
+        { text: 'Cancel', style: 'cancel' },
         {
-          text: "ACTIVATE SOS",
-          style: "destructive",
+          text: 'ACTIVATE SOS',
+          style: 'destructive',
           onPress: () => {
             Vibration.vibrate([0, 500, 200, 500]);
             Alert.alert(
-              "SOS Alert Sent",
-              "Emergency alert has been sent to building management, security, and your emergency contacts.",
-              [{ text: "OK", style: "default" }],
+              'SOS Alert Sent',
+              'Emergency alert has been sent to building management, security, and your emergency contacts.',
+              [{ text: 'OK', style: 'default' }]
             );
           },
         },
-      ],
+      ]
     );
   };
 
   const handleLogout = () => {
-    if (Platform.OS === "web") {
-      const confirmLogout = window.confirm("Are you sure you want to log out?");
+    if (Platform.OS === 'web') {
+      const confirmLogout = window.confirm('Are you sure you want to log out?');
       if (confirmLogout) {
         logout();
-        router.replace("/welcome");
+        router.replace('/welcome');
       }
     } else {
-      Alert.alert("Log out", "Are you sure you want to log out?", [
-        { text: "Cancel", style: "cancel" },
+      Alert.alert('Log out', 'Are you sure you want to log out?', [
+        { text: 'Cancel', style: 'cancel' },
         {
-          text: "Log out",
-          style: "destructive",
+          text: 'Log out',
+          style: 'destructive',
           onPress: () => {
             logout();
-            router.replace("/welcome");
+            router.replace('/welcome');
           },
         },
       ]);
@@ -177,20 +175,20 @@ export default function HomeScreen() {
   };
 
   const toggleViewMode = () => {
-    setViewMode(viewMode === "RESIDENT" ? "MANAGER" : "RESIDENT");
+    setViewMode(viewMode === 'RESIDENT' ? 'MANAGER' : 'RESIDENT');
   };
 
-  const renderCard = (card: FeatureCard) => (
+const renderCard = (card: FeatureCard) => (
     <TouchableOpacity
       key={card.title}
       // Apply the custom cardBg if it exists, otherwise keep it white
       style={[
-        styles.featureCard,
-        card.cardBg ? { backgroundColor: card.cardBg } : null,
+        styles.featureCard, 
+        card.cardBg ? { backgroundColor: card.cardBg } : null
       ]}
       onPress={() => {
         // Intercept the SOS action!
-        if (card.route === "ACTION_SOS") {
+        if (card.route === 'ACTION_SOS') {
           handleSOS();
         } else {
           router.push(card.route as any);
@@ -198,9 +196,7 @@ export default function HomeScreen() {
       }}
       activeOpacity={0.7}
     >
-      <View
-        style={[styles.featureIconContainer, { backgroundColor: card.iconBg }]}
-      >
+      <View style={[styles.featureIconContainer, { backgroundColor: card.iconBg }]}>
         <Ionicons name={card.icon} size={22} color={card.iconColor} />
       </View>
       <Text style={styles.featureTitle}>{card.title}</Text>
@@ -229,16 +225,11 @@ export default function HomeScreen() {
           </View>
         </View>
         <Text style={styles.managerLocation}>
-          <Ionicons
-            name="location-outline"
-            size={13}
-            color={COLORS.textLight}
-          />{" "}
-          {apartmentLocation}
+          <Ionicons name="location-outline" size={13} color={COLORS.textLight} /> {apartmentLocation}
         </Text>
         <TouchableOpacity
           style={styles.dashboardLink}
-          onPress={() => router.push("/manager-dashboard" as any)}
+          onPress={() => router.push('/manager-dashboard' as any)}
           activeOpacity={0.7}
         >
           <Text style={styles.dashboardLinkText}>Open Dashboard</Text>
@@ -267,15 +258,20 @@ export default function HomeScreen() {
     </>
   );
 
+
   const ResidentDashboard = () => (
     <>
       <Text style={styles.sectionTitle}>Quick Actions</Text>
-      <View style={styles.featureGrid}>{QUICK_ACTIONS.map(renderCard)}</View>
+      <View style={styles.featureGrid}>
+        {QUICK_ACTIONS.map(renderCard)}
+      </View>
 
       <View style={styles.separator} />
 
       <Text style={styles.sectionTitle}>Services</Text>
-      <View style={styles.featureGrid}>{SERVICES_ACTIONS.map(renderCard)}</View>
+      <View style={styles.featureGrid}>
+        {SERVICES_ACTIONS.map(renderCard)}
+      </View>
     </>
   );
 
@@ -294,79 +290,46 @@ export default function HomeScreen() {
               <Text style={styles.greeting}>{getGreeting()} 👋</Text>
               <Text style={styles.userName}>{userName}</Text>
               <View style={styles.apartmentBadge}>
-                <Ionicons
-                  name="home-outline"
-                  size={13}
-                  color={COLORS.primary}
-                />
+                <Ionicons name="home-outline" size={13} color={COLORS.primary} />
                 <Text style={styles.apartmentText}>{apartmentNo}</Text>
               </View>
             </View>
             <TouchableOpacity
               style={styles.avatar}
-              onPress={() => router.push("/(tabs)/profile")}
+              onPress={() => router.push('/(tabs)/profile')}
               activeOpacity={0.8}
             >
-              {user?.profileImage ? (
-                <Image
-                  source={{ uri: user.profileImage }}
-                  style={styles.avatarImage}
-                />
-              ) : (
-                <Text style={styles.avatarText}>
-                  {userName.charAt(0).toUpperCase()}
-                </Text>
-              )}
+              <Text style={styles.avatarText}>
+                {userName.charAt(0).toUpperCase()}
+              </Text>
             </TouchableOpacity>
           </View>
 
           {/* View Mode Toggle */}
-          {(user?.role === "MANAGER" || user?.role === "ADMIN") && (
+          {(user?.role === 'MANAGER' || user?.role === 'ADMIN') && (
             <View style={styles.viewModeToggle}>
-              <Text
-                style={[
-                  styles.viewModeLabel,
-                  viewMode === "RESIDENT" && styles.viewModeLabelActive,
-                ]}
-              >
+              <Text style={[styles.viewModeLabel, viewMode === 'RESIDENT' && styles.viewModeLabelActive]}>
                 Resident
               </Text>
               <Switch
-                value={viewMode === "MANAGER"}
+                value={viewMode === 'MANAGER'}
                 onValueChange={toggleViewMode}
                 trackColor={{ false: COLORS.border, true: COLORS.primary }}
                 thumbColor={COLORS.white}
                 style={styles.viewModeSwitch}
               />
-              <Text
-                style={[
-                  styles.viewModeLabel,
-                  viewMode === "MANAGER" && styles.viewModeLabelActive,
-                ]}
-              >
+              <Text style={[styles.viewModeLabel, viewMode === 'MANAGER' && styles.viewModeLabelActive]}>
                 Manager
               </Text>
             </View>
           )}
 
           {/* Dashboard Content */}
-          {viewMode === "RESIDENT" ? (
-            <ResidentDashboard />
-          ) : (
-            <ManagerDashboard />
-          )}
+           {viewMode === 'RESIDENT' ? <ResidentDashboard /> : <ManagerDashboard />}
 
           {/* Logout */}
-          <TouchableOpacity
-            style={styles.logoutButton}
-            onPress={handleLogout}
-            activeOpacity={0.7}
-          >
-            <Ionicons
-              name="log-out-outline"
-              size={18}
-              color={COLORS.textLight}
-            />
+          <TouchableOpacity style={styles.logoutButton} onPress={handleLogout} activeOpacity={0.7}>
+            <Ionicons name="log-out-outline" size={18} color={COLORS.textLight} />
             <Text style={styles.logoutText}>Log out</Text>
           </TouchableOpacity>
         </ScrollView>
@@ -403,9 +366,9 @@ const styles = StyleSheet.create({
 
   // Header
   header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
     marginTop: 12,
     marginBottom: 20,
   },
@@ -415,29 +378,29 @@ const styles = StyleSheet.create({
   greeting: {
     fontSize: 14,
     color: COLORS.textLight,
-    fontWeight: "500",
+    fontWeight: '500',
     marginBottom: 4,
   },
   userName: {
     fontSize: 24,
-    fontWeight: "800",
+    fontWeight: '800',
     color: COLORS.textDark,
     letterSpacing: -0.5,
     marginBottom: 8,
   },
   apartmentBadge: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: COLORS.primaryLight,
     paddingHorizontal: 12,
     paddingVertical: 5,
     borderRadius: 20,
-    alignSelf: "flex-start",
+    alignSelf: 'flex-start',
     gap: 5,
   },
   apartmentText: {
     fontSize: 13,
-    fontWeight: "600",
+    fontWeight: '600',
     color: COLORS.primary,
   },
   avatar: {
@@ -445,34 +408,28 @@ const styles = StyleSheet.create({
     height: 48,
     borderRadius: 24,
     backgroundColor: COLORS.avatarBg,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
     borderWidth: 2,
     borderColor: COLORS.primary,
-    overflow: 'hidden',
-  },
-  avatarImage: {
-    width: '100%',
-    height: '100%',
-    borderRadius: 24,
   },
   avatarText: {
     fontSize: 20,
-    fontWeight: "700",
+    fontWeight: '700',
     color: COLORS.primary,
   },
 
   // View Mode Toggle
   viewModeToggle: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: 16,
     paddingVertical: 8,
     paddingHorizontal: 16,
     backgroundColor: COLORS.white,
     borderRadius: 24,
-    alignSelf: "center",
+    alignSelf: 'center',
     ...Platform.select({
       ios: {
         shadowColor: COLORS.cardShadow,
@@ -485,13 +442,13 @@ const styles = StyleSheet.create({
   },
   viewModeLabel: {
     fontSize: 13,
-    fontWeight: "500",
+    fontWeight: '500',
     color: COLORS.textMuted,
     marginHorizontal: 8,
   },
   viewModeLabelActive: {
     color: COLORS.textDark,
-    fontWeight: "700",
+    fontWeight: '700',
   },
   viewModeSwitch: {
     transform: [{ scaleX: 0.85 }, { scaleY: 0.85 }],
@@ -500,7 +457,7 @@ const styles = StyleSheet.create({
   // Section Title
   sectionTitle: {
     fontSize: 17,
-    fontWeight: "700",
+    fontWeight: '700',
     color: COLORS.textDark,
     marginBottom: 14,
     letterSpacing: -0.3,
@@ -512,12 +469,12 @@ const styles = StyleSheet.create({
    * regardless of screen/container width
    */
   featureGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
   },
   featureCard: {
-    width: "48%",
+    width: '48%',
     backgroundColor: COLORS.white,
     borderRadius: 18,
     padding: 16,
@@ -531,7 +488,7 @@ const styles = StyleSheet.create({
       },
       android: { elevation: 2 },
       web: {
-        boxShadow: "0 2px 8px rgba(148,163,184,0.12)",
+        boxShadow: '0 2px 8px rgba(148,163,184,0.12)',
       },
     }),
   },
@@ -539,20 +496,20 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 14,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: 10,
   },
   featureTitle: {
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: '700',
     color: COLORS.textDark,
     marginBottom: 2,
   },
   featureSubtitle: {
     fontSize: 11,
     color: COLORS.textLight,
-    fontWeight: "400",
+    fontWeight: '400',
   },
 
   // Manager Card
@@ -572,28 +529,28 @@ const styles = StyleSheet.create({
     }),
   },
   managerCardHeader: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 8,
     marginBottom: 14,
   },
   managerCardTitle: {
     fontSize: 15,
-    fontWeight: "700",
+    fontWeight: '700',
     color: COLORS.textDark,
   },
   managerStatRow: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: 12,
   },
   managerStat: {
     flex: 1,
-    alignItems: "center",
+    alignItems: 'center',
   },
   managerStatValue: {
     fontSize: 15,
-    fontWeight: "700",
+    fontWeight: '700',
     color: COLORS.textDark,
     marginBottom: 2,
   },
@@ -613,9 +570,9 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   dashboardLink: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
     gap: 6,
     paddingVertical: 10,
     borderTopWidth: 1,
@@ -623,15 +580,15 @@ const styles = StyleSheet.create({
   },
   dashboardLinkText: {
     fontSize: 14,
-    fontWeight: "600",
+    fontWeight: '600',
     color: COLORS.primary,
   },
 
   // Logout
   logoutButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
     gap: 8,
     marginTop: 16,
     paddingVertical: 14,
@@ -649,13 +606,13 @@ const styles = StyleSheet.create({
   },
   logoutText: {
     fontSize: 14,
-    fontWeight: "600",
+    fontWeight: '600',
     color: COLORS.textLight,
   },
 
   // SOS Button
   sosButton: {
-    position: "absolute",
+    position: 'absolute',
     bottom: Platform.select({ ios: 100, android: 80, web: 80 }),
     right: 20,
     zIndex: 100,
@@ -665,8 +622,8 @@ const styles = StyleSheet.create({
     height: 58,
     borderRadius: 29,
     backgroundColor: COLORS.sosRed,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
     ...Platform.select({
       ios: {
         shadowColor: COLORS.sosRed,
@@ -679,7 +636,7 @@ const styles = StyleSheet.create({
   },
   sosLabel: {
     fontSize: 9,
-    fontWeight: "800",
+    fontWeight: '800',
     color: COLORS.white,
     letterSpacing: 1,
     marginTop: 1,
@@ -687,9 +644,8 @@ const styles = StyleSheet.create({
   // Separator
   separator: {
     height: 3,
-    backgroundColor: "#333333",
+    backgroundColor: '#333333',
     marginVertical: 18,
-    width: "100%",
+    width: '100%',
   },
-  
 });
