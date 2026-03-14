@@ -2,7 +2,8 @@
  * Profile Screen
  * User profile and account management — 2026 light theme
  */
-import { apiService } from '@/services/api';
+import { apiService } from "@/services/api";
+import { useEffect } from "react";
 import React, { useState } from "react";
 import {
   View,
@@ -58,10 +59,29 @@ const shadow = (elevation: number) =>
 /* ── component ─────────────────────────────────────────────────── */
 export default function ProfileScreen() {
   const router = useRouter();
-  const { user, logout } = useAuth();
-  
+  const { user, logout, updateUser } = useAuth();
+
   // State to hold our profile picture URI
   const [profilePic, setProfilePic] = useState<string | null>(null);
+
+  useEffect(() => {
+    const loadProfilePicture = async () => {
+      try {
+        // Hit the GET endpoint in Spring Boot
+        const response = await apiService.get<{ image: string | null }>(
+          "/api/users/profile-picture",
+        );
+
+        if (response && response.image) {
+          setProfilePic(response.image); // Instantly display the saved image!
+        }
+      } catch (error) {
+        console.error("Failed to load profile picture on mount:", error);
+      }
+    };
+
+    loadProfilePicture();
+  }, []);
 
   const handleLogout = () => {
     Alert.alert("Logout", "Are you sure you want to logout?", [
@@ -77,12 +97,12 @@ export default function ProfileScreen() {
     ]);
   };
 
-const saveImageToDatabase = async (base64Data: string | null) => {
+  const saveImageToDatabase = async (base64Data: string | null) => {
     try {
-      await apiService.put('/api/users/profile-picture', { 
-        image: base64Data || "" 
+      await apiService.put("/api/users/profile-picture", {
+        image: base64Data || "",
       });
-      
+
       console.log("Success! Saved to DB.");
     } catch (error) {
       console.error("Network error:", error);
@@ -91,7 +111,7 @@ const saveImageToDatabase = async (base64Data: string | null) => {
   };
 
   /* ── Image Picker & Menu Logic ───────────────────────────────── */
-const pickImage = async () => {
+  const pickImage = async () => {
     // Open the native image gallery
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -103,29 +123,35 @@ const pickImage = async () => {
 
     if (!result.canceled) {
       //Grab the raw Base64 string
-      const rawBase64 = result.assets[0].base64; 
+      const rawBase64 = result.assets[0].base64;
       //Format it as a Data URI (so it renders easily and saves cleanly)
       const formattedBase64 = `data:image/jpeg;base64,${rawBase64}`;
       //Update the UI immediately
-      setProfilePic(formattedBase64); 
+      setProfilePic(formattedBase64);
+      updateUser({ profileImage: formattedBase64 });
       //SEND IT TO THE BACKEND!
-      await saveImageToDatabase(formattedBase64); 
+      await saveImageToDatabase(formattedBase64);
     }
   };
 
-const confirmDeleteImage = () => {
+  const confirmDeleteImage = () => {
     Alert.alert(
       "Delete Picture",
       "Are you sure you want to delete your current profile picture?",
       [
         { text: "Cancel", style: "cancel" },
-        { 
-          text: "Delete", 
-          style: "destructive", 
-          // We just delete it right here inline!
-          onPress: () => setProfilePic(null) 
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            setProfilePic(null); 
+            //Update the global AuthContext so other screens know it's gone
+            updateUser({ profileImage: undefined }); 
+            //Tell the Spring Boot backend to delete it from PostgreSQL
+            await saveImageToDatabase(null); 
+          },
         },
-      ]
+      ],
     );
   };
 
@@ -133,7 +159,11 @@ const confirmDeleteImage = () => {
     Alert.alert("Profile Picture", "What would you like to do?", [
       { text: "Cancel", style: "cancel" },
       { text: "Change Picture", onPress: pickImage },
-      { text: "Delete Picture", onPress: confirmDeleteImage, style: "destructive" },
+      {
+        text: "Delete Picture",
+        onPress: confirmDeleteImage,
+        style: "destructive",
+      },
     ]);
   };
 
@@ -202,8 +232,8 @@ const confirmDeleteImage = () => {
               <Text style={styles.avatarText}>{initial}</Text>
             )}
           </View>
-          <TouchableOpacity 
-            style={styles.cameraBtn} 
+          <TouchableOpacity
+            style={styles.cameraBtn}
             activeOpacity={0.7}
             onPress={handleProfilePicturePress} // <-- Linked to our new function!
           >

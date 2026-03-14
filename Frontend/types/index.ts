@@ -9,7 +9,6 @@ export interface User {
   email: string;
   password?: string;
   role: UserRole;
-  phone?: string;
   apartmentNumber?: string;
   profileImage?: string;
   // Manager-specific fields
