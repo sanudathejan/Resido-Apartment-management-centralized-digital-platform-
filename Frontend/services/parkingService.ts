@@ -4,7 +4,7 @@
 
 import apiService from './api';
 import { API_CONFIG } from '@/constants/config';
-import { ParkingSlot, ParkingRequest, VisitorEntry } from '@/types';
+import { ParkingSlot, ParkingRequest } from '@/types';
 
 class ParkingService {
   /**
@@ -65,41 +65,6 @@ class ParkingService {
     return requests.filter((r) => r.requestedBy?.id === userId);
   }
 
-  /**
-   * Register a visitor
-   */
-  async registerVisitor(visitorData: Omit<VisitorEntry, 'id' | 'status' | 'entryTime'>): Promise<VisitorEntry> {
-    const endpoint = `${API_CONFIG.ENDPOINTS.PARKING_REQUESTS}/visitor`;
-    return apiService.post<VisitorEntry>(endpoint, {
-      ...visitorData,
-      status: 'PENDING',
-      entryTime: new Date().toISOString(),
-    });
-  }
-
-  /**
-   * Get visitor entries for a user
-   */
-  async getVisitorEntries(userId: number): Promise<VisitorEntry[]> {
-    const endpoint = `${API_CONFIG.ENDPOINTS.PARKING_REQUESTS}/visitors/${userId}`;
-    try {
-      return await apiService.get<VisitorEntry[]>(endpoint);
-    } catch {
-      // Return empty array if endpoint not available
-      return [];
-    }
-  }
-
-  /**
-   * Check out visitor
-   */
-  async checkOutVisitor(visitorId: number): Promise<VisitorEntry> {
-    const endpoint = `${API_CONFIG.ENDPOINTS.PARKING_REQUESTS}/visitor/${visitorId}/checkout`;
-    return apiService.put<VisitorEntry>(endpoint, {
-      exitTime: new Date().toISOString(),
-      status: 'CHECKED_OUT',
-    });
-  }
 }
 
 export const parkingService = new ParkingService();

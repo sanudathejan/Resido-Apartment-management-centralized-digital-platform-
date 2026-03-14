@@ -86,6 +86,14 @@ public class ParkingController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Self-requesting is not allowed.");
         }
 
+        boolean isOverlapping = requestRepository.existsOverlappingApprovedRequest(
+                targetSlot.getId(), request.getStartTime(), request.getEndTime(), -1L);
+
+        if (isOverlapping) {
+            // 409 CONFLICT is the standard HTTP status for this situation
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "This parking slot is already booked for the selected time.");
+        }
+
         request.setRequester(requester);
         request.setStatus("PENDING");
         request.setSlot(targetSlot);
@@ -109,6 +117,15 @@ public class ParkingController {
 
         if (!request.getSlot().getOwner().getId().equals(currentUser.getId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not the owner of this slot.");
+        }
+
+        if ("APPROVED".equalsIgnoreCase(status)) {
+            boolean isOverlapping = requestRepository.existsOverlappingApprovedRequest(
+                    request.getSlot().getId(), request.getStartTime(), request.getEndTime(), request.getId());
+
+            if (isOverlapping) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "You have already approved another user for this exact time frame.");
+            }
         }
 
         request.setStatus(status.toUpperCase());
@@ -167,5 +184,19 @@ public class ParkingController {
         } else {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You cannot delete this request.");
         }
+    }
+    // 8. OWNER: Get my parking slot details
+    @GetMapping("/my-slot")
+    public ParkingSlot getMySlot(Principal principal) {
+        User currentUser = getAuthenticatedUser(principal);
+        return slotRepository.findByOwner(currentUser)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No assigned slot found."));
+    }
+
+    // 9. OWNER: Check my approved requests (who is currently scheduled to use my slot)
+    @GetMapping("/my-slot/approved")
+    public List<ParkingRequest> getMyApprovedRequests(Principal principal) {
+        User currentUser = getAuthenticatedUser(principal);
+        return requestRepository.findBySlotOwnerAndStatus(currentUser, "APPROVED");
     }
 }

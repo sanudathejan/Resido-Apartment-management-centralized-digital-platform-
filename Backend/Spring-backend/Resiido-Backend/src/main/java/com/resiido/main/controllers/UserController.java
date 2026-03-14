@@ -43,18 +43,19 @@ public class UserController {
         }
     }
 
-    // 1. Upload/Update Profile Picture (Any Logged-in User)
+    // 1. Upload/Update/Delete Profile Picture
     @PutMapping("/profile-picture")
     public void uploadProfilePicture(Principal principal, @RequestBody Map<String, String> payload) {
         User user = getAuthenticatedUser(principal);
-
         String base64Image = payload.get("image");
+
+        // If the string is empty or null, treat it as a deletion!
         if (base64Image == null || base64Image.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Image data is missing.");
+            user.setProfilePicture(null);
+        } else {
+            user.setProfilePicture(base64Image);
         }
 
-        // Save the raw Base64 string directly into the TEXT column
-        user.setProfilePicture(base64Image);
         userRepository.save(user);
     }
 

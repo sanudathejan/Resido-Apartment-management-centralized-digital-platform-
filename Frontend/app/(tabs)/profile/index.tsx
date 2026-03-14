@@ -2,8 +2,8 @@
  * Profile Screen
  * User profile and account management — 2026 light theme
  */
-
-import React, { useState } from 'react';
+import { apiService } from '@/services/api';
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -11,34 +11,35 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
-  Switch,
   Platform,
-} from 'react-native';
-import { useRouter } from 'expo-router';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
-import { useAuth } from '@/context/AuthContext';
+  Image, // <-- Added Image import
+} from "react-native";
+import { useRouter } from "expo-router";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
+import { useAuth } from "@/context/AuthContext";
+import * as ImagePicker from "expo-image-picker"; // <-- Added ImagePicker import
 
 /* ── design tokens ─────────────────────────────────────────────── */
 const C = {
-  bg: '#F4F7FB',
-  primary: '#2563EB',
-  primaryLight: '#EFF6FF',
-  avatarBg: '#DBEAFE',
-  white: '#FFFFFF',
-  textDark: '#1E293B',
-  textLight: '#64748B',
-  textMuted: '#94A3B8',
-  border: '#E2E8F0',
-  success: '#10B981',
-  error: '#EF4444',
+  bg: "#EBF7ED",
+  primary: "#2563EB",
+  primaryLight: "#EFF6FF",
+  avatarBg: "#DBEAFE",
+  white: "#FFFFFF",
+  textDark: "#1E293B",
+  textLight: "#64748B",
+  textMuted: "#94A3B8",
+  border: "#E2E8F0",
+  success: "#10B981",
+  error: "#EF4444",
 } as const;
 
 /* ── platform shadow helper ────────────────────────────────────── */
 const shadow = (elevation: number) =>
   Platform.select({
     ios: {
-      shadowColor: '#000',
+      shadowColor: "#000",
       shadowOffset: { width: 0, height: elevation / 2 },
       shadowOpacity: 0.08,
       shadowRadius: elevation,
@@ -47,7 +48,7 @@ const shadow = (elevation: number) =>
       elevation,
     },
     default: {
-      shadowColor: '#000',
+      shadowColor: "#000",
       shadowOffset: { width: 0, height: elevation / 2 },
       shadowOpacity: 0.08,
       shadowRadius: elevation,
@@ -58,110 +59,128 @@ const shadow = (elevation: number) =>
 export default function ProfileScreen() {
   const router = useRouter();
   const { user, logout } = useAuth();
-  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
-  const [darkMode, setDarkMode] = useState(false);
+  
+  // State to hold our profile picture URI
+  const [profilePic, setProfilePic] = useState<string | null>(null);
 
   const handleLogout = () => {
+    Alert.alert("Logout", "Are you sure you want to logout?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Logout",
+        style: "destructive",
+        onPress: async () => {
+          await logout();
+          router.replace("/welcome");
+        },
+      },
+    ]);
+  };
+
+const saveImageToDatabase = async (base64Data: string | null) => {
+    try {
+      await apiService.put('/api/users/profile-picture', { 
+        image: base64Data || "" 
+      });
+      
+      console.log("Success! Saved to DB.");
+    } catch (error) {
+      console.error("Network error:", error);
+      Alert.alert("Error", "Could not connect to the server.");
+    }
+  };
+
+  /* ── Image Picker & Menu Logic ───────────────────────────────── */
+const pickImage = async () => {
+    // Open the native image gallery
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+      base64: true,
+    });
+
+    if (!result.canceled) {
+      //Grab the raw Base64 string
+      const rawBase64 = result.assets[0].base64; 
+      //Format it as a Data URI (so it renders easily and saves cleanly)
+      const formattedBase64 = `data:image/jpeg;base64,${rawBase64}`;
+      //Update the UI immediately
+      setProfilePic(formattedBase64); 
+      //SEND IT TO THE BACKEND!
+      await saveImageToDatabase(formattedBase64); 
+    }
+  };
+
+const confirmDeleteImage = () => {
     Alert.alert(
-      'Logout',
-      'Are you sure you want to logout?',
+      "Delete Picture",
+      "Are you sure you want to delete your current profile picture?",
       [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Logout',
-          style: 'destructive',
-          onPress: async () => {
-            await logout();
-            router.replace('/welcome');
-          },
+        { text: "Cancel", style: "cancel" },
+        { 
+          text: "Delete", 
+          style: "destructive", 
+          // We just delete it right here inline!
+          onPress: () => setProfilePic(null) 
         },
       ]
     );
   };
 
-  const userName = user?.name || 'John Doe';
-  const userEmail = user?.email || 'john.doe@email.com';
-  const apartmentNo = user?.apartmentNumber || 'A-101';
-  const userRole = user?.role || 'RESIDENT';
+  const handleProfilePicturePress = () => {
+    Alert.alert("Profile Picture", "What would you like to do?", [
+      { text: "Cancel", style: "cancel" },
+      { text: "Change Picture", onPress: pickImage },
+      { text: "Delete Picture", onPress: confirmDeleteImage, style: "destructive" },
+    ]);
+  };
+
+  const userName = user?.name || "John Doe";
+  const userEmail = user?.email || "john.doe@email.com";
+  const apartmentNo = user?.apartmentNumber || "A-101";
+  const userRole = user?.role || "RESIDENT";
   const initial = userName.charAt(0).toUpperCase();
 
   /* ── menu data ─────────────────────────────────────────────── */
   const menuItems = [
     {
-      section: 'Account',
+      section: "Account",
       items: [
         {
-          icon: 'person-outline' as const,
-          title: 'Edit Profile',
-          subtitle: 'Update your personal information',
+          icon: "person-outline" as const,
+          title: "Update Profile Name",
+          subtitle: "Update your personal information",
           onPress: () => {},
         },
         {
-          icon: 'lock-closed-outline' as const,
-          title: 'Change Password',
-          subtitle: 'Update your password',
-          onPress: () => {},
+          icon: "camera-outline" as const,
+          title: "Update Profile Picture",
+          subtitle: "Change your display photo",
+          onPress: handleProfilePicturePress, // <-- Linked to our new function!
         },
         {
-          icon: 'shield-checkmark-outline' as const,
-          title: 'Privacy & Security',
-          subtitle: 'Manage your privacy settings',
+          icon: "lock-closed-outline" as const,
+          title: "Change Password",
+          subtitle: "Update your password",
           onPress: () => {},
         },
       ],
     },
     {
-      section: 'Preferences',
+      section: "About Us",
       items: [
         {
-          icon: 'notifications-outline' as const,
-          title: 'Notifications',
-          subtitle: 'Manage notification preferences',
-          toggle: true,
-          value: notificationsEnabled,
-          onToggle: setNotificationsEnabled,
-        },
-        {
-          icon: 'moon-outline' as const,
-          title: 'Dark Mode',
-          subtitle: 'Toggle dark theme',
-          toggle: true,
-          value: darkMode,
-          onToggle: setDarkMode,
-        },
-        {
-          icon: 'language-outline' as const,
-          title: 'Language',
-          subtitle: 'English (US)',
-          onPress: () => {},
-        },
-      ],
-    },
-    {
-      section: 'Support',
-      items: [
-        {
-          icon: 'help-circle-outline' as const,
-          title: 'Help Center',
-          subtitle: 'Get help with the app',
+          icon: "chatbubble-outline" as const,
+          title: "Contact Support",
+          subtitle: "Reach out to our team",
           onPress: () => {},
         },
         {
-          icon: 'chatbubble-outline' as const,
-          title: 'Contact Support',
-          subtitle: 'Reach out to our team',
-          onPress: () => {},
-        },
-        {
-          icon: 'document-text-outline' as const,
-          title: 'Terms & Conditions',
-          subtitle: 'Read our terms of service',
-          onPress: () => {},
-        },
-        {
-          icon: 'information-circle-outline' as const,
-          title: 'About Resido',
-          subtitle: 'Version 1.0.0',
+          icon: "information-circle-outline" as const,
+          title: "About Resido",
+          subtitle: "Version 1.0.0",
           onPress: () => {},
         },
       ],
@@ -170,15 +189,24 @@ export default function ProfileScreen() {
 
   /* ── render ─────────────────────────────────────────────────── */
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={styles.container} edges={["top"]}>
       {/* ── flat header ─────────────────────────────────────── */}
       <View style={styles.header}>
         {/* avatar circle */}
         <View style={styles.avatarOuter}>
           <View style={styles.avatar}>
-            <Text style={styles.avatarText}>{initial}</Text>
+            {/* Show image if we have one, otherwise show initials */}
+            {profilePic ? (
+              <Image source={{ uri: profilePic }} style={styles.avatarImage} />
+            ) : (
+              <Text style={styles.avatarText}>{initial}</Text>
+            )}
           </View>
-          <TouchableOpacity style={styles.cameraBtn} activeOpacity={0.7}>
+          <TouchableOpacity 
+            style={styles.cameraBtn} 
+            activeOpacity={0.7}
+            onPress={handleProfilePicturePress} // <-- Linked to our new function!
+          >
             <Ionicons name="camera" size={14} color={C.white} />
           </TouchableOpacity>
         </View>
@@ -204,24 +232,6 @@ export default function ProfileScreen() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* ── quick stats card (overlapping header) ──────── */}
-        <View style={[styles.statsCard, shadow(6)]}>
-          <View style={styles.statItem}>
-            <Text style={styles.statValue}>12</Text>
-            <Text style={styles.statLabel}>Payments</Text>
-          </View>
-          <View style={styles.statDivider} />
-          <View style={styles.statItem}>
-            <Text style={styles.statValue}>3</Text>
-            <Text style={styles.statLabel}>Requests</Text>
-          </View>
-          <View style={styles.statDivider} />
-          <View style={styles.statItem}>
-            <Text style={styles.statValue}>8</Text>
-            <Text style={styles.statLabel}>Visitors</Text>
-          </View>
-        </View>
-
         {/* ── menu sections ──────────────────────────────── */}
         {menuItems.map((section, sectionIdx) => (
           <View key={sectionIdx} style={styles.menuSection}>
@@ -236,7 +246,7 @@ export default function ProfileScreen() {
                     key={itemIdx}
                     style={[styles.menuItem, !isLast && styles.menuItemBorder]}
                     onPress={item.onPress}
-                    disabled={!!item.toggle}
+                    disabled={false}
                     activeOpacity={0.6}
                   >
                     {/* icon circle */}
@@ -255,21 +265,11 @@ export default function ProfileScreen() {
                     </View>
 
                     {/* right control */}
-                    {item.toggle ? (
-                      <Switch
-                        value={item.value}
-                        onValueChange={item.onToggle}
-                        trackColor={{ false: C.border, true: '#93BBFD' }}
-                        thumbColor={item.value ? C.primary : C.textMuted}
-                        ios_backgroundColor={C.border}
-                      />
-                    ) : (
-                      <Ionicons
-                        name="chevron-forward"
-                        size={18}
-                        color={C.textMuted}
-                      />
-                    )}
+                    <Ionicons
+                      name="chevron-forward"
+                      size={18}
+                      color={C.textMuted}
+                    />
                   </TouchableOpacity>
                 );
               })}
@@ -289,7 +289,7 @@ export default function ProfileScreen() {
 
         {/* ── footer credit ──────────────────────────────── */}
         <Text style={styles.footerText}>
-          SDGP Project{'\n'}University of Westminster
+          SDGP Project{"\n"}University of Westminster
         </Text>
       </ScrollView>
     </SafeAreaView>
@@ -314,7 +314,7 @@ const styles = StyleSheet.create({
   /* ── header ─────────────────────────────────────────────────── */
   header: {
     backgroundColor: C.bg,
-    alignItems: 'center',
+    alignItems: "center",
     paddingTop: 16,
     paddingBottom: 32,
     paddingHorizontal: 20,
@@ -322,34 +322,39 @@ const styles = StyleSheet.create({
 
   /* avatar */
   avatarOuter: {
-    position: 'relative',
+    position: "relative",
     marginBottom: 14,
   },
   avatar: {
     width: 88,
     height: 88,
     borderRadius: 44,
-    backgroundColor: '#DBEAFE',
+    backgroundColor: "#DBEAFE",
     borderWidth: 3,
     borderColor: C.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
+    overflow: "hidden", // <-- Added to ensure images stay inside the circle
+  },
+  avatarImage: {
+    width: "100%", // <-- Added new style for the image
+    height: "100%",
   },
   avatarText: {
     fontSize: 34,
-    fontWeight: '700',
+    fontWeight: "700",
     color: C.primary,
   },
   cameraBtn: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 2,
     right: 2,
     width: 28,
     height: 28,
     borderRadius: 14,
     backgroundColor: C.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     borderWidth: 2,
     borderColor: C.bg,
   },
@@ -357,7 +362,7 @@ const styles = StyleSheet.create({
   /* name / email */
   userName: {
     fontSize: 22,
-    fontWeight: '700',
+    fontWeight: "700",
     color: C.textDark,
     marginBottom: 2,
   },
@@ -369,12 +374,12 @@ const styles = StyleSheet.create({
 
   /* pills */
   pillRow: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 10,
   },
   pill: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 5,
     backgroundColor: C.primaryLight,
     paddingHorizontal: 14,
@@ -383,40 +388,9 @@ const styles = StyleSheet.create({
   },
   pillText: {
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: "600",
     color: C.primary,
-    textTransform: 'capitalize',
-  },
-
-  /* ── stats card ─────────────────────────────────────────────── */
-  statsCard: {
-    flexDirection: 'row',
-    backgroundColor: C.white,
-    borderRadius: 16,
-    paddingVertical: 20,
-    paddingHorizontal: 12,
-    marginTop: -20,
-    marginBottom: 24,
-  },
-  statItem: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  statValue: {
-    fontSize: 22,
-    fontWeight: '700',
-    color: C.primary,
-    marginBottom: 4,
-  },
-  statLabel: {
-    fontSize: 12,
-    color: C.textLight,
-    fontWeight: '500',
-  },
-  statDivider: {
-    width: 1,
-    backgroundColor: C.border,
-    marginVertical: 2,
+    textTransform: "capitalize",
   },
 
   /* ── menu sections ──────────────────────────────────────────── */
@@ -425,9 +399,9 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 12,
-    fontWeight: '700',
+    fontWeight: "700",
     color: C.textMuted,
-    textTransform: 'uppercase',
+    textTransform: "uppercase",
     letterSpacing: 1,
     marginBottom: 10,
     marginLeft: 4,
@@ -435,11 +409,11 @@ const styles = StyleSheet.create({
   menuCard: {
     backgroundColor: C.white,
     borderRadius: 16,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   menuItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingVertical: 14,
     paddingHorizontal: 16,
   },
@@ -452,8 +426,8 @@ const styles = StyleSheet.create({
     height: 40,
     borderRadius: 12,
     backgroundColor: C.primaryLight,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     marginRight: 14,
   },
   menuTextBlock: {
@@ -461,7 +435,7 @@ const styles = StyleSheet.create({
   },
   menuTitle: {
     fontSize: 15,
-    fontWeight: '600',
+    fontWeight: "600",
     color: C.textDark,
     marginBottom: 2,
   },
@@ -472,9 +446,9 @@ const styles = StyleSheet.create({
 
   /* ── logout ─────────────────────────────────────────────────── */
   logoutBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     gap: 8,
     paddingVertical: 14,
     borderRadius: 14,
@@ -485,13 +459,13 @@ const styles = StyleSheet.create({
   },
   logoutText: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
     color: C.error,
   },
 
   /* ── footer ─────────────────────────────────────────────────── */
   footerText: {
-    textAlign: 'center',
+    textAlign: "center",
     fontSize: 12,
     color: C.textMuted,
     lineHeight: 18,

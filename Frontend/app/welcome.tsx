@@ -1,7 +1,8 @@
 /**
  * Welcome Screen
  * Modern 2026 light theme — premium minimal splash
- * Logo PNG already contains the building graphic + "RESIIDO" text
+ * Logo PNG contains the building graphic + "RESIIDO" text
+ * If user is already authenticated, offer "Continue" option
  */
 
 import React from 'react';
@@ -17,6 +18,8 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
+import { useAuth } from '@/context/AuthContext';
 
 const { width, height } = Dimensions.get('window');
 
@@ -31,18 +34,21 @@ const COLORS = {
   white: '#FFFFFF',
   border: '#E2E8F0',
   cardShadow: '#94A3B8',
+  green: '#10B981',
 };
 
-// Cap the logo so it never exceeds 35 % of screen height
-const LOGO_MAX_H = height * 0.30;
+// Cap logo at 28% of screen height so it fits well
+const LOGO_MAX_H = height * 0.28;
 
 export default function WelcomeScreen() {
   const router = useRouter();
+  const { isAuthenticated, user } = useAuth();
 
   return (
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
       <SafeAreaView style={styles.safeArea}>
+
         {/* ── Hero: centred logo ─────────────────────────────────── */}
         <View style={styles.heroSection}>
           <Image
@@ -55,15 +61,22 @@ export default function WelcomeScreen() {
 
         {/* ── Feature Pills ─────────────────────────────────────── */}
         <View style={styles.pillsContainer}>
-          {['Parking', 'Payments', 'Maintenance', 'Visitors'].map((f) => (
-            <View key={f} style={styles.pill}>
-              <Text style={styles.pillText}>{f}</Text>
+          {[
+            { label: 'Parking', icon: 'car-sport-outline' as const },
+            { label: 'Payments', icon: 'wallet-outline' as const },
+            { label: 'Maintenance', icon: 'construct-outline' as const },
+          ].map((f) => (
+            <View key={f.label} style={styles.pill}>
+              <Ionicons name={f.icon} size={14} color={COLORS.primary} />
+              <Text style={styles.pillText}>{f.label}</Text>
             </View>
           ))}
         </View>
 
         {/* ── Bottom Buttons ────────────────────────────────────── */}
         <View style={styles.buttonSection}>
+
+
           <TouchableOpacity
             style={styles.registerButton}
             onPress={() => router.push('/register')}
@@ -102,8 +115,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   logo: {
-    width: width * 0.50,
+    width: width * 0.48,
     height: LOGO_MAX_H,
+    maxWidth: 240,
     maxHeight: LOGO_MAX_H,
     marginBottom: 12,
   },
@@ -119,11 +133,14 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     justifyContent: 'center',
     gap: 8,
-    paddingBottom: 28,
+    paddingBottom: 24,
   },
   pill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
     backgroundColor: COLORS.white,
-    paddingHorizontal: 16,
+    paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 20,
     borderWidth: 1,
@@ -138,8 +155,9 @@ const styles = StyleSheet.create({
   /* ── Buttons ─────────────────────────────────────────────────── */
   buttonSection: {
     paddingBottom: Platform.OS === 'ios' ? 20 : 30,
-    gap: 14,
+    gap: 12,
   },
+
   registerButton: {
     backgroundColor: COLORS.primary,
     paddingVertical: 17,

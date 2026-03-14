@@ -24,7 +24,7 @@ const { width } = Dimensions.get('window');
 
 /** Local design-system color tokens */
 const C = {
-  background: '#F4F7FB',
+  background: '#D8F3DC',
   primary: '#2563EB',
   primaryLight: '#EFF6FF',
   white: '#FFFFFF',
@@ -40,11 +40,7 @@ const C = {
 /** Per-stat accent palette keyed by stat id */
 const STAT_ACCENT: Record<string, { icon: string; bg: string }> = {
   residents:   { icon: '#2563EB', bg: '#EFF6FF' },
-  maintenance: { icon: '#EA580C', bg: '#FFF7ED' },
-  payments:    { icon: '#EF4444', bg: '#FEF2F2' },
-  visitors:    { icon: '#10B981', bg: '#ECFDF5' },
   parking:     { icon: '#7C3AED', bg: '#F5F3FF' },
-  bookings:    { icon: '#0891B2', bg: '#ECFEFF' },
 };
 
 /** Cross-platform shadow helper */
@@ -100,44 +96,12 @@ export default function ManagerDashboardScreen() {
       subtitle: '64 units occupied',
     },
     {
-      id: 'maintenance',
-      title: 'Pending Requests',
-      value: 12,
-      icon: 'construct',
-      color: '#EA580C',
-      subtitle: '3 urgent',
-    },
-    {
-      id: 'payments',
-      title: 'Pending Payments',
-      value: 'Rs. 2.4M',
-      icon: 'card',
-      color: '#EF4444',
-      subtitle: '18 residents',
-    },
-    {
-      id: 'visitors',
-      title: 'Visitors Today',
-      value: 24,
-      icon: 'person-add',
-      color: '#10B981',
-      subtitle: '8 checked out',
-    },
-    {
       id: 'parking',
       title: 'Available Parking',
       value: '15/80',
       icon: 'car',
       color: '#7C3AED',
       subtitle: '15 slots free',
-    },
-    {
-      id: 'bookings',
-      title: 'Area Bookings',
-      value: 8,
-      icon: 'calendar',
-      color: '#0891B2',
-      subtitle: 'Today',
     },
   ];
 
@@ -256,13 +220,6 @@ export default function ManagerDashboardScreen() {
           <Text style={styles.sectionTitle}>Quick Actions</Text>
           <View style={styles.quickActionsGrid}>
             <QuickAction
-              icon="megaphone"
-              title="Create Announcement"
-              onPress={() => router.push('/(tabs)/announcements')}
-              iconColor="#2563EB"
-              iconBg="#EFF6FF"
-            />
-            <QuickAction
               icon="person-add"
               title="Add Resident"
               onPress={() => {}}
@@ -288,30 +245,6 @@ export default function ManagerDashboardScreen() {
           {/* Recent Activity */}
           <Text style={styles.sectionTitle}>Recent Activity</Text>
           <View style={styles.activityList}>
-            <ActivityItem
-              icon="construct"
-              title="New maintenance request"
-              description="Unit B-12: Plumbing issue"
-              time="10 mins ago"
-              iconColor="#EA580C"
-              iconBg="#FFF7ED"
-            />
-            <ActivityItem
-              icon="card"
-              title="Payment received"
-              description="Unit A-5: Rent for February"
-              time="1 hour ago"
-              iconColor="#10B981"
-              iconBg="#ECFDF5"
-            />
-            <ActivityItem
-              icon="person-add"
-              title="Visitor check-in"
-              description="Unit C-8: Guest arrived"
-              time="2 hours ago"
-              iconColor="#2563EB"
-              iconBg="#EFF6FF"
-            />
             <ActivityItem
               icon="alert-circle"
               title="SOS Alert resolved"

@@ -2,3 +2,7 @@
 2. Profile pictures and maintenance request photo implementation with AWS S3 buckets (Profile pic done with Base64)
 
 This is it until frontend merging and testing
+
+Forget password implementation - code for you email. if it's applied, you can set new password.
+
+when parking request get approved, send via notification

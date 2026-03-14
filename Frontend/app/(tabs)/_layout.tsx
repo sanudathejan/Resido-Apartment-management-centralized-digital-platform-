@@ -9,10 +9,10 @@ import { Ionicons } from "@expo/vector-icons";
 import { Platform, StyleSheet, View } from "react-native";
 
 const TAB_COLORS = {
-  active: '#2563EB',
-  inactive: '#94A3B8',
-  background: '#FFFFFF',
-  activeBg: '#EFF6FF',
+  active: "#2563EB",
+  inactive: "#94A3B8",
+  background: "#FFFFFF",
+  activeBg: "#EFF6FF",
 };
 
 export default function TabLayout() {
@@ -32,13 +32,11 @@ export default function TabLayout() {
         options={{
           title: "Home",
           tabBarIcon: ({ color, focused }) => (
-            <View style={focused ? styles.activeIconContainer : undefined}>
-              <Ionicons
-                name={focused ? "home" : "home-outline"}
-                size={22}
-                color={color}
-              />
-            </View>
+            <Ionicons
+              name={focused ? "home" : "home-outline"}
+              size={24} // 24 or 28 are standard, reliable sizes
+              color={color}
+            />
           ),
         }}
       />
@@ -46,15 +44,13 @@ export default function TabLayout() {
       <Tabs.Screen
         name="announcements/index"
         options={{
-          title: "Notifications",
+          title: "Alerts",
           tabBarIcon: ({ color, focused }) => (
-            <View style={focused ? styles.activeIconContainer : undefined}>
-              <Ionicons
-                name={focused ? "notifications" : "notifications-outline"}
-                size={22}
-                color={color}
-              />
-            </View>
+            <Ionicons
+              name={focused ? "notifications" : "notifications-outline"}
+              size={24} // 24 or 28 are standard, reliable sizes
+              color={color}
+            />
           ),
         }}
       />
@@ -64,29 +60,26 @@ export default function TabLayout() {
         options={{
           title: "Parking",
           tabBarIcon: ({ color, focused }) => (
-            <View style={focused ? styles.activeIconContainer : undefined}>
-              <Ionicons
-                name={focused ? "car-sport" : "car-sport-outline"}
-                size={22}
-                color={color}
-              />
-            </View>
+            <Ionicons
+              name={focused ? "car-sport" : "car-sport-outline"}
+              size={24} // 24 or 28 are standard, reliable sizes
+              color={color}
+            />
           ),
         }}
       />
 
       <Tabs.Screen
-        name="rent/index"
+        name="payments/index" // Ensure your new file is in app/(tabs)/payments/index.tsx
         options={{
           title: "Payments",
+          tabBarLabel: "Payments",
           tabBarIcon: ({ color, focused }) => (
-            <View style={focused ? styles.activeIconContainer : undefined}>
-              <Ionicons
-                name={focused ? "wallet" : "wallet-outline"}
-                size={22}
-                color={color}
-              />
-            </View>
+            <Ionicons
+              name={focused ? "wallet" : "wallet-outline"}
+              size={24} // 24 or 28 are standard, reliable sizes
+              color={color}
+            />
           ),
         }}
       />
@@ -96,13 +89,11 @@ export default function TabLayout() {
         options={{
           title: "Profile",
           tabBarIcon: ({ color, focused }) => (
-            <View style={focused ? styles.activeIconContainer : undefined}>
-              <Ionicons
-                name={focused ? "person" : "person-outline"}
-                size={22}
-                color={color}
-              />
-            </View>
+            <Ionicons
+              name={focused ? "person" : "person-outline"}
+              size={24} // 24 or 28 are standard, reliable sizes
+              color={color}
+            />
           ),
         }}
       />
@@ -110,8 +101,18 @@ export default function TabLayout() {
   );
 }
 
-const TAB_HEIGHT = Platform.select({ ios: 88, android: 68, web: 70, default: 68 });
-const TAB_PADDING_BOTTOM = Platform.select({ ios: 28, android: 10, web: 10, default: 10 });
+const TAB_HEIGHT = Platform.select({
+  ios: 88,
+  android: 68,
+  web: 70,
+  default: 68,
+});
+const TAB_PADDING_BOTTOM = Platform.select({
+  ios: 28,
+  android: 10,
+  web: 10,
+  default: 10,
+});
 
 const styles = StyleSheet.create({
   tabBar: {
@@ -124,14 +125,14 @@ const styles = StyleSheet.create({
       web: {
         // Not absolute on web — let it flow in the normal layout
         borderTopWidth: 1,
-        borderTopColor: '#E2E8F0',
+        borderTopColor: "#E2E8F0",
       },
       ios: {
-        position: 'absolute',
+        position: "absolute",
         bottom: 0,
         left: 0,
         right: 0,
-        shadowColor: '#94A3B8',
+        shadowColor: "#94A3B8",
         shadowOffset: { width: 0, height: -4 },
         shadowOpacity: 0.08,
         shadowRadius: 16,
@@ -142,17 +143,18 @@ const styles = StyleSheet.create({
     }),
   },
   tabBarLabel: {
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: "600",
     marginTop: 2,
   },
   tabBarItem: {
     paddingTop: 2,
   },
-  activeIconContainer: {
-    backgroundColor: TAB_COLORS.activeBg,
-    borderRadius: 14,
+  baseIconContainer: {
     paddingHorizontal: 14,
     paddingVertical: 6,
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 14,
   },
 });

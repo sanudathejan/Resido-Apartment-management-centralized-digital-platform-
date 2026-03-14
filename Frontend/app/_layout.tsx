@@ -35,6 +35,7 @@ export default function RootLayout() {
             <Stack.Screen name="welcome" />
             <Stack.Screen name="login" />
             <Stack.Screen name="register" />
+            <Stack.Screen name="verify" />
 
             {/* Authenticated Screens */}
             <Stack.Screen name="(tabs)" />
@@ -69,13 +70,7 @@ export default function RootLayout() {
                 title: 'Manager Dashboard'
               }}
             />
-            <Stack.Screen
-              name="visitor-management"
-              options={{
-                headerShown: false,
-                title: 'Visitor Management'
-              }}
-            />
+
           </Stack>
           <StatusBar style="auto" />
         </ThemeProvider>
