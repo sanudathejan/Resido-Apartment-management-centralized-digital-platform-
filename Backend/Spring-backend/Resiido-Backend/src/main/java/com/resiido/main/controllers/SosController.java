@@ -16,7 +16,8 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/sos")
-public class SosController {
+public class
+SosController {
 
     @Autowired
     private SosRepository sosRepository;

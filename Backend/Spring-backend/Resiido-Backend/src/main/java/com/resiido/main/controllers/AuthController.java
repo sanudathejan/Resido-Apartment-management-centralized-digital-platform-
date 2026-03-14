@@ -9,6 +9,12 @@ import com.resiido.main.repositories.ParkingSlotRepository;
 import com.resiido.main.repositories.UserRepository;
 import com.resiido.main.security.JwtUtil;
 import com.resiido.main.services.EmailService;
+import com.resiido.main.services.PasswordResetService;
+import com.resiido.main.dtos.ForgotPasswordRequest;
+import com.resiido.main.dtos.ResetPasswordRequest;
+
+import jakarta.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,11 +40,12 @@ public class AuthController {
     @Autowired private PasswordEncoder passwordEncoder;
     @Autowired private JwtUtil jwtUtil;
     @Autowired private EmailService emailService;
+    @Autowired private PasswordResetService passwordResetService;
 
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody User user) {
         if (userRepository.findByEmail(user.getEmail()).isPresent()) {
-            return ResponseEntity.badRequest().body("Email already exists. Please use a different email or log in.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email already exists");
         }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         String role = (user.getRole() != null && !user.getRole().isEmpty()) ? user.getRole().toUpperCase() : "RESIDENT";
@@ -49,10 +56,17 @@ public class AuthController {
 
         if ("RESIDENT".equals(role)) {
             String houseNum = user.getRequestedHouseNumber();
-            if (houseNum == null || houseNum.isEmpty()) return ResponseEntity.badRequest().body("Residents must select a house number.");
-            House house = houseRepository.findByHouseNumber(houseNum).orElse(null);
-            if (house == null) return ResponseEntity.badRequest().body("House " + houseNum + " does not exist.");
-            if (house.getResident() != null) return ResponseEntity.badRequest().body("House " + houseNum + " is already taken.");
+            if (houseNum == null || houseNum.isEmpty()) {
+                return ResponseEntity.badRequest().body("Residents must select a house number.");
+            }
+
+            House house = houseRepository.findByHouseNumber(houseNum)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "House " + houseNum + " does not exist."));
+
+            if (house.getResident() != null) {
+                return ResponseEntity.badRequest().body("House " + houseNum + " is already taken.");
+            }
+
             userRepository.save(user);
             emailService.sendVerificationCodeToManagers(user.getName(), "RESIDENT", houseNum, code);
             return ResponseEntity.ok("Request sent! Managers notified.");
@@ -65,73 +79,95 @@ public class AuthController {
 
     @PostMapping("/verify-account")
     @Transactional
-    public ResponseEntity<?> verifyAccount(@RequestBody Map<String, String> payload) {
+    public ResponseEntity<String> verifyAccount(@RequestBody Map<String, String> payload) {
         String email = payload.get("email");
         String code = payload.get("code");
-        User user = userRepository.findByEmail(email).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
-        if (user.isVerified()) return ResponseEntity.badRequest().body(Map.of("message", "User is already verified."));
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        if (user.isVerified()) {
+            return ResponseEntity.badRequest().body("User is already verified.");
+        }
+
         if (code.equals(user.getVerificationCode())) {
             String successMessage;
+
             if ("RESIDENT".equals(user.getRole())) {
                 String houseNum = user.getRequestedHouseNumber();
-                House house = houseRepository.findByHouseNumber(houseNum).orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "House not found"));
-                if (house.getResident() != null) return ResponseEntity.badRequest().body(Map.of("message", "House was taken while you were waiting."));
+
+                House house = houseRepository.findByHouseNumber(houseNum)
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "House not found"));
+
+                if (house.getResident() != null) {
+                    return ResponseEntity.badRequest().body("House was taken while you were waiting.");
+                }
+
                 house.setResident(user);
                 houseRepository.save(house);
+
                 String expectedSlot = "P-" + houseNum;
                 ParkingSlot slot = parkingSlotRepository.findBySlotNumber(expectedSlot);
                 if (slot != null) {
                     slot.setOwner(user);
                     parkingSlotRepository.save(slot);
                 }
+
                 successMessage = "Verification successful! Housing and Parking assigned.";
             } else {
                 successMessage = "Verification successful! Manager account activated.";
             }
+
             user.setVerified(true);
             user.setVerificationCode(null);
             userRepository.save(user);
-
-            // Generate JWT token so the user is auto-logged-in after verification
-            String token = jwtUtil.generateToken(user.getEmail());
-
-            // Return JSON with token and user info
-            return ResponseEntity.ok(Map.of(
-                "message", successMessage,
-                "token", token,
-                "user", Map.of(
-                    "id", user.getId(),
-                    "name", user.getName(),
-                    "email", user.getEmail(),
-                    "role", user.getRole(),
-                    "requestedHouseNumber", user.getRequestedHouseNumber() != null ? user.getRequestedHouseNumber() : ""
-                )
-            ));
+            return ResponseEntity.ok(successMessage);
         } else {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", "Invalid Verification Code."));
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Invalid Verification Code.");
         }
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody AuthRequest authRequest) {
-        User user = userRepository.findByEmail(authRequest.getEmail()).orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials"));
-        if (!user.isVerified()) throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Account not verified.");
-        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authRequest.getEmail(), authRequest.getPassword()));
-        String token = jwtUtil.generateToken(authRequest.getEmail());
+    public String login(@RequestBody AuthRequest authRequest) {
+        User user = userRepository.findByEmail(authRequest.getEmail())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials"));
 
-        return ResponseEntity.ok(Map.of(
-            "token", token,
-            "user", Map.of(
-                "id", user.getId(),
-                "name", user.getName(),
-                "email", user.getEmail(),
-                "role", user.getRole(),
-                "requestedHouseNumber", user.getRequestedHouseNumber() != null ? user.getRequestedHouseNumber() : ""
-            )
-        ));
+        if (!user.isVerified()) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Account not verified.");
+        }
+
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(authRequest.getEmail(), authRequest.getPassword())
+        );
+
+        return jwtUtil.generateToken(authRequest.getEmail());
     }
 
-    //DELETE USER (Safe Unlink)
+    @PostMapping("/forgot-password")
+    public ResponseEntity<String> forgotPassword(@Valid @RequestBody ForgotPasswordRequest req) {
+        if (req.getEmail() == null || req.getEmail().trim().isEmpty()) {
+            return ResponseEntity.badRequest().body("Email is required");
+        }
+
+        System.out.println("### FORGOT PASSWORD HIT FROM MY CURRENT APP ###");
+        System.out.println("EMAIL RECEIVED: " + req.getEmail());
+
+        passwordResetService.sendResetLink(req.getEmail());
+
+        return ResponseEntity.ok("Reset link sent if email exists.");
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<String> resetPassword(@Valid @RequestBody ResetPasswordRequest req) {
+        System.out.println("AUTH CONTROLLER /reset-password HIT");
+        System.out.println("REQ TOKEN: " + req.getToken());
+
+        passwordResetService.resetPassword(req.getToken(), req.getNewPassword());
+
+        return ResponseEntity.ok("Password updated successfully.");
+    }
+
+
     @DeleteMapping("/delete/{id}")
     @Transactional
     public ResponseEntity<String> deleteAccount(@PathVariable Long id, Principal principal) {
@@ -141,29 +177,25 @@ public class AuthController {
         User targetUser = userRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Target user not found"));
 
-        // PERMISSION CHECK
         boolean isSelfDelete = currentUser.getId().equals(targetUser.getId());
         boolean isManager = "MANAGER".equalsIgnoreCase(currentUser.getRole());
 
-        // 1. If you are NOT a manager and NOT deleting yourself, you are forbidden.
         if (!isManager && !isSelfDelete) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access Denied: You can only delete your own account.");
         }
 
-        // 2. SAFE UNLINK
         if (targetUser.getHouse() != null) {
             House h = targetUser.getHouse();
-            h.setResident(null); // The house becomes empty
+            h.setResident(null);
             houseRepository.save(h);
         }
 
         if (targetUser.getParkingSlot() != null) {
             ParkingSlot ps = targetUser.getParkingSlot();
-            ps.setOwner(null); // The slot becomes empty
+            ps.setOwner(null);
             parkingSlotRepository.save(ps);
         }
 
-        // 3. Delete the User
         userRepository.delete(targetUser);
 
         return ResponseEntity.ok("User account deleted safely. Housing and Parking slots are now empty.");

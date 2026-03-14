@@ -6,16 +6,21 @@ import com.resiido.main.models.User;
 import com.resiido.main.repositories.ParkingRequestRepository;
 import com.resiido.main.repositories.ParkingSlotRepository;
 import com.resiido.main.repositories.UserRepository;
+import com.resiido.main.services.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+
 import java.security.Principal;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/parking")
 public class ParkingController {
+
+    @Autowired
+    private NotificationService notificationService;
 
     @Autowired
     private ParkingSlotRepository slotRepository;
@@ -36,8 +41,10 @@ public class ParkingController {
     @PutMapping("/my-slot/availability")
     public ParkingSlot toggleAvailability(Principal principal, @RequestParam boolean available) {
         User currentUser = getAuthenticatedUser(principal);
+
         ParkingSlot slot = slotRepository.findByOwner(currentUser)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No assigned slot found."));
+
         slot.setAvailableForLending(available);
         return slotRepository.save(slot);
     }
@@ -51,10 +58,29 @@ public class ParkingController {
     // 3. BORROWER: Request a spot
     @PostMapping("/request")
     public ParkingRequest createRequest(Principal principal, @RequestBody ParkingRequest request) {
+        System.out.println("PARKING REQUEST ENDPOINT HIT");
+
+        if (principal == null) {
+            System.out.println("PRINCIPAL IS NULL");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not authenticated");
+        }
+
+        System.out.println("PRINCIPAL: " + principal.getName());
+
         User requester = getAuthenticatedUser(principal);
 
         ParkingSlot targetSlot = slotRepository.findById(request.getSlot().getId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Target slot not found"));
+
+        System.out.println("TARGET SLOT ID: " + targetSlot.getId());
+
+        if (targetSlot.getOwner() == null) {
+            System.out.println("TARGET SLOT OWNER IS NULL");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Parking slot has no owner assigned");
+        }
+
+        System.out.println("TARGET SLOT OWNER ID: " + targetSlot.getOwner().getId());
+        System.out.println("REQUESTER ID: " + requester.getId());
 
         if (targetSlot.getOwner().getId().equals(requester.getId())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Self-requesting is not allowed.");
@@ -70,13 +96,22 @@ public class ParkingController {
 
         request.setRequester(requester);
         request.setStatus("PENDING");
-        return requestRepository.save(request);
+        request.setSlot(targetSlot);
+
+        ParkingRequest savedRequest = requestRepository.save(request);
+        System.out.println("PARKING REQUEST SAVED WITH ID: " + savedRequest.getId());
+
+        return savedRequest;
     }
+
 
     // 4. OWNER: Approve or Deny
     @PutMapping("/request/{requestId}")
-    public ParkingRequest updateRequestStatus(@PathVariable Long requestId, @RequestParam String status, Principal principal) {
+    public ParkingRequest updateRequestStatus(@PathVariable Long requestId,
+                                              @RequestParam String status,
+                                              Principal principal) {
         User currentUser = getAuthenticatedUser(principal);
+
         ParkingRequest request = requestRepository.findById(requestId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Request not found"));
 
@@ -94,7 +129,17 @@ public class ParkingController {
         }
 
         request.setStatus(status.toUpperCase());
-        return requestRepository.save(request);
+        ParkingRequest updatedRequest = requestRepository.save(request);
+
+        if ("APPROVED".equalsIgnoreCase(status)) {
+            notificationService.createNotification(
+                    request.getRequester(),
+                    "Parking Request Approved",
+                    "Your parking request has been approved successfully."
+            );
+        }
+
+        return updatedRequest;
     }
 
     // 5. OWNER: Check my pending requests
@@ -115,23 +160,25 @@ public class ParkingController {
     @DeleteMapping("/request/{id}")
     public void deleteRequest(@PathVariable Long id, Principal principal) {
         User user = getAuthenticatedUser(principal);
+
         ParkingRequest request = requestRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Request not found"));
 
         boolean isRequester = request.getRequester().getId().equals(user.getId());
 
         boolean isSlotOwner = false;
-        if(request.getSlot().getOwner() != null) {
+        if (request.getSlot().getOwner() != null) {
             isSlotOwner = request.getSlot().getOwner().getId().equals(user.getId());
         }
 
         if (isRequester) {
-            // 1. Borrower logic: Can always cancel (even if approved)
+            // Borrower can cancel own request
             requestRepository.delete(request);
         } else if (isSlotOwner) {
-            // 2. Lender logic: Cannot cancel once APPROVED
+            // Owner cannot cancel after approval
             if ("APPROVED".equalsIgnoreCase(request.getStatus())) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You cannot cancel a booking once you have approved it.");
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                        "You cannot cancel a booking once you have approved it.");
             }
             requestRepository.delete(request);
         } else {

@@ -25,4 +25,7 @@ public class ParkingRequest {
     @ManyToOne
     @JoinColumn(name = "slot_id")
     private ParkingSlot slot;
+
+    @Column(nullable = false, length = 20)
+    private String visitorVehicleNumber; // visitor car plate number
 }

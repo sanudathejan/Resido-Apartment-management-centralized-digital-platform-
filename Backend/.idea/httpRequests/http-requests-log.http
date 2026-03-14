@@ -1,0 +1,465 @@
+POST http://127.0.0.1:8080/api/auth/forgot-password
+Content-Type: application/json
+Content-Length: 44
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2025.1.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "email": "exampleresidence1@gmail.com"
+}
+
+###
+
+POST http://127.0.0.1:8080/api/auth/forgot-password
+Content-Type: application/json
+Content-Length: 44
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2025.1.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "email": "exampleresidence1@gmail.com"
+}
+
+###
+
+POST http://127.0.0.1:8080/api/auth/forgot-password
+Content-Type: application/json
+Content-Length: 44
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2025.1.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "email": "exampleresidence1@gmail.com"
+}
+
+###
+
+POST http://127.0.0.1:8080/api/auth/forgot-password
+Content-Type: application/json
+Content-Length: 44
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2025.1.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "email": "exampleresidence1@gmail.com"
+}
+
+###
+
+POST http://127.0.0.1:8080/api/auth/reset-password
+Content-Type: application/json
+Content-Length: 84
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2025.1.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "token": "PASTE_TOKEN_FROM_EMAIL_LINK_HERE",
+  "newPassword": "newpassword123"
+}
+
+###
+
+POST http://127.0.0.1:8080/api/auth/login
+Content-Type: application/json
+Content-Length: 63
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2025.1.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "email": "alice@test.com",
+  "password": "newpassword123"
+}
+
+###
+
+POST http://127.0.0.1:8080/api/auth/forgot-password
+Content-Type: application/json
+Content-Length: 44
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2025.1.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "email": "exampleresidence1@gmail.com"
+}
+
+###
+
+POST http://127.0.0.1:8080/api/auth/forgot-password
+Content-Type: application/json
+Content-Length: 44
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2025.1.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "email": "exampleresidence1@gmail.com"
+}
+
+###
+
+POST http://127.0.0.1:8080/api/auth/forgot-password
+Content-Type: application/json
+Content-Length: 44
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2025.1.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "email": "exampleresidence1@gmail.com"
+}
+
+###
+
+POST http://127.0.0.1:8080/api/auth/reset-password
+Content-Type: application/json
+Content-Length: 84
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2025.1.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "token": "PASTE_TOKEN_FROM_EMAIL_LINK_HERE",
+  "newPassword": "newpassword123"
+}
+
+###
+
+POST http://127.0.0.1:8080/api/auth/forgot-password
+Content-Type: application/json
+Content-Length: 44
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2025.1.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "email": "exampleresidence1@gmail.com"
+}
+
+###
+
+POST http://127.0.0.1:8080/api/auth/forgot-password
+Content-Type: application/json
+Content-Length: 44
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2025.1.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "email": "exampleresidence1@gmail.com"
+}
+
+###
+
+POST http://127.0.0.1:8080/api/auth/forgot-password
+Content-Type: application/json
+Content-Length: 44
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2025.1.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "email": "exampleresidence1@gmail.com"
+}
+
+###
+
+POST http://127.0.0.1:8080/api/auth/forgot-password
+Content-Type: application/json
+Content-Length: 44
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2025.1.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "email": "exampleresidence1@gmail.com"
+}
+
+###
+
+POST http://127.0.0.1:8080/api/auth/forgot-password
+Content-Type: application/json
+Content-Length: 44
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2025.1.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "email": "exampleresidence1@gmail.com"
+}
+
+<> 2026-03-07T232508.200.txt
+
+###
+
+POST http://127.0.0.1:8080/api/auth/forgot-password
+Content-Type: application/json
+Content-Length: 31
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2025.1.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "email": "alice@test.com"
+}
+
+<> 2026-03-07T225633.200.txt
+
+###
+
+POST http://127.0.0.1:8080/api/auth/forgot-password
+Content-Type: application/json
+Content-Length: 31
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2025.1.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "email": "alice@test.com"
+}
+
+<> 2026-03-07T223426.200.txt
+
+###
+
+POST http://127.0.0.1:8080/api/auth/login
+Content-Type: application/json
+Content-Length: 63
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2025.1.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "email": "alice@test.com",
+  "password": "newpassword123"
+}
+
+###
+
+POST http://127.0.0.1:8080/api/auth/reset-password
+Content-Type: application/json
+Content-Length: 84
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2025.1.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "token": "PASTE_TOKEN_FROM_EMAIL_LINK_HERE",
+  "newPassword": "newpassword123"
+}
+
+###
+
+POST http://127.0.0.1:8080/api/auth/forgot-password
+Content-Type: application/json
+Content-Length: 31
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2025.1.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "email": "alice@test.com"
+}
+
+<> 2026-03-07T223101.200.txt
+
+###
+
+POST http://127.0.0.1:8080/api/auth/forgot-password
+Content-Type: application/json
+Content-Length: 31
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2025.1.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "email": "alice@test.com"
+}
+
+<> 2026-03-07T131138.200.txt
+
+###
+
+POST http://127.0.0.1:8080/api/auth/login
+Content-Type: application/json
+Content-Length: 63
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2025.1.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "email": "alice@test.com",
+  "password": "newpassword123"
+}
+
+###
+
+POST http://127.0.0.1:8080/api/auth/reset-password
+Content-Type: application/json
+Content-Length: 84
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2025.1.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "token": "PASTE_TOKEN_FROM_EMAIL_LINK_HERE",
+  "newPassword": "newpassword123"
+}
+
+###
+
+POST http://127.0.0.1:8080/api/auth/forgot-password
+Content-Type: application/json
+Content-Length: 31
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2025.1.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "email": "alice@test.com"
+}
+
+<> 2026-03-07T130749.200.txt
+
+###
+
+POST http://127.0.0.1:8080/api/auth/forgot-password
+Content-Type: application/json
+Content-Length: 31
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2025.1.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "email": "alice@test.com"
+}
+
+<> 2026-03-07T130745.200.txt
+
+###
+
+POST http://127.0.0.1:8080/api/auth/forgot-password
+Content-Type: application/json
+Content-Length: 31
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2025.1.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "email": "alice@test.com"
+}
+
+<> 2026-03-07T130708.200.txt
+
+###
+
+POST http://127.0.0.1:8080/api/auth/login
+Content-Type: application/json
+Content-Length: 63
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2025.1.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "email": "alice@test.com",
+  "password": "newpassword123"
+}
+
+###
+
+POST http://127.0.0.1:8080/api/auth/reset-password
+Content-Type: application/json
+Content-Length: 84
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2025.1.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "token": "PASTE_TOKEN_FROM_EMAIL_LINK_HERE",
+  "newPassword": "newpassword123"
+}
+
+###
+
+POST http://127.0.0.1:8080/api/auth/forgot-password
+Content-Type: application/json
+Content-Length: 31
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2025.1.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "email": "alice@test.com"
+}
+
+<> 2026-03-07T130647.200.txt
+
+###
+
+POST http://127.0.0.1:8080/api/auth/reset-password
+Content-Type: application/json
+Content-Length: 86
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2025.1.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "email": "alice@test.com",
+  "code": "123456",
+  "newPassword": "newpassword123"
+}
+
+###
+
+POST http://127.0.0.1:8080/api/auth/reset-password
+Content-Type: application/json
+Content-Length: 86
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2025.1.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "email": "alice@test.com",
+  "code": "123456",
+  "newPassword": "newpassword123"
+}
+
+###
+
+POST http://127.0.0.1:8080/api/auth/forgot-password
+Content-Type: application/json
+Content-Length: 31
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2025.1.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "email": "alice@test.com"
+}
+
+<> 2026-03-06T005327.200.txt
+
+###
+
+POST http://127.0.0.1:8080/api/auth/register
+Content-Type: application/json
+Accept: application/json
+Content-Length: 112
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2025.1.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+
+{
+  "name": "Test User",
+  "email": "test@gmail.com",
+  "password": "123456",
+  "requestedHouseNumber": "H-01"
+}
+
+###
+
