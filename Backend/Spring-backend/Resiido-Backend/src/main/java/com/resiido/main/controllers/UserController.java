@@ -29,6 +29,12 @@ public class UserController {
     @Autowired
     private ParkingSlotRepository parkingSlotRepository;
 
+    @Autowired
+    private org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private com.resiido.main.services.EmailService emailService;
+
     //Get the user requesting the action
     private User getAuthenticatedUser(Principal principal) {
         return userRepository.findByEmail(principal.getName())
@@ -122,5 +128,43 @@ public class UserController {
         } else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Name cannot be empty");
         }
+    }
+
+    // 7. Forgot Password - Request OTP
+    @PostMapping("/forgot-password")
+    public void requestPasswordReset(@RequestBody Map<String, String> payload) {
+        String email = payload.get("email");
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        // Generate a 6-digit OTP
+        String otp = String.format("%06d", new java.util.Random().nextInt(999999));
+        user.setVerificationCode(otp);
+        userRepository.save(user);
+
+        // 👇 Send the email using the service! 👇
+        emailService.sendPasswordResetOtp(user.getEmail(), otp);
+    }
+
+    // 8. Forgot Password - Verify OTP & Reset
+    @PostMapping("/reset-password")
+    public void resetPassword(@RequestBody Map<String, String> payload) {
+        String email = payload.get("email");
+        String otp = payload.get("otp");
+        String newPassword = payload.get("newPassword");
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        if (user.getVerificationCode() == null || !user.getVerificationCode().equals(otp)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid or expired OTP");
+        }
+
+        // Encrypt the password before saving it to the database!
+        user.setPassword(passwordEncoder.encode(newPassword));
+
+        // Clear the OTP so it can't be reused
+        user.setVerificationCode(null);
+        userRepository.save(user);
     }
 }

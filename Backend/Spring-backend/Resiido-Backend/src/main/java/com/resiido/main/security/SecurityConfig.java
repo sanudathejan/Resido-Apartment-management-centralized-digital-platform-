@@ -39,15 +39,13 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Allow Login/Register
                         .requestMatchers("/api/auth/**", "/error").permitAll()
-
-                        // NEW: Allow Public House Status for the registration dropdown
+                        // Allow Public House Status for the registration dropdown
                         .requestMatchers("/api/houses/status").permitAll()
-
+                        //Allow Forgot & Reset Password Endpoints
+                        .requestMatchers("/api/users/forgot-password", "/api/users/reset-password").permitAll()
                         // Allow OPTIONS (Pre-flight checks) for everyone
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-
                         .requestMatchers("/api/auth/**", "/auth/**").permitAll()
-
                         // Secure everything else
                         .anyRequest().authenticated()
                 )
