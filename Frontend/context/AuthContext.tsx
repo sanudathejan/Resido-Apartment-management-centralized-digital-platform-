@@ -3,11 +3,18 @@
  * Manages user authentication state across the app
  */
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { User, LoginRequest, RegisterRequest } from '@/types';
-import { authService } from '@/services';
-import { APP_CONFIG } from '@/constants/config';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { User, LoginRequest, RegisterRequest } from "@/types";
+import { authService } from "@/services";
+import { APP_CONFIG } from "@/constants/config";
+import { apiService } from "@/services/api";
 
 interface AuthContextType {
   user: User | null;
@@ -32,14 +39,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const loadStoredUser = async () => {
     try {
-      const userData = await AsyncStorage.getItem(APP_CONFIG.STORAGE_KEYS.USER_DATA);
+      const userData = await AsyncStorage.getItem(
+        APP_CONFIG.STORAGE_KEYS.USER_DATA,
+      );
       if (userData) {
         setUser(JSON.parse(userData));
+        loadProfilePicture();
       }
     } catch (error) {
-      console.error('Failed to load user data:', error);
+      console.error("Failed to load user data:", error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const loadProfilePicture = async () => {
+    try {
+      const response = await apiService.get<{ image: string | null }>(
+        "/api/users/profile-picture",
+      );
+      if (response && response.image) {
+        // Update the state and storage with the fetched image
+        setUser((prev) =>
+          prev ? { ...prev, profilePicture: response.image } : null,
+        );
+      }
+    } catch (error) {
+      console.error("Silent failed to fetch profile pic on login:", error);
     }
   };
 
@@ -49,8 +75,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(response.user);
       await AsyncStorage.setItem(
         APP_CONFIG.STORAGE_KEYS.USER_DATA,
-        JSON.stringify(response.user)
+        JSON.stringify(response.user),
       );
+      loadProfilePicture();
     } catch (error) {
       throw error;
     }
@@ -71,7 +98,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(response.user);
       await AsyncStorage.setItem(
         APP_CONFIG.STORAGE_KEYS.USER_DATA,
-        JSON.stringify(response.user)
+        JSON.stringify(response.user),
       );
     } catch (error) {
       throw error;
@@ -83,7 +110,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await authService.logout();
       setUser(null);
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error("Logout error:", error);
       // Still clear user even if logout fails
       setUser(null);
     }
@@ -95,7 +122,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(updatedUser);
       AsyncStorage.setItem(
         APP_CONFIG.STORAGE_KEYS.USER_DATA,
-        JSON.stringify(updatedUser)
+        JSON.stringify(updatedUser),
       );
     }
   };
@@ -121,7 +148,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 }

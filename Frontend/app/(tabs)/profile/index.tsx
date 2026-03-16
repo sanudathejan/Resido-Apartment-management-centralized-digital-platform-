@@ -4,6 +4,7 @@
  */
 import { apiService } from '@/services/api';
 import React, { useState } from "react";
+import { useEffect } from 'react';
 import {
   View,
   Text,
@@ -58,10 +59,27 @@ const shadow = (elevation: number) =>
 /* ── component ─────────────────────────────────────────────────── */
 export default function ProfileScreen() {
   const router = useRouter();
-  const { user, logout } = useAuth();
+  const { user, logout,updateUser } = useAuth();
   
   // State to hold our profile picture URI
   const [profilePic, setProfilePic] = useState<string | null>(null);
+
+  useEffect(() => {
+    const loadProfilePicture = async () => {
+      try {
+        // Hit the GET endpoint you already made in Spring Boot
+        const response = await apiService.get<{ image: string | null }>('/api/users/profile-picture');
+        
+        if (response && response.image) {
+          setProfilePic(response.image); // Instantly display the saved image!
+        }
+      } catch (error) {
+        console.error("Failed to load profile picture on mount:", error);
+      }
+    };
+
+    loadProfilePicture();
+  }, []); // The empty array means this only runs once when the screen opens
 
   const handleLogout = () => {
     Alert.alert("Logout", "Are you sure you want to logout?", [
@@ -108,6 +126,7 @@ const pickImage = async () => {
       const formattedBase64 = `data:image/jpeg;base64,${rawBase64}`;
       //Update the UI immediately
       setProfilePic(formattedBase64); 
+      updateUser({ profileImage: formattedBase64 });
       //SEND IT TO THE BACKEND!
       await saveImageToDatabase(formattedBase64); 
     }
@@ -119,13 +138,19 @@ const confirmDeleteImage = () => {
       "Are you sure you want to delete your current profile picture?",
       [
         { text: "Cancel", style: "cancel" },
-        { 
-          text: "Delete", 
-          style: "destructive", 
-          // We just delete it right here inline!
-          onPress: () => setProfilePic(null) 
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            //Clear the image from the screen immediately
+            setProfilePic(null); 
+            //Update the global AuthContext so other screens know it's gone
+            updateUser({ profileImage: undefined }); 
+            //Tell the Spring Boot backend to delete it from PostgreSQL
+            await saveImageToDatabase(null); 
+          },
         },
-      ]
+      ],
     );
   };
 
