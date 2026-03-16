@@ -2,9 +2,9 @@
  * Profile Screen
  * User profile and account management — 2026 light theme
  */
-import { apiService } from '@/services/api';
+import { apiService } from "@/services/api";
 import React, { useState } from "react";
-import { useEffect } from 'react';
+import { useEffect } from "react";
 import {
   View,
   Text,
@@ -13,7 +13,9 @@ import {
   TouchableOpacity,
   Alert,
   Platform,
-  Image, // <-- Added Image import
+  Image,
+  Modal,
+  TextInput,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -59,17 +61,46 @@ const shadow = (elevation: number) =>
 /* ── component ─────────────────────────────────────────────────── */
 export default function ProfileScreen() {
   const router = useRouter();
-  const { user, logout,updateUser } = useAuth();
-  
+  const { user, logout, updateUser } = useAuth();
+
   // State to hold our profile picture URI
   const [profilePic, setProfilePic] = useState<string | null>(null);
+
+  //states for the Name Edit Modal
+  const [isNameModalVisible, setNameModalVisible] = useState(false);
+  const [newNameInput, setNewNameInput] = useState(user?.name || "");
+
+  // Function to save the new name
+  const handleSaveName = async () => {
+    if (!newNameInput.trim()) {
+      Alert.alert("Hold up", "Name cannot be empty!");
+      return;
+    }
+
+    try {
+      // 1. Send it to the Spring Boot backend
+      await apiService.put("/api/users/name", { name: newNameInput.trim() });
+
+      // 2. Update the local context so the UI changes instantly
+      updateUser({ name: newNameInput.trim() });
+
+      // 3. Close the modal and celebrate
+      setNameModalVisible(false);
+      console.log("Success! Name updated.");
+    } catch (error) {
+      console.error("Failed to update name:", error);
+      Alert.alert("Error", "Could not connect to the server.");
+    }
+  };
 
   useEffect(() => {
     const loadProfilePicture = async () => {
       try {
         // Hit the GET endpoint you already made in Spring Boot
-        const response = await apiService.get<{ image: string | null }>('/api/users/profile-picture');
-        
+        const response = await apiService.get<{ image: string | null }>(
+          "/api/users/profile-picture",
+        );
+
         if (response && response.image) {
           setProfilePic(response.image); // Instantly display the saved image!
         }
@@ -95,12 +126,12 @@ export default function ProfileScreen() {
     ]);
   };
 
-const saveImageToDatabase = async (base64Data: string | null) => {
+  const saveImageToDatabase = async (base64Data: string | null) => {
     try {
-      await apiService.put('/api/users/profile-picture', { 
-        image: base64Data || "" 
+      await apiService.put("/api/users/profile-picture", {
+        image: base64Data || "",
       });
-      
+
       console.log("Success! Saved to DB.");
     } catch (error) {
       console.error("Network error:", error);
@@ -109,7 +140,7 @@ const saveImageToDatabase = async (base64Data: string | null) => {
   };
 
   /* ── Image Picker & Menu Logic ───────────────────────────────── */
-const pickImage = async () => {
+  const pickImage = async () => {
     // Open the native image gallery
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -121,18 +152,18 @@ const pickImage = async () => {
 
     if (!result.canceled) {
       //Grab the raw Base64 string
-      const rawBase64 = result.assets[0].base64; 
+      const rawBase64 = result.assets[0].base64;
       //Format it as a Data URI (so it renders easily and saves cleanly)
       const formattedBase64 = `data:image/jpeg;base64,${rawBase64}`;
       //Update the UI immediately
-      setProfilePic(formattedBase64); 
+      setProfilePic(formattedBase64);
       updateUser({ profileImage: formattedBase64 });
       //SEND IT TO THE BACKEND!
-      await saveImageToDatabase(formattedBase64); 
+      await saveImageToDatabase(formattedBase64);
     }
   };
 
-const confirmDeleteImage = () => {
+  const confirmDeleteImage = () => {
     Alert.alert(
       "Delete Picture",
       "Are you sure you want to delete your current profile picture?",
@@ -143,11 +174,11 @@ const confirmDeleteImage = () => {
           style: "destructive",
           onPress: async () => {
             //Clear the image from the screen immediately
-            setProfilePic(null); 
+            setProfilePic(null);
             //Update the global AuthContext so other screens know it's gone
-            updateUser({ profileImage: undefined }); 
+            updateUser({ profileImage: undefined });
             //Tell the Spring Boot backend to delete it from PostgreSQL
-            await saveImageToDatabase(null); 
+            await saveImageToDatabase(null);
           },
         },
       ],
@@ -158,7 +189,11 @@ const confirmDeleteImage = () => {
     Alert.alert("Profile Picture", "What would you like to do?", [
       { text: "Cancel", style: "cancel" },
       { text: "Change Picture", onPress: pickImage },
-      { text: "Delete Picture", onPress: confirmDeleteImage, style: "destructive" },
+      {
+        text: "Delete Picture",
+        onPress: confirmDeleteImage,
+        style: "destructive",
+      },
     ]);
   };
 
@@ -177,7 +212,10 @@ const confirmDeleteImage = () => {
           icon: "person-outline" as const,
           title: "Update Profile Name",
           subtitle: "Update your personal information",
-          onPress: () => {},
+          onPress: () => {
+            setNewNameInput(user?.name || ""); // Reset input to current name
+            setNameModalVisible(true); // Show the modal
+          },
         },
         {
           icon: "camera-outline" as const,
@@ -227,8 +265,8 @@ const confirmDeleteImage = () => {
               <Text style={styles.avatarText}>{initial}</Text>
             )}
           </View>
-          <TouchableOpacity 
-            style={styles.cameraBtn} 
+          <TouchableOpacity
+            style={styles.cameraBtn}
             activeOpacity={0.7}
             onPress={handleProfilePicturePress} // <-- Linked to our new function!
           >
@@ -317,6 +355,39 @@ const confirmDeleteImage = () => {
           SDGP Project{"\n"}University of Westminster
         </Text>
       </ScrollView>
+
+      {/* ── Name Edit Modal ──────────────────────────────── */}
+      <Modal visible={isNameModalVisible} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Update Name</Text>
+
+            <TextInput
+              style={styles.modalInput}
+              value={newNameInput}
+              onChangeText={setNewNameInput}
+              placeholder="Enter your new name"
+              autoCapitalize="words"
+            />
+
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={[styles.modalBtn, styles.modalBtnCancel]}
+                onPress={() => setNameModalVisible(false)}
+              >
+                <Text style={styles.modalBtnCancelText}>Cancel</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.modalBtn, styles.modalBtnSave]}
+                onPress={handleSaveName}
+              >
+                <Text style={styles.modalBtnSaveText}>Save</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -496,4 +567,63 @@ const styles = StyleSheet.create({
     lineHeight: 18,
     marginBottom: 20,
   },
+
+  /* ── Modal Styles ────────────────────────────────────────────── */
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+  modalContent: {
+    backgroundColor: C.white,
+    borderRadius: 16,
+    padding: 24,
+    width: "100%",
+    maxWidth: 400,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: C.textDark,
+    marginBottom: 16,
+  },
+  modalInput: {
+    borderWidth: 1,
+    borderColor: C.border,
+    borderRadius: 12,
+    padding: 14,
+    fontSize: 16,
+    color: C.textDark,
+    marginBottom: 24,
+    backgroundColor: C.primaryLight,
+  },
+  modalButtons: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  modalBtn: {
+    flex: 1,
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: "center",
+  },
+  modalBtnCancel: {
+    backgroundColor: C.bg,
+  },
+  modalBtnSave: {
+    backgroundColor: C.primary,
+  },
+  modalBtnCancelText: {
+    color: C.textDark,
+    fontWeight: "600",
+    fontSize: 16,
+  },
+  modalBtnSaveText: {
+    color: C.white,
+    fontWeight: "600",
+    fontSize: 16,
+  },
+
 });

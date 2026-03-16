@@ -109,4 +109,18 @@ public class UserController {
         // Now safe to delete
         userRepository.delete(targetUser);
     }
+
+    // 6. Update Profile Name
+    @PutMapping("/name")
+    public void updateProfileName(Principal principal, @RequestBody Map<String, String> payload) {
+        User user = getAuthenticatedUser(principal);
+        String newName = payload.get("name");
+
+        if (newName != null && !newName.trim().isEmpty()) {
+            user.setName(newName.trim());
+            userRepository.save(user);
+        } else {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Name cannot be empty");
+        }
+    }
 }

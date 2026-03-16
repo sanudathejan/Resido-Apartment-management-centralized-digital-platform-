@@ -77,7 +77,6 @@ const loadProfilePicture = async () => {
   const login = async (credentials: LoginRequest) => {
     try {
       const response = await authService.login(credentials);
-      console.log("RAW BACKEND RESPONSE:", JSON.stringify(response, null, 2));
       setUser(response.user);
       await AsyncStorage.setItem(
         APP_CONFIG.STORAGE_KEYS.USER_DATA,
