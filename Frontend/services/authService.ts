@@ -46,42 +46,7 @@ class AuthService {
    */
   async login(credentials: LoginRequest): Promise<AuthResponse> {
     try {
-      // Demo mode - use local demo users
-      // if (DEMO_MODE) {
-      //   const user = DEMO_USERS.find(
-      //     (u) =>
-      //       u.email === credentials.email &&
-      //       u.password === credentials.password,
-      //   );
-
-      //   if (user) {
-      //     const { password, ...safeUser } = user;
-      //     await this.saveUserData(safeUser as User);
-      //     return {
-      //       user: safeUser as User,
-      //       message: "Login successful",
-      //       token: "demo-token",
-      //     };
-      //   }
-
-      //   // Allow any email/password in demo mode for testing
-      //   const demoUser: User = {
-      //     id: Date.now(),
-      //     name: credentials.email.split("@")[0],
-      //     email: credentials.email,
-      //     role: "RESIDENT",
-      //     apartmentNumber: "B-4",
-      //     phone: "+94 XX XXX XXXX",
-      //   };
-      //   await this.saveUserData(demoUser);
-      //   return {
-      //     user: demoUser,
-      //     message: "Demo login successful",
-      //     token: "demo-token",
-      //   };
-      // }
-
-      // Production mode - call login API endpoint
+      //call login API endpoint
       const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.LOGIN}`;
       const response = await fetch(url, {
         method: "POST",

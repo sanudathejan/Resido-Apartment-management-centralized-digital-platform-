@@ -53,16 +53,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const loadProfilePicture = async () => {
+const loadProfilePicture = async () => {
     try {
       const response = await apiService.get<{ image: string | null }>(
         "/api/users/profile-picture",
       );
       if (response && response.image) {
-        // Update the state and storage with the fetched image
-        setUser((prev) =>
-          prev ? { ...prev, profilePicture: response.image } : null,
-        );
+        setUser((prev: any) => {
+          if (!prev) return null; 
+          const updatedUser = { ...prev, profileImage: response.image }; 
+          //Save it to local storage so it persists between app restarts
+          AsyncStorage.setItem(APP_CONFIG.STORAGE_KEYS.USER_DATA, JSON.stringify(updatedUser))
+            .catch(err => console.error("Failed to save image to storage:", err));
+
+          return updatedUser;
+        });
       }
     } catch (error) {
       console.error("Silent failed to fetch profile pic on login:", error);
@@ -72,12 +77,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (credentials: LoginRequest) => {
     try {
       const response = await authService.login(credentials);
+      console.log("RAW BACKEND RESPONSE:", JSON.stringify(response, null, 2));
       setUser(response.user);
       await AsyncStorage.setItem(
         APP_CONFIG.STORAGE_KEYS.USER_DATA,
         JSON.stringify(response.user),
       );
-      loadProfilePicture();
+      apiService.setToken((response as any).token);
+      await loadProfilePicture();
     } catch (error) {
       throw error;
     }
