@@ -79,6 +79,8 @@ export default function ProfileScreen() {
   const [isPasswordLoading, setIsPasswordLoading] = useState(false);
   // State for Contact Support Modal
   const [isContactModalVisible, setContactModalVisible] = useState(false);
+  // State for About Resiido Modal
+  const [isAboutModalVisible, setAboutModalVisible] = useState(false);
 
   // Function to save the new name
   const handleSaveName = async () => {
@@ -362,7 +364,7 @@ export default function ProfileScreen() {
           icon: "information-circle-outline" as const,
           title: "About Resido",
           subtitle: "Version 1.0.0",
-          onPress: () => {},
+          onPress: () => setAboutModalVisible(true),
         },
       ],
     },
@@ -620,6 +622,58 @@ export default function ProfileScreen() {
                 <Text style={styles.modalBtnCancelText}>Close</Text>
               </TouchableOpacity>
             </View>
+          </View>
+        </View>
+      </Modal>
+      {/* ── About Resiido Modal ──────────────────────────────── */}
+      <Modal visible={isAboutModalVisible} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            
+            {/* Header with an Icon */}
+            <View style={{ alignItems: "center", marginBottom: 16 }}>
+              <View style={{ width: 60, height: 60, borderRadius: 16, backgroundColor: C.primaryLight, alignItems: 'center', justifyContent: 'center', marginBottom: 12 }}>
+                <Ionicons name="business" size={32} color={C.primary} />
+              </View>
+              <Text style={styles.modalTitle}>About Resiido</Text>
+            </View>
+
+            {/* Thank you message */}
+            <Text style={{ textAlign: "center", fontSize: 15, color: C.textDark, marginBottom: 20, lineHeight: 22 }}>
+              Thank you for choosing the Resiido Apartment Management Platform.
+            </Text>
+
+            {/* Details Card (Reusing the style from Contact Support!) */}
+            <View style={[styles.contactCard, { flexDirection: "column", alignItems: "flex-start", padding: 16 }]}>
+              
+              <View style={{ marginBottom: 16 }}>
+                <Text style={styles.contactLabel}>Version</Text>
+                <Text style={styles.contactValue}>1.0.0</Text>
+              </View>
+
+              <View style={{ marginBottom: 16 }}>
+                <Text style={styles.contactLabel}>Apartment Name</Text>
+                <Text style={styles.contactValue}>Example Residence</Text>
+              </View>
+
+              <View>
+                <Text style={styles.contactLabel}>Apartment Address</Text>
+                <Text style={[styles.contactValue, { lineHeight: 22 }]}>
+                  123/4, example road,{"\n"}example.
+                </Text>
+              </View>
+
+            </View>
+
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={[styles.modalBtn, styles.modalBtnCancel]}
+                onPress={() => setAboutModalVisible(false)}
+              >
+                <Text style={styles.modalBtnCancelText}>Close</Text>
+              </TouchableOpacity>
+            </View>
+            
           </View>
         </View>
       </Modal>
