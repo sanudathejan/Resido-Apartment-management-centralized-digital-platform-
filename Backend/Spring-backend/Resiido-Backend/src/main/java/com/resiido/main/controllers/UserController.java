@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.security.core.Authentication;
 
 import java.security.Principal;
 import java.util.List;
@@ -166,5 +167,32 @@ public class UserController {
         // Clear the OTP so it can't be reused
         user.setVerificationCode(null);
         userRepository.save(user);
+    }
+
+    // 9. Delete Current User Account
+    @DeleteMapping("/me")
+    public org.springframework.http.ResponseEntity<?> deleteMyAccount(org.springframework.security.core.Authentication authentication) {
+        String email = authentication.getName();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        // 1. Unlink the House so the physical house isn't deleted/locked
+        if (user.getHouse() != null) {
+            House house = user.getHouse();
+            house.setResident(null);
+            houseRepository.save(house);
+        }
+
+        // 2. Unlink the Parking Slot (if you have one)
+        if (user.getParkingSlot() != null) {
+            ParkingSlot parkingSlot = user.getParkingSlot();
+            parkingSlot.setOwner(null);
+            parkingSlotRepository.save(parkingSlot);
+        }
+
+        // 3. Now it is safe to delete the user!
+        userRepository.delete(user);
+
+        return org.springframework.http.ResponseEntity.ok(java.util.Map.of("message", "Account deleted successfully"));
     }
 }

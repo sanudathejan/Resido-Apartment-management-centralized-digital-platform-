@@ -16,6 +16,7 @@ import {
   Image,
   Modal,
   TextInput,
+  ActivityIndicator,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -70,6 +71,12 @@ export default function ProfileScreen() {
   const [isNameModalVisible, setNameModalVisible] = useState(false);
   const [newNameInput, setNewNameInput] = useState(user?.name || "");
 
+  // States for the Password Edit Modal
+  const [isPasswordModalVisible, setPasswordModalVisible] = useState(false);
+  const [otpInput, setOtpInput] = useState("");
+  const [newPasswordInput, setNewPasswordInput] = useState("");
+  const [isPasswordLoading, setIsPasswordLoading] = useState(false);
+
   // Function to save the new name
   const handleSaveName = async () => {
     if (!newNameInput.trim()) {
@@ -90,6 +97,62 @@ export default function ProfileScreen() {
     } catch (error) {
       console.error("Failed to update name:", error);
       Alert.alert("Error", "Could not connect to the server.");
+    }
+  };
+
+  // 1. Trigger the OTP email and open the modal
+  const handleInitiatePasswordChange = async () => {
+    if (!user?.email) return;
+
+    setIsPasswordLoading(true); // ⏳ Start loading!
+
+    try {
+      await apiService.post("/api/users/forgot-password", {
+        email: user.email,
+      });
+
+      setPasswordModalVisible(true);
+      Alert.alert(
+        "OTP Sent",
+        "Please check your email for the 6-digit verification code.",
+      );
+    } catch (error) {
+      console.error("Failed to send OTP:", error);
+      Alert.alert("Error", "Could not send OTP. Please try again.");
+    } finally {
+      setIsPasswordLoading(false); //Stop loading no matter what happens
+    }
+  };
+
+  // 2. Submit the OTP and New Password
+  const handleSubmitNewPassword = async () => {
+    if (!otpInput.trim() || !newPasswordInput.trim()) {
+      Alert.alert(
+        "Hold up",
+        "Please enter both the OTP and your new password.",
+      );
+      return;
+    }
+
+    try {
+      // Reuse the reset-password endpoint!
+      await apiService.post("/api/users/reset-password", {
+        email: user?.email,
+        otp: otpInput.trim(),
+        newPassword: newPasswordInput.trim(),
+      });
+
+      // Clear the inputs and close the modal on success
+      setPasswordModalVisible(false);
+      setOtpInput("");
+      setNewPasswordInput("");
+      Alert.alert("Success!", "Your password has been updated safely.");
+    } catch (error) {
+      console.error("Failed to update password:", error);
+      Alert.alert(
+        "Error",
+        "Invalid OTP or request failed. Please check your code.",
+      );
     }
   };
 
@@ -124,6 +187,38 @@ export default function ProfileScreen() {
         },
       },
     ]);
+  };
+
+  const confirmDeleteAccount = () => {
+    Alert.alert(
+      "Delete Account",
+      "Are you absolutely sure? This action cannot be undone and you will lose all access to ResiiDo.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete My Account",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              // 1. Tell backend to delete the user
+              await apiService.delete("/api/users/me");
+
+              // 2. Clear local auth state
+              await logout();
+
+              // 3. Kick them back to the welcome screen
+              router.replace("/welcome");
+            } catch (error) {
+              console.error("Failed to delete account:", error);
+              Alert.alert(
+                "Error",
+                "Could not delete your account. Please try again later.",
+              );
+            }
+          },
+        },
+      ],
+    );
   };
 
   const saveImageToDatabase = async (base64Data: string | null) => {
@@ -203,13 +298,26 @@ export default function ProfileScreen() {
   const userRole = user?.role || "RESIDENT";
   const initial = userName.charAt(0).toUpperCase();
 
+  type MenuItemType = {
+    icon: keyof typeof Ionicons.glyphMap;
+    title: string;
+    subtitle: string;
+    onPress: () => void;
+    isLoading?: boolean;
+  };
+
+  type MenuSectionType = {
+    section: string;
+    items: MenuItemType[];
+  };
+
   /* ── menu data ─────────────────────────────────────────────── */
-  const menuItems = [
+  const menuItems: MenuSectionType[] = [
     {
       section: "Account",
       items: [
         {
-          icon: "person-outline" as const,
+          icon: "person-outline",
           title: "Update Profile Name",
           subtitle: "Update your personal information",
           onPress: () => {
@@ -227,7 +335,14 @@ export default function ProfileScreen() {
           icon: "lock-closed-outline" as const,
           title: "Change Password",
           subtitle: "Update your password",
-          onPress: () => {},
+          onPress: handleInitiatePasswordChange,
+          isLoading: isPasswordLoading,
+        },
+        {
+          icon: "trash-outline" as const,
+          title: "Delete Account",
+          subtitle: "Permanently remove your account",
+          onPress: confirmDeleteAccount,
         },
       ],
     },
@@ -309,7 +424,7 @@ export default function ProfileScreen() {
                     key={itemIdx}
                     style={[styles.menuItem, !isLast && styles.menuItemBorder]}
                     onPress={item.onPress}
-                    disabled={false}
+                    disabled={item.isLoading}
                     activeOpacity={0.6}
                   >
                     {/* icon circle */}
@@ -327,12 +442,15 @@ export default function ProfileScreen() {
                       <Text style={styles.menuSubtitle}>{item.subtitle}</Text>
                     </View>
 
-                    {/* right control */}
-                    <Ionicons
-                      name="chevron-forward"
-                      size={18}
-                      color={C.textMuted}
-                    />
+                    {item.isLoading ? (
+                      <ActivityIndicator size="small" color={C.primary} />
+                    ) : (
+                      <Ionicons
+                        name="chevron-forward"
+                        size={18}
+                        color={C.textMuted}
+                      />
+                    )}
                   </TouchableOpacity>
                 );
               })}
@@ -381,6 +499,57 @@ export default function ProfileScreen() {
               <TouchableOpacity
                 style={[styles.modalBtn, styles.modalBtnSave]}
                 onPress={handleSaveName}
+              >
+                <Text style={styles.modalBtnSaveText}>Save</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+      {/* ── Change Password Modal ──────────────────────────────── */}
+      <Modal visible={isPasswordModalVisible} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Change Password</Text>
+
+            <Text
+              style={{ marginBottom: 16, color: C.textLight, fontSize: 14 }}
+            >
+              An OTP has been sent to {userEmail}.
+            </Text>
+
+            <TextInput
+              style={styles.modalInput}
+              value={otpInput}
+              onChangeText={setOtpInput}
+              placeholder="Enter 6-digit OTP"
+              keyboardType="number-pad"
+              maxLength={6}
+            />
+
+            <TextInput
+              style={styles.modalInput}
+              value={newPasswordInput}
+              onChangeText={setNewPasswordInput}
+              placeholder="Enter your new password"
+              secureTextEntry // Hides the typing
+            />
+
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={[styles.modalBtn, styles.modalBtnCancel]}
+                onPress={() => {
+                  setPasswordModalVisible(false);
+                  setOtpInput("");
+                  setNewPasswordInput("");
+                }}
+              >
+                <Text style={styles.modalBtnCancelText}>Cancel</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.modalBtn, styles.modalBtnSave]}
+                onPress={handleSubmitNewPassword}
               >
                 <Text style={styles.modalBtnSaveText}>Save</Text>
               </TouchableOpacity>
@@ -625,5 +794,4 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     fontSize: 16,
   },
-
 });

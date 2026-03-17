@@ -138,7 +138,7 @@ export default function LoginScreen() {
       });
       Alert.alert(
         "Success",
-        "If this email exists, an OTP has been sent. (Check backend console for the code!)",
+        "An OTP has been sent to your email.",
       );
       setForgotStep(2);
     } catch (error) {
