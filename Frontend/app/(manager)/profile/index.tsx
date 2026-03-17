@@ -28,7 +28,7 @@ import * as ImagePicker from "expo-image-picker"; // <-- Added ImagePicker impor
 /* ── design tokens ─────────────────────────────────────────────── */
 const C = {
   bg: "#EBF7ED",
-  primary: "#2563EB",
+  primary: "#7C3AED",
   primaryLight: "#EFF6FF",
   avatarBg: "#DBEAFE",
   white: "#FFFFFF",
@@ -317,6 +317,7 @@ export default function ProfileScreen() {
     items: MenuItemType[];
   };
 
+  /* ── menu data ─────────────────────────────────────────────── */
   const menuItems: MenuSectionType[] = [
     {
       section: "Account",
@@ -396,20 +397,6 @@ export default function ProfileScreen() {
 
         <Text style={styles.userName}>{userName}</Text>
         <Text style={styles.userEmail}>{userEmail}</Text>
-
-        {/* info pills */}
-        <View style={styles.pillRow}>
-          {userRole !== "MANAGER" && (
-            <View style={styles.pill}>
-              <Ionicons name="home-outline" size={13} color={C.primary} />
-              <Text style={styles.pillText}>Apt {apartmentNo}</Text>
-            </View>
-          )}
-          <View style={styles.pill}>
-            <Ionicons name="person-outline" size={13} color={C.primary} />
-            <Text style={styles.pillText}>{userRole}</Text>
-          </View>
-        </View>
       </View>
 
       <ScrollView
