@@ -17,6 +17,7 @@ import {
   Modal,
   TextInput,
   ActivityIndicator,
+  Linking,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -76,6 +77,8 @@ export default function ProfileScreen() {
   const [otpInput, setOtpInput] = useState("");
   const [newPasswordInput, setNewPasswordInput] = useState("");
   const [isPasswordLoading, setIsPasswordLoading] = useState(false);
+  // State for Contact Support Modal
+  const [isContactModalVisible, setContactModalVisible] = useState(false);
 
   // Function to save the new name
   const handleSaveName = async () => {
@@ -353,7 +356,7 @@ export default function ProfileScreen() {
           icon: "chatbubble-outline" as const,
           title: "Contact Support",
           subtitle: "Reach out to our team",
-          onPress: () => {},
+          onPress: () => setContactModalVisible(true),
         },
         {
           icon: "information-circle-outline" as const,
@@ -552,6 +555,69 @@ export default function ProfileScreen() {
                 onPress={handleSubmitNewPassword}
               >
                 <Text style={styles.modalBtnSaveText}>Save</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+{/* ── Contact Support Modal ──────────────────────────────── */}
+      <Modal visible={isContactModalVisible} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { maxHeight: "80%" }]}>
+            <Text style={styles.modalTitle}>Contact Support</Text>
+
+            <ScrollView showsVerticalScrollIndicator={false} style={{ marginBottom: 20 }}>
+              
+              {/* General Contact Info */}
+              <View style={styles.contactCard}>
+                <Ionicons name="mail" size={22} color={C.primary} />
+                <View style={{ marginLeft: 12 }}>
+                  <Text style={styles.contactLabel}>Email Us</Text>
+                  <Text style={styles.contactValue}>resiido.conect@gmail.com</Text>
+                </View>
+              </View>
+
+              <TouchableOpacity 
+                style={styles.contactCard}
+                activeOpacity={0.7}
+                onPress={() => Linking.openURL("https://resiido.com")}
+              >
+                <Ionicons name="globe" size={22} color={C.primary} />
+                <View style={{ marginLeft: 12 }}>
+                  <Text style={styles.contactLabel}>Website</Text>
+                  <Text style={[styles.contactValue, { textDecorationLine: "underline" }]}>
+                    resiido.com
+                  </Text>
+                </View>
+              </TouchableOpacity>
+
+              <Text style={styles.teamSectionTitle}>Resiido Team</Text>
+
+              {/* Team Members List */}
+              {[
+                { role: "Project Lead", name: "Theminda Dulara", email: "theminda.20232878@iit.ac.lk" },
+                { role: "Lead Developer (Frontend)", name: "Sanuda Thejan", email: "sanuda.20231570@iit.ac.lk" },
+                { role: "Lead Developer (Backend)", name: "Subhagya Narayana", email: "subhagya.20240133@iit.ac.lk" },
+                { role: "Database Administrator", name: "Sanithi Amalja", email: "sanithi.20231765@iit.ac.lk" },
+                { role: "UI/UX Designer", name: "Mukunthan Abishek", email: "abishek.20240205@iit.ac.lk" },
+                { role: "QA Engineer", name: "Vidupa Senevirathna", email: "vidupa.20232873@iit.ac.lk" },
+              ].map((member, idx) => (
+                <View key={idx} style={{ marginBottom: 16 }}>
+                  <View style={styles.teamInfo}>
+                    <Text style={styles.teamRole}>{member.role}</Text>
+                    <Text style={styles.teamName}>{member.name}</Text>
+                    <Text style={styles.teamEmail}>{member.email}</Text>
+                  </View>
+                </View>
+              ))}
+            </ScrollView>
+
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={[styles.modalBtn, styles.modalBtnCancel]}
+                onPress={() => setContactModalVisible(false)}
+              >
+                <Text style={styles.modalBtnCancelText}>Close</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -793,5 +859,72 @@ const styles = StyleSheet.create({
     color: C.white,
     fontWeight: "600",
     fontSize: 16,
+  },
+  /* ── Contact Support Modal Styles ────────────────────────────── */
+  contactCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: C.primaryLight,
+    padding: 14,
+    borderRadius: 12,
+    marginBottom: 12,
+  },
+  contactLabel: {
+    fontSize: 12,
+    color: C.textLight,
+    fontWeight: "600",
+    textTransform: "uppercase",
+  },
+  contactValue: {
+    fontSize: 15,
+    color: C.primary,
+    fontWeight: "600",
+  },
+  teamSectionTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: C.textDark,
+    marginTop: 14,
+    marginBottom: 16,
+  },
+  teamMemberRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  teamAvatar: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: C.bg,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 14,
+  },
+  teamAvatarText: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: C.primary,
+  },
+  teamInfo: {
+    flex: 1,
+  },
+  teamRole: {
+    fontSize: 11,
+    color: C.primary,
+    fontWeight: "700",
+    textTransform: "uppercase",
+    marginBottom: 2,
+    letterSpacing: 0.5,
+  },
+  teamName: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: C.textDark,
+  },
+  teamEmail: {
+    fontSize: 13,
+    color: C.textLight,
+    marginTop: 2,
   },
 });
