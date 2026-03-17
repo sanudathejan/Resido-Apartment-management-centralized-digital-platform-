@@ -790,7 +790,14 @@ export default function ParkingScreen() {
                     </View>
                     <TouchableOpacity
                       style={styles.borrowBtn}
-                      onPress={() => setSelectedSlotForBorrow(slot)}
+                      onPress={() => {
+                        // 1. Close the first modal immediately
+                        setIsModalVisible(false);
+                        // 2. Wait for the iOS closing animation, then open the second modal
+                        setTimeout(() => {
+                          setSelectedSlotForBorrow(slot);
+                        }, 300); // 300ms is usually perfect for iOS
+                      }}
                     >
                       <Text style={styles.borrowBtnText}>Borrow</Text>
                     </TouchableOpacity>
@@ -801,7 +808,7 @@ export default function ParkingScreen() {
           </Pressable>
         </Pressable>
       </Modal>
-      <Modal
+<Modal
         visible={!!selectedSlotForBorrow}
         transparent={true}
         animationType="slide"
@@ -812,6 +819,8 @@ export default function ParkingScreen() {
           onPress={() => setSelectedSlotForBorrow(null)}
         >
           <Pressable style={styles.modalContent}>
+            
+            {/* HEADER STAYS OUTSIDE SCROLLVIEW (Fixed at top) */}
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Select Time</Text>
               <TouchableOpacity onPress={() => setSelectedSlotForBorrow(null)}>
@@ -819,158 +828,187 @@ export default function ParkingScreen() {
               </TouchableOpacity>
             </View>
 
-            <Text style={styles.cardSubtitle}>
-              Borrowing Slot {selectedSlotForBorrow?.slotNumber || "Unknown"}
-            </Text>
+            {/* ─── SCROLLVIEW STARTS HERE ─── */}
+            <ScrollView 
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={{ flexGrow: 1, paddingBottom: 10 }}
+            >
+              <Text style={styles.cardSubtitle}>
+                Borrowing Slot {selectedSlotForBorrow?.slotNumber || "Unknown"}
+              </Text>
 
-            <View style={{ marginTop: 20 }}>
-              <Text style={styles.detailText}>Start Time</Text>
-              <TouchableOpacity
-                style={styles.timePickerButton}
-                onPress={() => setShowStartPicker(true)}
-              >
-                <Text style={styles.timePickerButtonText}>
-                  {borrowStartTime.toLocaleString([], {
-                    dateStyle: "short",
-                    timeStyle: "short",
-                  })}
-                </Text>
-                <Ionicons name="calendar-outline" size={20} color={C.primary} />
-              </TouchableOpacity>
-            </View>
+              {/* ─── START TIME SECTION ─── */}
+              <View style={{ marginTop: 20 }}>
+                <Text style={styles.detailText}>Start Time</Text>
+                <TouchableOpacity
+                  style={styles.timePickerButton}
+                  onPress={() => setShowStartPicker(true)}
+                >
+                  <Text style={styles.timePickerButtonText}>
+                    {borrowStartTime.toLocaleString([], {
+                      dateStyle: "short",
+                      timeStyle: "short",
+                    })}
+                  </Text>
+                  <Ionicons name="calendar-outline" size={20} color={C.primary} />
+                </TouchableOpacity>
 
-            <View style={{ marginTop: 15, marginBottom: 24 }}>
-              <Text style={styles.detailText}>End Time</Text>
-              <TouchableOpacity
-                style={styles.timePickerButton}
-                onPress={() => setShowEndPicker(true)}
-              >
-                <Text style={styles.timePickerButtonText}>
-                  {borrowEndTime.toLocaleString([], {
-                    dateStyle: "short",
-                    timeStyle: "short",
-                  })}
-                </Text>
-                <Ionicons name="calendar-outline" size={20} color={C.primary} />
-              </TouchableOpacity>
-            </View>
-
-            {/* ANDROID: Uses the native popup dialog */}
-            {Platform.OS === "android" && showStartPicker && (
-              <DateTimePicker
-                value={borrowStartTime}
-                mode={startMode}
-                display="default"
-                onChange={(event, selectedDate) => {
-                  if (event.type === "dismissed") {
-                    setShowStartPicker(false);
-                    setStartMode("date");
-                    return;
-                  }
-                  const currentDate = selectedDate || borrowStartTime;
-                  setBorrowStartTime(currentDate);
-
-                  if (startMode === "date") {
-                    setStartMode("time");
-                  } else {
-                    setShowStartPicker(false);
-                    setStartMode("date");
-                  }
-                }}
-              />
-            )}
-
-            {/* IOS: Wraps the picker in a slide-up Modal */}
-            {Platform.OS === "ios" && (
-              <Modal
-                visible={showStartPicker}
-                transparent={true}
-                animationType="slide"
-              >
-                <View style={styles.iosModalOverlay}>
-                  <View style={styles.iosPickerContainer}>
+                {/* iOS INLINE START PICKER */}
+                {Platform.OS === "ios" && showStartPicker && (
+                  <View
+                    style={{
+                      backgroundColor: "#F1F5F9",
+                      borderRadius: 12,
+                      marginTop: 8,
+                      overflow: "hidden",
+                    }}
+                  >
                     <DateTimePicker
                       value={borrowStartTime}
                       mode="datetime"
                       display="spinner"
+                      textColor="#1D4ED8"
                       onChange={(event, selectedDate) => {
                         const currentDate = selectedDate || borrowStartTime;
                         setBorrowStartTime(currentDate);
                       }}
                     />
-                    {/* iOS needs a Done button to close the modal */}
                     <Button
                       title="Done"
                       onPress={() => setShowStartPicker(false)}
                     />
                   </View>
-                </View>
-              </Modal>
-            )}
+                )}
+              </View>
 
-            {showEndPicker && (
-              <DateTimePicker
-                value={borrowEndTime}
-                mode={Platform.OS === "ios" ? "datetime" : endMode}
-                display="default"
-                minimumDate={borrowStartTime}
-                onChange={(event, selectedDate) => {
-                  // 1. Handle Cancel button
-                  if (event.type === "dismissed") {
-                    setShowEndPicker(false);
-                    setEndMode("date"); // Reset for next time
-                    return;
-                  }
+              {/* ─── END TIME SECTION ─── */}
+              <View style={{ marginTop: 15, marginBottom: 24 }}>
+                <Text style={styles.detailText}>End Time</Text>
+                <TouchableOpacity
+                  style={styles.timePickerButton}
+                  onPress={() => setShowEndPicker(true)}
+                >
+                  <Text style={styles.timePickerButtonText}>
+                    {borrowEndTime.toLocaleString([], {
+                      dateStyle: "short",
+                      timeStyle: "short",
+                    })}
+                  </Text>
+                  <Ionicons name="calendar-outline" size={20} color={C.primary} />
+                </TouchableOpacity>
 
-                  // 2. Update the time
-                  const currentDate = selectedDate || borrowEndTime;
-                  setBorrowEndTime(currentDate);
+                {/* iOS INLINE END PICKER */}
+                {Platform.OS === "ios" && showEndPicker && (
+                  <View
+                    style={{
+                      backgroundColor: "#F1F5F9",
+                      borderRadius: 12,
+                      marginTop: 8,
+                      overflow: "hidden",
+                    }}
+                  >
+                    <DateTimePicker
+                      value={borrowEndTime}
+                      mode="datetime"
+                      display="spinner"
+                      textColor="#1D4ED8"
+                      minimumDate={borrowStartTime}
+                      onChange={(event, selectedDate) => {
+                        const currentDate = selectedDate || borrowEndTime;
+                        setBorrowEndTime(currentDate);
+                      }}
+                    />
+                    <Button
+                      title="Done"
+                      onPress={() => setShowEndPicker(false)}
+                    />
+                  </View>
+                )}
+              </View>
 
-                  // 3. Platform specific behavior for Android chaining
-                  if (Platform.OS === "android") {
+              {/* ─── ANDROID NATIVE POPUP PICKERS ─── */}
+              {Platform.OS === "android" && showStartPicker && (
+                <DateTimePicker
+                  value={borrowStartTime}
+                  mode={startMode}
+                  display="default"
+                  onChange={(event, selectedDate) => {
+                    if (event.type === "dismissed") {
+                      setShowStartPicker(false);
+                      setStartMode("date");
+                      return;
+                    }
+                    const currentDate = selectedDate || borrowStartTime;
+                    setBorrowStartTime(currentDate);
+
+                    if (startMode === "date") {
+                      setStartMode("time");
+                    } else {
+                      setShowStartPicker(false);
+                      setStartMode("date");
+                    }
+                  }}
+                />
+              )}
+
+              {Platform.OS === "android" && showEndPicker && (
+                <DateTimePicker
+                  value={borrowEndTime}
+                  mode={endMode}
+                  display="default"
+                  minimumDate={borrowStartTime}
+                  onChange={(event, selectedDate) => {
+                    if (event.type === "dismissed") {
+                      setShowEndPicker(false);
+                      setEndMode("date");
+                      return;
+                    }
+                    const currentDate = selectedDate || borrowEndTime;
+                    setBorrowEndTime(currentDate);
+
                     if (endMode === "date") {
-                      // They just picked the date, now show the time!
                       setEndMode("time");
                     } else {
-                      // They finished picking the time, we are done.
                       setShowEndPicker(false);
-                      setEndMode("date"); // Reset for next time
+                      setEndMode("date");
                     }
-                  } else {
-                    // Optional: close on iOS
-                    setShowEndPicker(false);
-                  }
-                }}
-              />
-            )}
-
-            <TouchableOpacity
-              style={[
-                styles.registerButton,
-                isSubmittingRequest && { opacity: 0.7 },
-              ]}
-              onPress={submitBorrowRequest}
-              disabled={isSubmittingRequest}
-            >
-              {isSubmittingRequest ? (
-                <ActivityIndicator color={C.white} />
-              ) : (
-                <>
-                  <Text style={styles.registerButtonText}>
-                    Confirm Borrow Request
-                  </Text>
-                  <Ionicons
-                    name="arrow-forward"
-                    size={18}
-                    color={C.white}
-                    style={{ marginLeft: 8 }}
-                  />
-                </>
+                  }}
+                />
               )}
-            </TouchableOpacity>
+
+              {/* ─── CONFIRM BUTTON ─── */}
+              <TouchableOpacity
+                style={[
+                  styles.registerButton,
+                  isSubmittingRequest && { opacity: 0.7 },
+                ]}
+                onPress={submitBorrowRequest}
+                disabled={isSubmittingRequest}
+              >
+                {isSubmittingRequest ? (
+                  <ActivityIndicator color={C.white} />
+                ) : (
+                  <>
+                    <Text style={styles.registerButtonText}>
+                      Confirm Borrow Request
+                    </Text>
+                    <Ionicons
+                      name="arrow-forward"
+                      size={18}
+                      color={C.white}
+                      style={{ marginLeft: 8 }}
+                    />
+                  </>
+                )}
+              </TouchableOpacity>
+              
+            </ScrollView>
+            {/* ─── SCROLLVIEW ENDS HERE ─── */}
+
           </Pressable>
         </Pressable>
       </Modal>
+
       {/* ─── NEW: MY REQUESTS MODAL ─── */}
       <Modal
         visible={isRequestsModalVisible}

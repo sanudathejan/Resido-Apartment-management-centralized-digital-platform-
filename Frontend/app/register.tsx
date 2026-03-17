@@ -140,7 +140,6 @@ export default function RegisterScreen() {
   // REGISTER HANDLER
   // ==========================================
   const handleRegister = async () => {
-    console.log('=== CREATE ACCOUNT PRESSED ===');
 
     if (!name.trim()) {
       showAlert('Missing Name', 'Please enter your full name.');
@@ -184,8 +183,6 @@ export default function RegisterScreen() {
     };
 
     const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.REGISTER}`;
-    console.log('Registering with URL:', url);
-    console.log('Payload:', JSON.stringify(payload));
 
     try {
       const response = await fetch(url, {
@@ -195,7 +192,6 @@ export default function RegisterScreen() {
       });
 
       const text = await response.text();
-      console.log('Registration response:', response.status, text);
 
       if (!response.ok) {
         let errorMsg = 'Registration failed';
@@ -207,15 +203,12 @@ export default function RegisterScreen() {
         }
         showAlert('Registration Failed', errorMsg);
       } else {
-        // API succeeded → go to verify page with email and role
-        console.log('Registration successful! Navigating to verify...');
         router.push({
           pathname: '/verify',
           params: { email: email.trim(), role: selectedRole === 'manager' ? 'MANAGER' : 'RESIDENT' },
         });
       }
     } catch (error: any) {
-      console.log('Registration error:', error);
       showAlert(
         'Connection Error',
         'Could not connect to the server. Please make sure the backend is running.\n\nURL: ' + url

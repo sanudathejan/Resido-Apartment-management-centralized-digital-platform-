@@ -430,6 +430,7 @@ export default function LoginScreen() {
                   <TextInput
                     style={styles.modalInput}
                     placeholder="6-Digit OTP"
+                    placeholderTextColor="#94A3B8"
                     value={forgotOtp}
                     onChangeText={setForgotOtp}
                     keyboardType="number-pad"
@@ -437,6 +438,7 @@ export default function LoginScreen() {
                   <TextInput
                     style={styles.modalInput}
                     placeholder="New Password"
+                    placeholderTextColor="#94A3B8"
                     value={forgotNewPassword}
                     onChangeText={setForgotNewPassword}
                     secureTextEntry
