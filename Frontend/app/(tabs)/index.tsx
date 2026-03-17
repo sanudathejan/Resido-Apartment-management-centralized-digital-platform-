@@ -58,7 +58,7 @@ const QUICK_ACTIONS: FeatureCard[] = [
   {
     icon: "megaphone",
     title: "Announcements",
-    subtitle: "Latest updates",
+    subtitle: "Latest Updates",
     route: "/(tabs)/announcements",
     iconColor: "#DC2626",
     iconBg: "#FEF2F2",
@@ -66,7 +66,7 @@ const QUICK_ACTIONS: FeatureCard[] = [
   {
     icon: "car-sport",
     title: "Parking",
-    subtitle: "Manage slots",
+    subtitle: "Manage Slots",
     route: "/(tabs)/parking",
     iconColor: "#2563EB",
     iconBg: "#EFF6FF",
@@ -94,7 +94,7 @@ const SERVICES_ACTIONS: FeatureCard[] = [
   {
     icon: "fitness",
     title: "Facilities",
-    subtitle: "Book amenities",
+    subtitle: "Book Amenities",
     route: "/common-area",
     iconColor: "#7C3AED",
     iconBg: "#F5F3FF",
@@ -102,7 +102,7 @@ const SERVICES_ACTIONS: FeatureCard[] = [
   {
     icon: "construct",
     title: "Maintenance",
-    subtitle: "Request repairs",
+    subtitle: "Request Repairs",
     route: "/maintenance",
     iconColor: "#EA580C",
     iconBg: "#FFF7ED",

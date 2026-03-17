@@ -31,6 +31,8 @@ const COLORS = {
   textDark: "#1E293B",
   textLight: "#64748B",
   textMuted: "#94A3B8",
+  sosRed: "#EF4444",
+  sosRedDark: "#DC2626",
   white: "#FFFFFF",
   cardShadow: "#94A3B8",
   border: "#E2E8F0",
@@ -44,49 +46,51 @@ type FeatureCard = {
   route: string;
   iconColor: string;
   iconBg: string;
+  cardBg?: string;
 };
 
 // 5 Placeholder Actions
 const MANAGER_ACTIONS: FeatureCard[] = [
   {
-    icon: "layers-outline",
-    title: "Action 1",
-    subtitle: "Manage item 1",
-    route: "#",
-    iconColor: "#2563EB",
-    iconBg: "#EFF6FF",
-  },
-  {
-    icon: "people-outline",
-    title: "Action 2",
-    subtitle: "Manage item 2",
+    icon: "wallet",
+    title: "Payments",
+    subtitle: "Issue & Receive",
     route: "#",
     iconColor: "#059669",
     iconBg: "#ECFDF5",
   },
   {
-    icon: "document-text-outline",
-    title: "Action 3",
-    subtitle: "Manage item 3",
+    icon: "megaphone",
+    title: "Announcements",
+    subtitle: "Update Residents",
     route: "#",
     iconColor: "#DC2626",
     iconBg: "#FEF2F2",
   },
   {
-    icon: "construct-outline",
-    title: "Action 4",
-    subtitle: "Manage item 4",
+    icon: "fitness",
+    title: "Facilities",
+    subtitle: "Reserve Amenities",
+    route: "#",
+    iconColor: "#7C3AED",
+    iconBg: "#F5F3FF",
+  },
+  {
+    icon: "construct",
+    title: "Maintenance",
+    subtitle: "Manage Repairs",
     route: "#",
     iconColor: "#EA580C",
     iconBg: "#FFF7ED",
   },
   {
-    icon: "chatbubbles-outline",
-    title: "Action 5",
-    subtitle: "Manage item 5",
+    icon: "alert",
+    title: "SOS Resolve",
+    subtitle: "Emergency",
     route: "#",
-    iconColor: "#7C3AED",
-    iconBg: "#F5F3FF",
+    iconColor: COLORS.sosRedDark,
+    iconBg: "#ffffff",
+    cardBg: "#FECACA",
   },
 ];
 
@@ -128,11 +132,16 @@ export default function ManagerHomeScreen() {
   const renderCard = (card: FeatureCard, index: number) => (
     <TouchableOpacity
       key={index}
-      style={styles.featureCard}
+      style={[
+        styles.featureCard,
+        card.cardBg ? { backgroundColor: card.cardBg } : null,
+      ]}
       onPress={() => console.log(`Navigating to ${card.route}`)}
       activeOpacity={0.7}
     >
-      <View style={[styles.featureIconContainer, { backgroundColor: card.iconBg }]}>
+      <View
+        style={[styles.featureIconContainer, { backgroundColor: card.iconBg }]}
+      >
         <Ionicons name={card.icon} size={22} color={card.iconColor} />
       </View>
       <Text style={styles.featureTitle}>{card.title}</Text>
@@ -174,8 +183,8 @@ export default function ManagerHomeScreen() {
           </View>
 
           {/* Big Dashboard Button */}
-          <TouchableOpacity 
-            style={styles.dashboardBigButton} 
+          <TouchableOpacity
+            style={styles.dashboardBigButton}
             activeOpacity={0.8}
             onPress={() => console.log("Navigate to Main Dashboard")}
           >
@@ -185,7 +194,9 @@ export default function ManagerHomeScreen() {
               </View>
               <View style={styles.dashboardBtnTextWrap}>
                 <Text style={styles.dashboardBtnTitle}>Dashboard</Text>
-                <Text style={styles.dashboardBtnSub}>View property analytics & reports</Text>
+                <Text style={styles.dashboardBtnSub}>
+                  View all details of residents
+                </Text>
               </View>
               <Ionicons name="chevron-forward" size={20} color={COLORS.white} />
             </View>
@@ -205,7 +216,11 @@ export default function ManagerHomeScreen() {
             onPress={handleLogout}
             activeOpacity={0.7}
           >
-            <Ionicons name="log-out-outline" size={18} color={COLORS.textLight} />
+            <Ionicons
+              name="log-out-outline"
+              size={18}
+              color={COLORS.textLight}
+            />
             <Text style={styles.logoutText}>Log out</Text>
           </TouchableOpacity>
         </ScrollView>
