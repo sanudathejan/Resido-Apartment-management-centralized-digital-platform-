@@ -64,7 +64,7 @@ export default function RootLayout() {
               }}
             />
             <Stack.Screen
-              name="manager-dashboard"
+              name="(manager)/manager-dashboard"
               options={{
                 headerShown: false,
                 title: 'Manager Dashboard'

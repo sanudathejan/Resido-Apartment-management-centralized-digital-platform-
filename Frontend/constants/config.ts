@@ -4,9 +4,7 @@
 
 // API Configuration
 export const API_CONFIG = {
-  BASE_URL: 'http://192.168.1.8:8080', // Android emulator localhost
-  // BASE_URL: 'http://localhost:8080', // iOS simulator or web
-  // BASE_URL: "http://localhost:8080", // Physical device (machine's IP)
+  BASE_URL: 'http://192.168.1.8:8080', // ipconfig
 
   ENDPOINTS: {
     // Auth
@@ -45,6 +43,9 @@ export const API_CONFIG = {
 
     // Houses
     HOUSES: "/api/houses/status",
+
+    // Manager
+    MANAGER_RESIDENTS: "/api/manager/residents",
 
     // Apartments (Manager)
     APARTMENTS: "/api/apartments",

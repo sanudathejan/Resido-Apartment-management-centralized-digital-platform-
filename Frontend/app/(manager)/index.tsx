@@ -186,7 +186,7 @@ export default function ManagerHomeScreen() {
           <TouchableOpacity
             style={styles.dashboardBigButton}
             activeOpacity={0.8}
-            onPress={() => console.log("Navigate to Main Dashboard")}
+            onPress={() => router.push('/manager-dashboard')}
           >
             <View style={styles.dashboardBtnContent}>
               <View style={styles.dashboardIconCircle}>
