@@ -72,4 +72,12 @@ public class User {
     @OneToMany(mappedBy = "resident", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private List<CommonAreaBooking> commonAreaBookings;
+
+    // Custom getter so Spring Boot sends the house number to the frontend automatically
+    public String getHouseNumber() {
+        if (this.house != null) {
+            return this.house.getHouseNumber();
+        }
+        return this.requestedHouseNumber;
+    }
 }

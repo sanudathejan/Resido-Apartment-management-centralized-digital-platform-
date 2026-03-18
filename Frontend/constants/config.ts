@@ -18,7 +18,8 @@ export const API_CONFIG = {
 
     // Payments
     PAYMENTS: "/api/payments",
-    PAYMENTS_BY_USER: (userId: number) => `/api/payments/user/${userId}`,
+    PAYMENTS_REVIEW: "/api/payments/pending-review",
+    PAYMENTS_UNPAID: "/api/payments/unpaid",
 
     // Maintenance
     MAINTENANCE: "/api/maintenance",

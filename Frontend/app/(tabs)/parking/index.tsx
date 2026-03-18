@@ -808,7 +808,7 @@ export default function ParkingScreen() {
           </Pressable>
         </Pressable>
       </Modal>
-<Modal
+      <Modal
         visible={!!selectedSlotForBorrow}
         transparent={true}
         animationType="slide"
@@ -819,7 +819,6 @@ export default function ParkingScreen() {
           onPress={() => setSelectedSlotForBorrow(null)}
         >
           <Pressable style={styles.modalContent}>
-            
             {/* HEADER STAYS OUTSIDE SCROLLVIEW (Fixed at top) */}
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Select Time</Text>
@@ -829,7 +828,7 @@ export default function ParkingScreen() {
             </View>
 
             {/* ─── SCROLLVIEW STARTS HERE ─── */}
-            <ScrollView 
+            <ScrollView
               showsVerticalScrollIndicator={false}
               contentContainerStyle={{ flexGrow: 1, paddingBottom: 10 }}
             >
@@ -850,7 +849,11 @@ export default function ParkingScreen() {
                       timeStyle: "short",
                     })}
                   </Text>
-                  <Ionicons name="calendar-outline" size={20} color={C.primary} />
+                  <Ionicons
+                    name="calendar-outline"
+                    size={20}
+                    color={C.primary}
+                  />
                 </TouchableOpacity>
 
                 {/* iOS INLINE START PICKER */}
@@ -894,7 +897,11 @@ export default function ParkingScreen() {
                       timeStyle: "short",
                     })}
                   </Text>
-                  <Ionicons name="calendar-outline" size={20} color={C.primary} />
+                  <Ionicons
+                    name="calendar-outline"
+                    size={20}
+                    color={C.primary}
+                  />
                 </TouchableOpacity>
 
                 {/* iOS INLINE END PICKER */}
@@ -1001,10 +1008,8 @@ export default function ParkingScreen() {
                   </>
                 )}
               </TouchableOpacity>
-              
             </ScrollView>
             {/* ─── SCROLLVIEW ENDS HERE ─── */}
-
           </Pressable>
         </Pressable>
       </Modal>

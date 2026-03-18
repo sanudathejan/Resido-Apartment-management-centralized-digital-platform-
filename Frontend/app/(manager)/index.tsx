@@ -3,7 +3,7 @@
  * Modern 2026 light theme - premium minimal UI
  */
 
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -15,6 +15,8 @@ import {
   Platform,
   Image,
   Alert,
+  Modal,
+  Pressable,
 } from "react-native";
 import { useRouter, Href } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -44,7 +46,7 @@ interface ManagerCard {
   icon: keyof typeof Ionicons.glyphMap;
   title: string;
   subtitle: string;
-  route: Href | "#";
+  route: Href | "#" | "PAYMENTS_MODAL";
   iconColor: string;
   iconBg: string;
   cardBg?: string; // Optional background override
@@ -56,7 +58,7 @@ const MANAGER_ACTIONS: ManagerCard[] = [
     icon: "wallet",
     title: "Payments",
     subtitle: "Issue & Receive",
-    route: "#",
+    route: "PAYMENTS_MODAL",
     iconColor: "#059669",
     iconBg: "#ECFDF5",
   },
@@ -105,6 +107,7 @@ function getGreeting(): string {
 export default function ManagerHomeScreen() {
   const router = useRouter();
   const { user, logout } = useAuth();
+  const [showPaymentsModal, setShowPaymentsModal] = useState(false);
 
   const userName = user?.name || "Manager Name";
 
@@ -139,8 +142,10 @@ export default function ManagerHomeScreen() {
         card.cardBg ? { backgroundColor: card.cardBg } : null,
       ]}
       onPress={() => {
-        if (card.route !== "#") {
-          router.push(card.route as any); // Use 'card.route', not 'item.route'
+        if (card.route === "PAYMENTS_MODAL") {
+          setShowPaymentsModal(true);
+        } else if (card.route !== "#") {
+          router.push(card.route as any);
         } else {
           console.log("Route not implemented yet!");
         }
@@ -194,7 +199,7 @@ export default function ManagerHomeScreen() {
           <TouchableOpacity
             style={styles.dashboardBigButton}
             activeOpacity={0.8}
-            onPress={() => router.push('/manager-dashboard')}
+            onPress={() => router.push("/manager-dashboard")}
           >
             <View style={styles.dashboardBtnContent}>
               <View style={styles.dashboardIconCircle}>
@@ -233,6 +238,58 @@ export default function ManagerHomeScreen() {
           </TouchableOpacity>
         </ScrollView>
       </SafeAreaView>
+      {/* --- PAYMENTS POPUP MODAL --- */}
+      <Modal visible={showPaymentsModal} transparent={true} animationType="fade">
+        <Pressable 
+          style={styles.modalOverlay} 
+          onPress={() => setShowPaymentsModal(false)}
+        >
+          <View style={styles.modalContent}>
+            
+            <View style={styles.modalHeader}>
+              <View style={[styles.featureIconContainer, { backgroundColor: "#ECFDF5", marginBottom: 0, marginRight: 12 }]}>
+                <Ionicons name="wallet" size={22} color="#059669" />
+              </View>
+              <View>
+                <Text style={styles.modalTitle}>Payments</Text>
+                <Text style={styles.modalSubtitle}>What would you like to do?</Text>
+              </View>
+            </View>
+
+            <TouchableOpacity 
+              style={styles.modalOptionButton}
+              onPress={() => {
+                setShowPaymentsModal(false);
+                router.push("/(manager)/payments/issue" as any);
+              }}
+            >
+              <Ionicons name="add-circle-outline" size={24} color={COLORS.primary} />
+              <Text style={styles.modalOptionText}>Issue New Bill</Text>
+              <Ionicons name="chevron-forward" size={20} color={COLORS.textMuted} style={{ marginLeft: 'auto' }} />
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={styles.modalOptionButton}
+              onPress={() => {
+                setShowPaymentsModal(false);
+                router.push("/(manager)/payments/view" as any); // The new file you will create
+              }}
+            >
+              <Ionicons name="list-outline" size={24} color={COLORS.primary} />
+              <Text style={styles.modalOptionText}>View Issued Bills</Text>
+              <Ionicons name="chevron-forward" size={20} color={COLORS.textMuted} style={{ marginLeft: 'auto' }} />
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={styles.modalCancelButton}
+              onPress={() => setShowPaymentsModal(false)}
+            >
+              <Text style={styles.modalCancelText}>Cancel</Text>
+            </TouchableOpacity>
+
+          </View>
+        </Pressable>
+      </Modal>
     </View>
   );
 }
@@ -412,6 +469,69 @@ const styles = StyleSheet.create({
   logoutText: {
     fontSize: 14,
     fontWeight: "600",
+    color: COLORS.textLight,
+  },
+  /* ── Modal Styles ────────────────────────────────────────────────── */
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(15, 23, 42, 0.6)', // Deep slate overlay
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  modalContent: {
+    backgroundColor: COLORS.white,
+    borderRadius: 24,
+    width: '100%',
+    padding: 24,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 10 },
+        shadowOpacity: 0.1,
+        shadowRadius: 20,
+      },
+      android: { elevation: 10 },
+    }),
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: COLORS.textDark,
+  },
+  modalSubtitle: {
+    fontSize: 13,
+    color: COLORS.textLight,
+    marginTop: 2,
+  },
+  modalOptionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+    backgroundColor: COLORS.primaryLight,
+    borderRadius: 16,
+    marginBottom: 12,
+  },
+  modalOptionText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: COLORS.textDark,
+    marginLeft: 12,
+  },
+  modalCancelButton: {
+    marginTop: 12,
+    paddingVertical: 14,
+    alignItems: 'center',
+  },
+  modalCancelText: {
+    fontSize: 15,
+    fontWeight: '600',
     color: COLORS.textLight,
   },
 });

@@ -82,18 +82,20 @@ export interface AuthResponse {
   message?: string;
 }
 
-// Payment types
 export interface Payment {
   id: number;
   amount: number;
-  type: PaymentType;
-  dueDate: string;
-  isPaid: boolean;
-  paidDate?: string;
-  resident: User;
+  type: string; // 'RENT', 'MAINTENANCE', 'UTILITY', 'LATE_FEE'
+  dueDate: string; // 'YYYY-MM-DD'
+  receiptImage?: string; // Base64
+  status: 'PENDING' | 'REVIEW' | 'PAID' | 'REJECTED';
+  paid: boolean;
+  resident: {
+    id: number;
+    name: string;
+    email: string;
+  };
 }
-
-export type PaymentType = 'RENT' | 'PARKING' | 'LATE_FEE' | 'UTILITY' | 'MAINTENANCE';
 
 // Maintenance types
 export interface MaintenanceRequest {
