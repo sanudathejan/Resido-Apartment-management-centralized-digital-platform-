@@ -16,7 +16,7 @@ import {
   Image,
   Alert,
 } from "react-native";
-import { useRouter } from "expo-router";
+import { useRouter, Href } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "@/context/AuthContext";
@@ -39,18 +39,19 @@ const COLORS = {
   avatarBg: "#DBEAFE",
 };
 
-type FeatureCard = {
+// 1. Define the exact shape of your cards
+interface ManagerCard {
   icon: keyof typeof Ionicons.glyphMap;
   title: string;
   subtitle: string;
-  route: string;
+  route: Href | "#";
   iconColor: string;
   iconBg: string;
-  cardBg?: string;
-};
+  cardBg?: string; // Optional background override
+}
 
-// 5 Placeholder Actions
-const MANAGER_ACTIONS: FeatureCard[] = [
+// 2. Apply the interface to your array
+const MANAGER_ACTIONS: ManagerCard[] = [
   {
     icon: "wallet",
     title: "Payments",
@@ -63,7 +64,7 @@ const MANAGER_ACTIONS: FeatureCard[] = [
     icon: "megaphone",
     title: "Announcements",
     subtitle: "Update Residents",
-    route: "#",
+    route: "/(manager)/announcements",
     iconColor: "#DC2626",
     iconBg: "#FEF2F2",
   },
@@ -129,14 +130,21 @@ export default function ManagerHomeScreen() {
     }
   };
 
-  const renderCard = (card: FeatureCard, index: number) => (
+  // 3. Update the renderCard function to use the corrected `card` prop
+  const renderCard = (card: ManagerCard, index: number) => (
     <TouchableOpacity
       key={index}
       style={[
         styles.featureCard,
         card.cardBg ? { backgroundColor: card.cardBg } : null,
       ]}
-      onPress={() => console.log(`Navigating to ${card.route}`)}
+      onPress={() => {
+        if (card.route !== "#") {
+          router.push(card.route as any); // Use 'card.route', not 'item.route'
+        } else {
+          console.log("Route not implemented yet!");
+        }
+      }}
       activeOpacity={0.7}
     >
       <View

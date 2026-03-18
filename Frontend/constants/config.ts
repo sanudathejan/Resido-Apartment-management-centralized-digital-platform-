@@ -4,7 +4,7 @@
 
 // API Configuration
 export const API_CONFIG = {
-  BASE_URL: 'http://192.168.1.8:8080', // ipconfig
+  BASE_URL: "http://192.168.1.8:8080", // ipconfig
 
   ENDPOINTS: {
     // Auth
@@ -34,7 +34,7 @@ export const API_CONFIG = {
     SOS_ACTIVE: "/api/sos/active",
 
     // Announcements
-    ANNOUNCEMENTS: "/api/announcements",
+    ANNOUNCEMENTS: "/api/notices",
 
     // Common Areas & Bookings
     COMMON_AREAS: "/api/common-areas",
