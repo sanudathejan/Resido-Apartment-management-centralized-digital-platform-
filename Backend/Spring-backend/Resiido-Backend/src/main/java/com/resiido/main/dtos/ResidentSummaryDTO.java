@@ -13,6 +13,5 @@ public class ResidentSummaryDTO {
     // Activity Counters (Quick stats for the manager)
     private int activeMaintenanceRequests;
     private int pendingParkingRequests;
-    private int totalSosAlerts;
     private int activeCommonAreaBookings;
 }

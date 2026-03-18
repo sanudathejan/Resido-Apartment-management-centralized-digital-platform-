@@ -3,7 +3,7 @@
  * Modern 2026 light theme - premium minimal UI
  */
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -21,7 +21,10 @@ import {
 import { useRouter, Href } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from "@/context/AuthContext";
+import { API_CONFIG, APP_CONFIG } from '@/constants/config';
+import Assistance from '@/app/Assistance/Assistance'; // Import our new card
 
 const { width } = Dimensions.get("window");
 
@@ -39,9 +42,9 @@ const COLORS = {
   cardShadow: "#94A3B8",
   border: "#E2E8F0",
   avatarBg: "#DBEAFE",
+  green: "#10B981",
 };
 
-// 1. Define the exact shape of your cards
 interface ManagerCard {
   icon: keyof typeof Ionicons.glyphMap;
   title: string;
@@ -49,10 +52,10 @@ interface ManagerCard {
   route: Href | "#" | "PAYMENTS_MODAL";
   iconColor: string;
   iconBg: string;
-  cardBg?: string; // Optional background override
+  cardBg?: string; 
 }
 
-// 2. Apply the interface to your array
+// Removed "SOS Resolve" from this array
 const MANAGER_ACTIONS: ManagerCard[] = [
   {
     icon: "wallet",
@@ -86,15 +89,6 @@ const MANAGER_ACTIONS: ManagerCard[] = [
     iconColor: "#EA580C",
     iconBg: "#FFF7ED",
   },
-  {
-    icon: "alert",
-    title: "SOS Resolve",
-    subtitle: "Emergency",
-    route: "#",
-    iconColor: COLORS.sosRedDark,
-    iconBg: "#ffffff",
-    cardBg: "#FECACA",
-  },
 ];
 
 function getGreeting(): string {
@@ -110,6 +104,42 @@ export default function ManagerHomeScreen() {
   const [showPaymentsModal, setShowPaymentsModal] = useState(false);
 
   const userName = user?.name || "Manager Name";
+
+  // --- Check Pending Assistance Effect ---
+  useEffect(() => {
+    const checkPendingAssistance = async () => {
+      try {
+        const token = await AsyncStorage.getItem(APP_CONFIG.STORAGE_KEYS.AUTH_TOKEN);
+        if (!token) return;
+
+        const response = await fetch(`${API_CONFIG.BASE_URL}/api/assistance/check-pending`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.hasPending) {
+            Alert.alert(
+              "Community Alert",
+              "There are active requests from residents who need your help.",
+              [
+                { text: "Dismiss", style: "cancel" },
+                // Route updated to the new generic needs screen
+                { text: "View Needs", onPress: () => router.push('/Assistance/needs' as any) }
+              ]
+            );
+          }
+        }
+      } catch (error) {
+        console.error("Failed to check pending assistance:", error);
+      }
+    };
+
+    checkPendingAssistance();
+  }, [router]);
 
   const handleLogout = () => {
     if (Platform.OS === "web") {
@@ -133,7 +163,6 @@ export default function ManagerHomeScreen() {
     }
   };
 
-  // 3. Update the renderCard function to use the corrected `card` prop
   const renderCard = (card: ManagerCard, index: number) => (
     <TouchableOpacity
       key={index}
@@ -221,6 +250,11 @@ export default function ManagerHomeScreen() {
           {/* Feature Grid */}
           <View style={styles.featureGrid}>
             {MANAGER_ACTIONS.map((card, index) => renderCard(card, index))}
+            
+            {/* Inject the Assistance Component directly into the grid */}
+            <View style={styles.assistanceCardWrapper}>
+              <Assistance />
+            </View>
           </View>
 
           {/* Logout */}
@@ -238,6 +272,7 @@ export default function ManagerHomeScreen() {
           </TouchableOpacity>
         </ScrollView>
       </SafeAreaView>
+
       {/* --- PAYMENTS POPUP MODAL --- */}
       <Modal visible={showPaymentsModal} transparent={true} animationType="fade">
         <Pressable 
@@ -272,7 +307,7 @@ export default function ManagerHomeScreen() {
               style={styles.modalOptionButton}
               onPress={() => {
                 setShowPaymentsModal(false);
-                router.push("/(manager)/payments/view" as any); // The new file you will create
+                router.push("/(manager)/payments/view" as any); 
               }}
             >
               <Ionicons name="list-outline" size={24} color={COLORS.primary} />
@@ -307,8 +342,6 @@ const styles = StyleSheet.create({
     paddingTop: 8,
     paddingBottom: Platform.select({ ios: 40, android: 40, web: 30 }),
   },
-
-  /* ── Header ──────────────────────────────────────────────────────── */
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -352,8 +385,6 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: COLORS.primary,
   },
-
-  /* ── Big Dashboard Button ────────────────────────────────────────── */
   dashboardBigButton: {
     backgroundColor: COLORS.primary,
     borderRadius: 20,
@@ -396,8 +427,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     opacity: 0.9,
   },
-
-  /* ── Section Title & Grid ────────────────────────────────────────── */
   sectionTitle: {
     fontSize: 17,
     fontWeight: "700",
@@ -426,6 +455,10 @@ const styles = StyleSheet.create({
       android: { elevation: 2 },
     }),
   },
+  assistanceCardWrapper: {
+    width: "48%",
+    marginBottom: 12,
+  },
   featureIconContainer: {
     width: 44,
     height: 44,
@@ -445,8 +478,6 @@ const styles = StyleSheet.create({
     color: COLORS.textLight,
     fontWeight: "400",
   },
-
-  /* ── Logout Button ───────────────────────────────────────────────── */
   logoutButton: {
     flexDirection: "row",
     alignItems: "center",
@@ -471,10 +502,9 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: COLORS.textLight,
   },
-  /* ── Modal Styles ────────────────────────────────────────────────── */
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(15, 23, 42, 0.6)', // Deep slate overlay
+    backgroundColor: 'rgba(15, 23, 42, 0.6)',
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,

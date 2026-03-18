@@ -23,7 +23,6 @@ interface ResidentSummary {
   parkingSlot: string;
   activeMaintenanceRequests: number;
   pendingParkingRequests: number;
-  totalSosAlerts: number;
   activeCommonAreaBookings: number;
 }
 
@@ -116,17 +115,6 @@ export default function ManagerDashboard() {
         <View style={styles.statBox}>
           <Text style={styles.statNumber}>{item.pendingParkingRequests}</Text>
           <Text style={styles.statLabel}>Parking</Text>
-        </View>
-        <View style={styles.statBox}>
-          <Text
-            style={[
-              styles.statNumber,
-              item.totalSosAlerts > 0 && { color: "#EF4444" },
-            ]}
-          >
-            {item.totalSosAlerts}
-          </Text>
-          <Text style={styles.statLabel}>SOS</Text>
         </View>
         <View style={styles.statBox}>
           <Text style={styles.statNumber}>{item.activeCommonAreaBookings}</Text>

@@ -5,7 +5,7 @@
  * Compact 2-column feature grid
  */
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -14,16 +14,18 @@ import {
   TouchableOpacity,
   StatusBar,
   Dimensions,
-  Vibration,
   Alert,
   Switch,
   Platform,
   Image,
 } from "react-native";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "@/context/AuthContext";
+import { API_CONFIG, APP_CONFIG } from '@/constants/config';
+import Assistance from '@/app/Assistance/Assistance';
 
 const { width } = Dimensions.get("window");
 
@@ -54,6 +56,7 @@ type FeatureCard = {
   cardBg?: string;
 };
 
+// Removed the 'SOS Alert' object from QUICK_ACTIONS
 const QUICK_ACTIONS: FeatureCard[] = [
   {
     icon: "megaphone",
@@ -78,15 +81,6 @@ const QUICK_ACTIONS: FeatureCard[] = [
     route: "/(tabs)/payments",
     iconColor: "#059669",
     iconBg: "#ECFDF5",
-  },
-  {
-    icon: "alert",
-    title: "SOS Alert",
-    subtitle: "Emergency",
-    route: "ACTION_SOS", // Special string we will intercept
-    iconColor: COLORS.sosRedDark,
-    iconBg: "#ffffff",
-    cardBg: "#FECACA", // The light red background for the whole card
   },
 ];
 
@@ -132,27 +126,41 @@ export default function HomeScreen() {
     user?.managedApartment?.location || "23/A, Bakers street, Colombo 7";
   const numberOfResidences = user?.managedApartment?.numberOfUnits || 64;
 
-  const handleSOS = () => {
-    Alert.alert(
-      "Emergency Alert",
-      "This will immediately alert same floor neighbors, and building management. Continue?",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "ACTIVATE SOS",
-          style: "destructive",
-          onPress: () => {
-            Vibration.vibrate([0, 500, 200, 500]);
-            Alert.alert(
-              "SOS Alert Sent",
-              "Emergency alert has been sent to building management, security, and your emergency contacts.",
-              [{ text: "OK", style: "default" }],
-            );
+  // --- NEW: Check Pending Assistance Effect ---
+  useEffect(() => {
+    const checkPendingAssistance = async () => {
+      try {
+        const token = await AsyncStorage.getItem(APP_CONFIG.STORAGE_KEYS.AUTH_TOKEN);
+        if (!token) return;
+
+        const response = await fetch(`${API_CONFIG.BASE_URL}/api/assistance/check-pending`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
           },
-        },
-      ],
-    );
-  };
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.hasPending) {
+            Alert.alert(
+              "Community Alert",
+              "There might be residents who need your help.",
+              [
+                { text: "Dismiss", style: "cancel" },
+                { text: "View Needs", onPress: () => router.push('/Assistance/active-assistance' as any) }
+              ]
+            );
+          }
+        }
+      } catch (error) {
+        console.error("Failed to check pending assistance:", error);
+      }
+    };
+
+    // Trigger the check
+    checkPendingAssistance();
+  }, [router]); // Added router to dependency array to satisfy React linting rules
 
   const handleLogout = () => {
     if (Platform.OS === "web") {
@@ -183,19 +191,11 @@ export default function HomeScreen() {
   const renderCard = (card: FeatureCard) => (
     <TouchableOpacity
       key={card.title}
-      // Apply the custom cardBg if it exists, otherwise keep it white
       style={[
         styles.featureCard,
         card.cardBg ? { backgroundColor: card.cardBg } : null,
       ]}
-      onPress={() => {
-        // Intercept the SOS action!
-        if (card.route === "ACTION_SOS") {
-          handleSOS();
-        } else {
-          router.push(card.route as any);
-        }
-      }}
+      onPress={() => router.push(card.route as any)}
       activeOpacity={0.7}
     >
       <View
@@ -246,31 +246,23 @@ export default function HomeScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* Feature Grid */}
-      {/* <Text style={styles.sectionTitle}></Text>
-      <View style={styles.featureGrid}>
-        {FEATURE_CARDS.map((card, index) => (
-          <TouchableOpacity
-            key={card.title}
-            style={styles.featureCard}
-            onPress={() => router.push(card.route as any)}
-            activeOpacity={0.7}
-          >
-            <View style={[styles.featureIconContainer, { backgroundColor: card.iconBg }]}>
-              <Ionicons name={card.icon} size={22} color={card.iconColor} />
-            </View>
-            <Text style={styles.featureTitle}>{card.title}</Text>
-            <Text style={styles.featureSubtitle}>{card.subtitle}</Text>
-          </TouchableOpacity>
-        ))}
-      </View> */}
+      {/* Put the Assistance Button prominently in the Manager Dashboard too */}
+      <View style={styles.assistanceContainer}>
+         <Assistance />
+      </View>
     </>
   );
 
   const ResidentDashboard = () => (
     <>
       <Text style={styles.sectionTitle}>Quick Actions</Text>
-      <View style={styles.featureGrid}>{QUICK_ACTIONS.map(renderCard)}</View>
+      <View style={styles.featureGrid}>
+        {QUICK_ACTIONS.map(renderCard)}
+        {/* We place the new AssistanceButton where the 4th card used to be */}
+        <View style={styles.assistanceCardWrapper}>
+            <Assistance />
+        </View>
+      </View>
 
       <View style={styles.separator} />
 
@@ -370,18 +362,6 @@ export default function HomeScreen() {
             <Text style={styles.logoutText}>Log out</Text>
           </TouchableOpacity>
         </ScrollView>
-
-        {/* SOS Floating Button
-        <TouchableOpacity
-          style={styles.sosButton}
-          onPress={handleSOS}
-          activeOpacity={0.85}
-        >
-          <View style={styles.sosInner}>
-            <Ionicons name="alert" size={20} color={COLORS.white} />
-            <Text style={styles.sosLabel}>SOS</Text>
-          </View>
-        </TouchableOpacity> */}
       </SafeAreaView>
     </View>
   );
@@ -400,8 +380,6 @@ const styles = StyleSheet.create({
     paddingTop: 8,
     paddingBottom: Platform.select({ ios: 120, android: 100, web: 30 }),
   },
-
-  // Header
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -461,8 +439,6 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: COLORS.primary,
   },
-
-  // View Mode Toggle
   viewModeToggle: {
     flexDirection: "row",
     alignItems: "center",
@@ -496,8 +472,6 @@ const styles = StyleSheet.create({
   viewModeSwitch: {
     transform: [{ scaleX: 0.85 }, { scaleY: 0.85 }],
   },
-
-  // Section Title
   sectionTitle: {
     fontSize: 17,
     fontWeight: "700",
@@ -505,12 +479,6 @@ const styles = StyleSheet.create({
     marginBottom: 14,
     letterSpacing: -0.3,
   },
-
-  /*
-   * Feature Grid — 2 columns using percentage width
-   * Using 48% width with space-between ensures two cards per row
-   * regardless of screen/container width
-   */
   featureGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
@@ -554,8 +522,17 @@ const styles = StyleSheet.create({
     color: COLORS.textLight,
     fontWeight: "400",
   },
-
-  // Manager Card
+  // --- New styles for the Assistance Button Placement ---
+  assistanceCardWrapper: {
+    width: "48%",
+    marginBottom: 12,
+    // You can let the button fill this space naturally
+  },
+  assistanceContainer: {
+     marginTop: 10,
+     marginBottom: 20,
+  },
+  // ----------------------------------------------------
   managerCard: {
     backgroundColor: COLORS.white,
     borderRadius: 18,
@@ -626,8 +603,6 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: COLORS.primary,
   },
-
-  // Logout
   logoutButton: {
     flexDirection: "row",
     alignItems: "center",
@@ -652,39 +627,6 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: COLORS.textLight,
   },
-
-  // SOS Button
-  sosButton: {
-    position: "absolute",
-    bottom: Platform.select({ ios: 100, android: 80, web: 80 }),
-    right: 20,
-    zIndex: 100,
-  },
-  sosInner: {
-    width: 58,
-    height: 58,
-    borderRadius: 29,
-    backgroundColor: COLORS.sosRed,
-    alignItems: "center",
-    justifyContent: "center",
-    ...Platform.select({
-      ios: {
-        shadowColor: COLORS.sosRed,
-        shadowOffset: { width: 0, height: 6 },
-        shadowOpacity: 0.4,
-        shadowRadius: 14,
-      },
-      android: { elevation: 10 },
-    }),
-  },
-  sosLabel: {
-    fontSize: 9,
-    fontWeight: "800",
-    color: COLORS.white,
-    letterSpacing: 1,
-    marginTop: 1,
-  },
-  // Separator
   separator: {
     height: 3,
     backgroundColor: "#333333",

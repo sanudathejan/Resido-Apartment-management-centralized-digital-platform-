@@ -45,6 +45,18 @@ public class AssistanceController {
         return assistanceRepository.save(request);
     }
 
+    // View ALL Requests (Active & Resolved) - Managers Only
+    @GetMapping
+    public List<AssistanceRequest> getAllRequests(Principal principal) {
+        User currentUser = getLoggedInUser(principal);
+
+        // Security check: Only allow Manager/Admin to pull the full log
+        if (!"MANAGER".equalsIgnoreCase(currentUser.getRole()) && !"ADMIN".equalsIgnoreCase(currentUser.getRole())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only managers can view the full history.");
+        }
+        return assistanceRepository.findAll();
+    }
+
     // 2. View Active Requests (Managers see all, Residents see their floor)
     @GetMapping("/active")
     public List<AssistanceRequest> getActiveRequests(Principal principal) {

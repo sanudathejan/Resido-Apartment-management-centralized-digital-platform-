@@ -81,12 +81,7 @@ public class ManagerController {
             dto.setPendingParkingRequests((int) pendingParking);
         }
 
-        // 3. Total SOS Alerts (History)
-        if (user.getSosAlerts() != null) {
-            dto.setTotalSosAlerts(user.getSosAlerts().size());
-        }
-
-        // 4. Active Common Area Bookings
+        // 3. Active Common Area Bookings
         if (user.getCommonAreaBookings() != null) {
             long activeBookings = user.getCommonAreaBookings().stream()
                     .filter(b -> "APPROVED".equalsIgnoreCase(b.getStatus()) || "PENDING".equalsIgnoreCase(b.getStatus()))

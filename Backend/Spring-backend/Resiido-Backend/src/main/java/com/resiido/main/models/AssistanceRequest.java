@@ -21,4 +21,8 @@ public class AssistanceRequest {
     private User resident;
 
     private boolean isActive = true;
+
+    public String getStatus() {
+        return this.isActive ? "ACTIVE" : "RESOLVED";
+    }
 }
