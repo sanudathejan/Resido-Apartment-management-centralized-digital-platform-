@@ -44,10 +44,10 @@ export default function TabLayout() {
       <Tabs.Screen
         name="announcements/index"
         options={{
-          title: "Alerts",
+          title: "Notices",
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
-              name={focused ? "notifications" : "notifications-outline"}
+              name={focused ? "megaphone" : "megaphone-outline"}
               size={24} // 24 or 28 are standard, reliable sizes
               color={color}
             />
