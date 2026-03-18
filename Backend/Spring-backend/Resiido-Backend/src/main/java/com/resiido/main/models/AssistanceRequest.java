@@ -6,9 +6,9 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "sos_alerts")
+@Table(name = "assistance_requests")
 @Data
-public class SosAlert {
+public class AssistanceRequest {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -17,9 +17,8 @@ public class SosAlert {
 
     @ManyToOne
     @JoinColumn(name = "resident_id")
-    @JsonIgnoreProperties({"password", "maintenanceRequests", "payments", "sosAlerts", "parkingRequests", "notices", "parkingSlot"})
+    @JsonIgnoreProperties({"password", "maintenanceRequests", "payments", "assistanceRequests", "parkingRequests", "notices", "parkingSlot", "expoPushToken"})
     private User resident;
 
-    // We can add "isActive" so managers can clear the alert later
     private boolean isActive = true;
 }

@@ -2,7 +2,6 @@
  * Authentication Context for Resiido
  * Manages user authentication state across the app
  */
-
 import React, {
   createContext,
   useContext,
@@ -13,7 +12,7 @@ import React, {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { User, LoginRequest, RegisterRequest } from "@/types";
 import { authService } from "@/services";
-import { APP_CONFIG } from "@/constants/config";
+import { APP_CONFIG, API_CONFIG } from "@/constants/config"; // Added API_CONFIG here
 import { apiService } from "@/services/api";
 
 interface AuthContextType {
@@ -53,7 +52,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-const loadProfilePicture = async () => {
+  const loadProfilePicture = async () => {
     try {
       const response = await apiService.get<{ image: string | null }>(
         "/api/users/profile-picture",
@@ -82,7 +81,10 @@ const loadProfilePicture = async () => {
         APP_CONFIG.STORAGE_KEYS.USER_DATA,
         JSON.stringify(response.user),
       );
-      apiService.setToken((response as any).token);
+      
+      const token = (response as any).token;
+      apiService.setToken(token);
+
       await loadProfilePicture();
     } catch (error) {
       throw error;
@@ -106,6 +108,7 @@ const loadProfilePicture = async () => {
         APP_CONFIG.STORAGE_KEYS.USER_DATA,
         JSON.stringify(response.user),
       );
+      
     } catch (error) {
       throw error;
     }

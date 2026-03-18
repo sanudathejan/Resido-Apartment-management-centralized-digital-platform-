@@ -8,6 +8,7 @@ import com.resiido.main.repositories.ParkingSlotRepository;
 import com.resiido.main.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -194,5 +195,22 @@ public class UserController {
         userRepository.delete(user);
 
         return org.springframework.http.ResponseEntity.ok(java.util.Map.of("message", "Account deleted successfully"));
+    }
+
+    @PutMapping("/push-token")
+    public ResponseEntity<?> updatePushToken(@RequestBody Map<String, String> payload, Principal principal) {
+        String pushToken = payload.get("token");
+
+        if (pushToken == null || pushToken.isEmpty()) {
+            return ResponseEntity.badRequest().body("Token is required");
+        }
+
+        User currentUser = userRepository.findByEmail(principal.getName())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        currentUser.setExpoPushToken(pushToken);
+        userRepository.save(currentUser);
+
+        return ResponseEntity.ok().body("Push token updated successfully");
     }
 }

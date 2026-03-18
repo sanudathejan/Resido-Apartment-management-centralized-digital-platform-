@@ -40,6 +40,9 @@ public class User {
     @Column(name = "requested_house_number")
     private String requestedHouseNumber;
 
+    @Column(name = "expo_push_token")
+    private String expoPushToken;
+
     // Changed ALL to PERSIST, MERGE. Deleting User will NOT delete House.
     @OneToOne(mappedBy = "resident", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JsonIgnore
@@ -59,7 +62,7 @@ public class User {
 
     @OneToMany(mappedBy = "resident", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
-    private List<SosAlert> sosAlerts;
+    private List<AssistanceRequest> assistanceRequests;
 
     @OneToMany(mappedBy = "requester", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
