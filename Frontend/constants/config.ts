@@ -4,7 +4,7 @@
 
 // API Configuration
 export const API_CONFIG = {
-  BASE_URL: "http://192.168.1.79:8080", // ipconfig
+  BASE_URL: "http://192.168.1.8:8080", // ipconfig
 
   ENDPOINTS: {
     // Auth
