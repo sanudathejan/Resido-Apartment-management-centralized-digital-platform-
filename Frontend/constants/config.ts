@@ -4,7 +4,7 @@
 
 // API Configuration
 export const API_CONFIG = {
-  BASE_URL: "http://192.168.1.8:8080", // ipconfig
+  BASE_URL: "https://resiido-backend-hosting-production.up.railway.app",
 
   ENDPOINTS: {
     // Auth
