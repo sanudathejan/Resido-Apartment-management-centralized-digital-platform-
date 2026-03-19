@@ -97,7 +97,7 @@ const SERVICES_ACTIONS: FeatureCard[] = [
     icon: "construct",
     title: "Maintenance",
     subtitle: "Request Repairs",
-    route: "/maintenance",
+    route: "/maintenance_requests",
     iconColor: "#EA580C",
     iconBg: "#FFF7ED",
   },

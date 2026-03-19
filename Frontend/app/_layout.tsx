@@ -57,13 +57,6 @@ export default function RootLayout() {
               }}
             />
             <Stack.Screen
-              name="common-area"
-              options={{
-                headerShown: false,
-                title: 'Common Area Booking'
-              }}
-            />
-            <Stack.Screen
               name="(manager)/manager-dashboard"
               options={{
                 headerShown: false,

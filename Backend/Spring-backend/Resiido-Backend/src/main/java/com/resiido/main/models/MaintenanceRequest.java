@@ -25,6 +25,9 @@ public class MaintenanceRequest {
     @Column(nullable = false)
     private String status = "PENDING"; // Default status
 
+    @Column(columnDefinition = "TEXT")
+    private String imageBase64;
+
     // This creates a "resident_id" column in your SQL table
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "resident_id", nullable = false)

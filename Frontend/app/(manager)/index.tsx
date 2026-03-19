@@ -24,7 +24,7 @@ import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from "@/context/AuthContext";
 import { API_CONFIG, APP_CONFIG } from '@/constants/config';
-import Assistance from '@/app/Assistance/Assistance'; // Import our new card
+import Assistance from '@/app/Assistance/Assistance';
 
 const { width } = Dimensions.get("window");
 
@@ -85,7 +85,7 @@ const MANAGER_ACTIONS: ManagerCard[] = [
     icon: "construct",
     title: "Maintenance",
     subtitle: "Manage Repairs",
-    route: "#",
+    route: "/(manager)/maintenance",
     iconColor: "#EA580C",
     iconBg: "#FFF7ED",
   },
