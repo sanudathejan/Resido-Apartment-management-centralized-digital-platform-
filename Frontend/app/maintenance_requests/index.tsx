@@ -155,6 +155,7 @@ export default function ResidentMaintenanceScreen() {
           <TextInput
             style={styles.input}
             placeholder="e.g., Leaking faucet"
+            placeholderTextColor={COLORS.textLight}
             value={title}
             onChangeText={setTitle}
           />
@@ -163,6 +164,7 @@ export default function ResidentMaintenanceScreen() {
           <TextInput
             style={[styles.input, styles.textArea]}
             placeholder="Describe the issue in detail..."
+            placeholderTextColor={COLORS.textLight}
             value={description}
             onChangeText={setDescription}
             multiline

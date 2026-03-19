@@ -233,14 +233,16 @@ export default function IssueBillScreen() {
             </View>
           </TouchableOpacity>
 
-          {/* ─── iOS INLINE DATE PICKER ─── */}
+{/* ─── iOS INLINE DATE PICKER ─── */}
           {Platform.OS === "ios" && showDueDatePicker && (
             <View
               style={{
-                backgroundColor: "#F1F5F9",
+                backgroundColor: C.white,
                 borderRadius: 12,
                 marginTop: 8,
                 overflow: "hidden",
+                alignItems: "center",
+                marginHorizontal: -15,
               }}
             >
               <DateTimePicker
@@ -248,12 +250,15 @@ export default function IssueBillScreen() {
                 mode="date"
                 display="inline"
                 textColor={C.textDark}
+                themeVariant="light" 
+                accentColor={C.primary} 
                 onChange={(event, selectedDate) => {
                   if (selectedDate) setDueDate(selectedDate);
                 }}
               />
               <Button
                 title="Done"
+                color={C.primary}    
                 onPress={() => setShowDueDatePicker(false)}
               />
             </View>
