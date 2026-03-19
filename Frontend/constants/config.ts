@@ -37,10 +37,15 @@ export const API_CONFIG = {
     // Announcements
     ANNOUNCEMENTS: "/api/notices",
 
-    // Common Areas & Bookings
-    COMMON_AREAS: "/api/common-areas",
-    BOOKINGS: "/api/bookings",
-    BOOKINGS_BY_USER: (userId: number) => `/api/bookings/user/${userId}`,
+    COMMON_AREA: {
+      CALENDAR: "/api/common-area/calendar", // + ?area=Rooftop
+      BOOK: "/api/common-area/book",
+      MY_BOOKINGS: "/api/common-area/my-bookings",
+      PENDING: "/api/common-area/pending",
+      ALL_HISTORY: "/api/common-area/all",
+      MANAGE_REQUEST: (id: number) => `/api/common-area/request/${id}`, // + ?status=APPROVED
+      DELETE: (id: number) => `/api/common-area/${id}`,
+    },
 
     // Houses
     HOUSES: "/api/houses/status",

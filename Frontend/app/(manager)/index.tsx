@@ -77,7 +77,7 @@ const MANAGER_ACTIONS: ManagerCard[] = [
     icon: "fitness",
     title: "Facilities",
     subtitle: "Reserve Amenities",
-    route: "#",
+    route: "/(manager)/facilities",
     iconColor: "#7C3AED",
     iconBg: "#F5F3FF",
   },

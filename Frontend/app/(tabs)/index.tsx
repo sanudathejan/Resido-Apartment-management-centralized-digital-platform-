@@ -89,7 +89,7 @@ const SERVICES_ACTIONS: FeatureCard[] = [
     icon: "fitness",
     title: "Facilities",
     subtitle: "Book Amenities",
-    route: "/common-area",
+    route: "/facilities",
     iconColor: "#7C3AED",
     iconBg: "#F5F3FF",
   },
