@@ -131,7 +131,7 @@ export default function ActiveAssistanceScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F8FAFC' },
+  container: { flex: 1, backgroundColor: '#D8F3DC' },
   header: {
     flexDirection: 'row',
     alignItems: 'center',

@@ -27,7 +27,7 @@ import * as ImagePicker from "expo-image-picker"; // <-- Added ImagePicker impor
 
 /* ── design tokens ─────────────────────────────────────────────── */
 const C = {
-  bg: "#EBF7ED",
+  bg: '#D8F3DC',
   primary: "#7C3AED",
   primaryLight: "#EFF6FF",
   avatarBg: "#DBEAFE",

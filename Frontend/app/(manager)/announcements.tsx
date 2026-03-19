@@ -231,14 +231,14 @@ export default function ManagerAnnouncements() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F8FAFC" },
+  container: { flex: 1, backgroundColor: '#D8F3DC' },
   centered: { flex: 1, justifyContent: "center", alignItems: "center" },
   header: {
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: "#FFF",
+    backgroundColor: '#D8F3DC',
     borderBottomWidth: 1,
     borderBottomColor: "#E2E8F0",
   },

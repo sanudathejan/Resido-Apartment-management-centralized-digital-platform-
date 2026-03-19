@@ -6,7 +6,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { apiService } from "@/services/api";
 
 const COLORS = {
-  background: "#F4F7FB", primary: "#7C3AED", white: "#FFFFFF",
+  background: '#D8F3DC', primary: "#7C3AED", white: "#FFFFFF",
   textDark: "#1E293B", textLight: "#64748B", border: "#E2E8F0",
   success: "#10B981", successBg: "#D1FAE5",
   warning: "#F59E0B", warningBg: "#FEF3C7",

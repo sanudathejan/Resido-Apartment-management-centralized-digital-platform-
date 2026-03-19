@@ -31,7 +31,7 @@ const { width } = Dimensions.get("window");
 
 // Design tokens
 const COLORS = {
-  background: "#D8F3DC",
+  background: '#D8F3DC',
   primary: "#2563EB",
   primaryLight: "#EFF6FF",
   sosRed: "#EF4444",

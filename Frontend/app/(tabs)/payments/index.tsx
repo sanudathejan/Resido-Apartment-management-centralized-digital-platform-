@@ -22,8 +22,8 @@ import { API_CONFIG, APP_CONFIG } from '@/constants/config';
 
 // Design tokens
 const C = {
-  bg: '#F8FAFC',
-  primary: '#7C3AED',
+  bg: '#D8F3DC',
+  primary: "#2563EB",
   primaryLight: '#F5F3FF',
   white: '#FFFFFF',
   textDark: '#1E293B',

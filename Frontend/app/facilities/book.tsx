@@ -15,7 +15,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const COLORS = {
-  background: "#F4F7FB",
+  background:'#D8F3DC',
   primary: "#2563EB",
   white: "#FFFFFF",
   textDark: "#1E293B",
