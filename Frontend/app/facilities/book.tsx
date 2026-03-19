@@ -7,6 +7,8 @@ import {
   Alert,
   ActivityIndicator,
   ScrollView,
+  Platform,
+  Modal,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import DateTimePicker from "@react-native-community/datetimepicker";
@@ -247,40 +249,115 @@ export default function BookFacilityScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* Date/Time Pickers (Native Overlays) */}
+      {/* Date/Time Pickers */}
       {showDatePicker && (
-        <DateTimePicker
-          value={date}
-          mode="date"
-          display="default"
-          minimumDate={new Date()}
-          onChange={(event, selected) => {
-            setShowDatePicker(false);
-            if (selected) setDate(selected);
-          }}
-        />
+        Platform.OS === "ios" ? (
+          <Modal transparent animationType="slide">
+            <View style={styles.iosModalOverlay}>
+              <View style={styles.iosModalContent}>
+                <View style={styles.iosModalHeader}>
+                  <TouchableOpacity onPress={() => setShowDatePicker(false)}>
+                    <Text style={styles.iosDoneText}>Done</Text>
+                  </TouchableOpacity>
+                </View>
+                <DateTimePicker
+                  value={date}
+                  mode="date"
+                  display="spinner"
+                  textColor={COLORS.textDark} 
+                  themeVariant="light"
+                  minimumDate={new Date()}
+                  onChange={(event, selected) => {
+                    if (selected) setDate(selected);
+                  }}
+                />
+              </View>
+            </View>
+          </Modal>
+        ) : (
+          <DateTimePicker
+            value={date}
+            mode="date"
+            display="default"
+            minimumDate={new Date()}
+            onChange={(event, selected) => {
+              setShowDatePicker(false);
+              if (selected) setDate(selected);
+            }}
+          />
+        )
       )}
+
       {showStartPicker && (
-        <DateTimePicker
-          value={startTime}
-          mode="time"
-          display="default"
-          onChange={(event, selected) => {
-            setShowStartPicker(false);
-            if (selected) setStartTime(selected);
-          }}
-        />
+        Platform.OS === "ios" ? (
+          <Modal transparent animationType="slide">
+            <View style={styles.iosModalOverlay}>
+              <View style={styles.iosModalContent}>
+                <View style={styles.iosModalHeader}>
+                  <TouchableOpacity onPress={() => setShowStartPicker(false)}>
+                    <Text style={styles.iosDoneText}>Done</Text>
+                  </TouchableOpacity>
+                </View>
+                <DateTimePicker
+                  value={startTime}
+                  mode="time"
+                  display="spinner"
+                  textColor={COLORS.textDark}
+                  themeVariant="light"
+                  onChange={(event, selected) => {
+                    if (selected) setStartTime(selected);
+                  }}
+                />
+              </View>
+            </View>
+          </Modal>
+        ) : (
+          <DateTimePicker
+            value={startTime}
+            mode="time"
+            display="default"
+            onChange={(event, selected) => {
+              setShowStartPicker(false);
+              if (selected) setStartTime(selected);
+            }}
+          />
+        )
       )}
+
       {showEndPicker && (
-        <DateTimePicker
-          value={endTime}
-          mode="time"
-          display="default"
-          onChange={(event, selected) => {
-            setShowEndPicker(false);
-            if (selected) setEndTime(selected);
-          }}
-        />
+        Platform.OS === "ios" ? (
+          <Modal transparent animationType="slide">
+            <View style={styles.iosModalOverlay}>
+              <View style={styles.iosModalContent}>
+                <View style={styles.iosModalHeader}>
+                  <TouchableOpacity onPress={() => setShowEndPicker(false)}>
+                    <Text style={styles.iosDoneText}>Done</Text>
+                  </TouchableOpacity>
+                </View>
+                <DateTimePicker
+                  value={endTime}
+                  mode="time"
+                  display="spinner"
+                  textColor={COLORS.textDark}
+                  themeVariant="light"
+                  onChange={(event, selected) => {
+                    if (selected) setEndTime(selected);
+                  }}
+                />
+              </View>
+            </View>
+          </Modal>
+        ) : (
+          <DateTimePicker
+            value={endTime}
+            mode="time"
+            display="default"
+            onChange={(event, selected) => {
+              setShowEndPicker(false);
+              if (selected) setEndTime(selected);
+            }}
+          />
+        )
       )}
     </SafeAreaView>
   );
@@ -370,4 +447,27 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   submitBtnText: { color: COLORS.white, fontSize: 16, fontWeight: "700" },
+  iosModalOverlay: {
+    flex: 1,
+    justifyContent: "flex-end",
+    backgroundColor: "rgba(0,0,0,0.4)", // Darkens the background slightly
+  },
+  iosModalContent: {
+    backgroundColor: COLORS.white,
+    paddingBottom: 20, // Safe area padding for newer iPhones
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+  },
+  iosModalHeader: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    padding: 16,
+    borderBottomWidth: 1,
+    borderColor: COLORS.border,
+  },
+  iosDoneText: {
+    color: COLORS.primary,
+    fontSize: 16,
+    fontWeight: "600",
+  },
 });
