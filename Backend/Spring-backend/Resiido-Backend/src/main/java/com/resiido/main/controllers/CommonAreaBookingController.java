@@ -118,4 +118,14 @@ public class CommonAreaBookingController {
         }
     }
 
+    // 7. MANAGER: View ALL bookings (History)
+    @GetMapping("/all")
+    public List<CommonAreaBooking> getAllBookings(Principal principal) {
+        User manager = getAuthenticatedUser(principal);
+        if (!"MANAGER".equalsIgnoreCase(manager.getRole())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only managers can view all bookings.");
+        }
+        return bookingRepository.findAll();
+    }
+
 }

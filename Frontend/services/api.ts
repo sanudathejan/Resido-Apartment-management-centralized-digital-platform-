@@ -35,11 +35,21 @@ class ApiService {
         headers: this.getHeaders(),
       });
 
+      const responseText = await response.text();
+
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        throw new Error(`HTTP error! status: ${response.status} - ${responseText}`);
       }
 
-      return await response.json();
+      if (!responseText) {
+        return null as unknown as T;
+      }
+
+      try {
+        return JSON.parse(responseText) as T;
+      } catch (_e) {
+        return responseText as unknown as T;
+      }
     } catch (error) {
       console.error("API GET Error:", error);
       throw error;
@@ -123,11 +133,23 @@ class ApiService {
         headers: this.getHeaders(),
       });
 
+      // Fix: Read as text first to handle empty backend responses
+      const responseText = await response.text();
+
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        throw new Error(`HTTP error! status: ${response.status} - ${responseText}`);
       }
 
-      return await response.json();
+      // Fix: Check if it's empty before parsing
+      if (!responseText) {
+        return null as unknown as T;
+      }
+
+      try {
+        return JSON.parse(responseText) as T;
+      } catch (_e) {
+        return responseText as unknown as T;
+      }
     } catch (error) {
       console.error("API DELETE Error:", error);
       throw error;

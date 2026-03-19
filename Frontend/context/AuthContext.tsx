@@ -38,12 +38,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const loadStoredUser = async () => {
     try {
+      // 1. Grab BOTH the user data and the auth token
       const userData = await AsyncStorage.getItem(
         APP_CONFIG.STORAGE_KEYS.USER_DATA,
       );
-      if (userData) {
+      const token = await AsyncStorage.getItem(
+        APP_CONFIG.STORAGE_KEYS.AUTH_TOKEN,
+      );
+
+      // 2. Only proceed if we have BOTH
+      if (userData && token) {
+        // Feed the token to the apiService first!
+        apiService.setToken(token);
+
         setUser(JSON.parse(userData));
-        loadProfilePicture();
+        await loadProfilePicture();
+      } else {
+        // If one is missing, clear out any ghost data to be safe
+        await AsyncStorage.removeItem(APP_CONFIG.STORAGE_KEYS.USER_DATA);
       }
     } catch (error) {
       console.error("Failed to load user data:", error);
@@ -59,11 +71,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       );
       if (response && response.image) {
         setUser((prev: any) => {
-          if (!prev) return null; 
-          const updatedUser = { ...prev, profileImage: response.image }; 
+          if (!prev) return null;
+          const updatedUser = { ...prev, profileImage: response.image };
           //Save it to local storage so it persists between app restarts
-          AsyncStorage.setItem(APP_CONFIG.STORAGE_KEYS.USER_DATA, JSON.stringify(updatedUser))
-            .catch(err => console.error("Failed to save image to storage:", err));
+          AsyncStorage.setItem(
+            APP_CONFIG.STORAGE_KEYS.USER_DATA,
+            JSON.stringify(updatedUser),
+          ).catch((err) =>
+            console.error("Failed to save image to storage:", err),
+          );
 
           return updatedUser;
         });
@@ -81,7 +97,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         APP_CONFIG.STORAGE_KEYS.USER_DATA,
         JSON.stringify(response.user),
       );
-      
+
       const token = (response as any).token;
       apiService.setToken(token);
 
@@ -108,20 +124,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         APP_CONFIG.STORAGE_KEYS.USER_DATA,
         JSON.stringify(response.user),
       );
-      
     } catch (error) {
       throw error;
     }
   };
 
-  const logout = async () => {
+const logout = async () => {
     try {
       await authService.logout();
-      setUser(null);
     } catch (error) {
       console.error("Logout error:", error);
-      // Still clear user even if logout fails
+    } finally {
+      // ALWAYS clear state and storage, even if the backend logout fails
       setUser(null);
+      await AsyncStorage.removeItem(APP_CONFIG.STORAGE_KEYS.USER_DATA);
+      await AsyncStorage.removeItem(APP_CONFIG.STORAGE_KEYS.AUTH_TOKEN);
+      
+      // Clear it from the API service too
+      apiService.setToken("");
     }
   };
 

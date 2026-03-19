@@ -47,17 +47,25 @@ export interface CommonArea {
 }
 
 export interface CommonAreaBooking {
-  id: number;
-  commonArea: CommonArea;
-  resident: User;
-  date: string;
-  startTime: string;
-  endTime: string;
-  purpose?: string;
-  status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'CANCELLED';
-  createdAt?: string;
-  approvedBy?: User;
+  id?: number;
+  areaName: string;
+  startTime: string; // ISO 8601 string (e.g., "2026-03-20T14:30:00")
+  endTime: string;   // ISO 8601 string
+  status?: "PENDING" | "APPROVED" | "REJECTED";
+  resident?: {
+    id: number;
+    name: string;
+    email: string;
+  };
 }
+
+export const VALID_FACILITIES = [
+  "Rooftop", 
+  "Swimming Pool", 
+  "Fitness Center", 
+  "Party hall", 
+  "BBQ area"
+];
 
 // Auth types
 export interface LoginRequest {
