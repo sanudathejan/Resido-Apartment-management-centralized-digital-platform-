@@ -117,10 +117,26 @@ export default function LoginScreen() {
         router.replace("/(tabs)"); // Routes to the existing resident tabs
       }
     } catch (error: any) {
-      Alert.alert(
-        "Login Failed",
-        error.message || "Invalid credentials. Please try again.",
-      );
+      // NEW: Translate the generic Spring Boot error into a friendly message
+      const errorMsg = error.message || "";
+
+      if (
+        errorMsg.includes("403") ||
+        errorMsg.includes("401") ||
+        errorMsg.includes("Forbidden") ||
+        errorMsg.includes("Bad credentials")
+      ) {
+        Alert.alert(
+          "Login Failed",
+          "Invalid email or password. Please check your credentials and try again.",
+        );
+      } else {
+        // Fallback for network errors, 500 server errors, etc.
+        Alert.alert(
+          "Error",
+          "Could not connect to the server. Please try again later.",
+        );
+      }
     } finally {
       setIsLoading(false);
     }
@@ -136,10 +152,7 @@ export default function LoginScreen() {
       await apiService.post("/api/users/forgot-password", {
         email: forgotEmail.trim(),
       });
-      Alert.alert(
-        "Success",
-        "An OTP has been sent to your email.",
-      );
+      Alert.alert("Success", "An OTP has been sent to your email.");
       setForgotStep(2);
     } catch (error) {
       Alert.alert("Error", "Could not request OTP. Try again.");
@@ -663,7 +676,12 @@ const styles = StyleSheet.create({
     width: "100%",
     maxWidth: 400,
     ...Platform.select({
-      ios: { shadowColor: "#000", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 12 },
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 12,
+      },
       android: { elevation: 8 },
     }),
   },
