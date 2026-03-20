@@ -1,10 +1,10 @@
 {
   "expo": {
-    "name": "Resiido Apartment Management",
+    "name": "Resiido",
     "slug": "resiido-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/ResiiDo_logo.png",
     "scheme": "resiido",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -44,6 +44,12 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "a1bf116c-1545-4147-b5a1-51cd425618c7"
+      }
     }
   }
 }
