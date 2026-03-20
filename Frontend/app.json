@@ -14,10 +14,8 @@
     "android": {
       "package": "com.resiido.mobile",
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+        "backgroundColor": "#FFFFFF",
+        "foregroundImage": "./assets/images/ResiiDo_logo_1x1_nobg.png"
       },
       "edgeToEdgeEnabled": false,
       "predictiveBackGestureEnabled": false
