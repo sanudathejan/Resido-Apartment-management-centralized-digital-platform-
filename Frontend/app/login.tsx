@@ -8,7 +8,7 @@ import { useAuth } from '@/context/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Alert,
   Animated,
@@ -59,7 +59,12 @@ export default function LoginScreen() {
     ]).start();
   }, []);
 
-  const handleLogin = async () => {
+  const handlePasswordChange = useCallback((text: string) => {
+    setPassword(text);
+    if (passwordError) setPasswordError('');
+  }, [passwordError]);
+
+  const handleLogin = useCallback(async () => {
     let isValid = true;
 
     if (!password.trim()) {
@@ -83,7 +88,7 @@ export default function LoginScreen() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [email, password, passwordError, login, router]);
 
   return (
     <View style={styles.container}>
@@ -154,10 +159,7 @@ export default function LoginScreen() {
                 placeholder="Password"
                 placeholderTextColor={Colors.gray[500]}
                 value={password}
-                onChangeText={(text) => {
-                  setPassword(text);
-                  if (passwordError) setPasswordError('');
-                }}
+                onChangeText={handlePasswordChange}
                 secureTextEntry={!showPassword}
               />
               <TouchableOpacity
