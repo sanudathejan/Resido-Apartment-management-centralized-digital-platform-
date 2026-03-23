@@ -37,6 +37,8 @@ export default function LoginScreen() {
   const [passwordError, setPasswordError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [emailFocused, setEmailFocused] = useState(false);
+  const [passwordFocused, setPasswordFocused] = useState(false);
 
   // Slide-down animation for brand name
   const slideAnim = useRef(new Animated.Value(-30)).current;
@@ -140,27 +142,42 @@ export default function LoginScreen() {
         >
           <View style={styles.formCard}>
             {/* Email Input */}
-            <View style={styles.inputContainer}>
+            <View style={[
+              styles.inputContainer,
+              emailFocused && styles.inputContainerFocused,
+            ]}>
               <TextInput
                 style={styles.input}
                 placeholder="Email"
-                placeholderTextColor={Colors.gray[500]}
+                placeholderTextColor="#5A7A8A"
                 value={email}
                 onChangeText={setEmail}
                 keyboardType="email-address"
                 autoCapitalize="none"
+                autoCorrect={false}
+                keyboardAppearance="dark"
+                onFocus={() => setEmailFocused(true)}
+                onBlur={() => setEmailFocused(false)}
               />
             </View>
 
             {/* Password Input */}
-            <View style={[styles.inputContainer, passwordError ? { borderColor: '#E74C3C' } : null]}>
+            <View style={[
+              styles.inputContainer,
+              passwordFocused && styles.inputContainerFocused,
+              passwordError ? styles.inputContainerError : null,
+            ]}>
               <TextInput
                 style={styles.input}
                 placeholder="Password"
-                placeholderTextColor={Colors.gray[500]}
+                placeholderTextColor="#5A7A8A"
                 value={password}
                 onChangeText={handlePasswordChange}
                 secureTextEntry={!showPassword}
+                keyboardAppearance="dark"
+                autoCorrect={false}
+                onFocus={() => setPasswordFocused(true)}
+                onBlur={() => setPasswordFocused(false)}
               />
               <TouchableOpacity
                 style={styles.eyeIcon}
@@ -169,7 +186,7 @@ export default function LoginScreen() {
                 <Ionicons
                   name={showPassword ? "eye-off-outline" : "eye-outline"}
                   size={22}
-                  color={Colors.gray[400]}
+                  color={passwordFocused ? '#5DADE2' : Colors.gray[400]}
                 />
               </TouchableOpacity>
             </View>
@@ -315,13 +332,29 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   inputContainer: {
-    backgroundColor: '#1B2A3B',
+    backgroundColor: '#0F1E2D',
     borderRadius: 12,
     marginBottom: 16,
-    borderWidth: 1,
-    borderColor: '#2C3E50',
+    borderWidth: 1.5,
+    borderColor: '#243447',
     flexDirection: 'row',
     alignItems: 'center',
+  },
+  inputContainerFocused: {
+    borderColor: '#5DADE2',
+    shadowColor: '#5DADE2',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.35,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  inputContainerError: {
+    borderColor: '#E74C3C',
+    shadowColor: '#E74C3C',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 3,
   },
   input: {
     flex: 1,
