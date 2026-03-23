@@ -1,88 +1,88 @@
 /**
  * Resiido App Colors
  * Modern apartment management app color palette
- * Based on High Fidelity Prototype - Green/Blue theme
+ * 2026 Light theme - premium minimal design
  */
 
 export const Colors = {
-  // Primary brand colors (Green from prototype)
-  primary: '#2ECC71',      // Resiido Green
-  primaryDark: '#27AE60',
-  primaryLight: '#58D68D',
-  
-  // Secondary colors (Blue from prototype)
-  secondary: '#3498DB',    // Resiido Blue
-  secondaryDark: '#2980B9',
-  secondaryLight: '#5DADE2',
-  
-  // Dashboard blue (Dark blue from prototype)
-  dashboard: '#1A4B6E',    // Dark blue for dashboard
+  // Primary brand colors
+  primary: '#2563EB',
+  primaryDark: '#1D4ED8',
+  primaryLight: '#EFF6FF',
+
+  // Secondary colors
+  secondary: '#7C3AED',
+  secondaryDark: '#6D28D9',
+  secondaryLight: '#F5F3FF',
+
+  // Dashboard (kept for backward compatibility with other screens)
+  dashboard: '#1A4B6E',
   dashboardLight: '#2C6E9E',
   dashboardCard: '#1E5F8A',
-  
+
   // Accent colors
-  accent: '#F39C12',       // Orange/Amber
-  accentDark: '#D68910',
-  accentLight: '#F5B041',
-  
+  accent: '#F59E0B',
+  accentDark: '#D97706',
+  accentLight: '#FEF3C7',
+
   // Status colors
-  success: '#2ECC71',      // Green
-  warning: '#F39C12',      // Orange
-  error: '#E74C3C',        // Red
-  info: '#3498DB',         // Blue
-  
+  success: '#10B981',
+  warning: '#F59E0B',
+  error: '#EF4444',
+  info: '#2563EB',
+
   // SOS Emergency
-  sos: '#E74C3C',          // Red
-  sosLight: '#FADBD8',     // Light Red
-  sosDark: '#C0392B',
-  
+  sos: '#EF4444',
+  sosLight: '#FEF2F2',
+  sosDark: '#DC2626',
+
   // Neutrals
   white: '#FFFFFF',
   black: '#000000',
   gray: {
-    50: '#F8F9FA',
-    100: '#F1F3F5',
-    200: '#E9ECEF',
-    300: '#DEE2E6',
-    400: '#ADB5BD',
-    500: '#6C757D',
-    600: '#495057',
-    700: '#343A40',
-    800: '#212529',
-    900: '#121416',
+    50: '#F8FAFC',
+    100: '#F1F5F9',
+    200: '#E2E8F0',
+    300: '#CBD5E1',
+    400: '#94A3B8',
+    500: '#64748B',
+    600: '#475569',
+    700: '#334155',
+    800: '#1E293B',
+    900: '#0F172A',
   },
-  
+
   // Background colors
-  background: '#F5F7FA',
-  backgroundDark: '#0D2137',
+  background: '#F4F7FB',
+  backgroundDark: '#0F172A',
   card: '#FFFFFF',
-  cardDark: '#1A4B6E',
-  
+  cardDark: '#1E293B',
+
   // Text colors
   text: {
-    primary: '#212529',
-    secondary: '#6C757D',
-    tertiary: '#ADB5BD',
+    primary: '#1E293B',
+    secondary: '#64748B',
+    tertiary: '#94A3B8',
     light: '#FFFFFF',
-    dark: '#121416',
+    dark: '#0F172A',
   },
-  
-  // Gradient presets (for LinearGradient) - Matching prototype
+
+  // Gradient presets (for LinearGradient)
   gradients: {
-    primary: ['#2ECC71', '#27AE60'],        // Green gradient
-    secondary: ['#3498DB', '#2980B9'],      // Blue gradient
-    welcome: ['#2ECC71', '#3498DB'],        // Green to Blue (prototype splash)
-    header: ['#2ECC71', '#3498DB'],         // Green to Blue header
-    dashboard: ['#1A4B6E', '#0D2137'],      // Dark blue dashboard
-    card: ['#1E5F8A', '#1A4B6E'],           // Dashboard card gradient
-    sos: ['#E74C3C', '#C0392B'],            // Red SOS gradient
-    success: ['#2ECC71', '#27AE60'],        // Green success
-    dark: ['#212529', '#121416'],           // Dark gradient
+    primary: ['#2563EB', '#1D4ED8'],
+    secondary: ['#7C3AED', '#6D28D9'],
+    welcome: ['#2563EB', '#7C3AED'],
+    header: ['#2563EB', '#3B82F6'],
+    dashboard: ['#1A4B6E', '#0D2137'],
+    card: ['#1E5F8A', '#1A4B6E'],
+    sos: ['#EF4444', '#DC2626'],
+    success: ['#10B981', '#059669'],
+    dark: ['#1E293B', '#0F172A'],
   },
-  
+
   // Shadow colors
-  shadow: 'rgba(0, 0, 0, 0.1)',
-  shadowDark: 'rgba(0, 0, 0, 0.25)',
+  shadow: 'rgba(148, 163, 184, 0.1)',
+  shadowDark: 'rgba(15, 23, 42, 0.15)',
 };
 
 // Light theme

@@ -7,17 +7,14 @@ import { API_CONFIG, APP_CONFIG } from '@/constants/config';
 import {
   AuthResponse,
   LoginRequest,
-  OtpVerifyRequest,
   RegisterRequest,
-  RegistrationInitiateRequest,
-  RegistrationInitiateResponse,
   User,
 } from '@/types';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import apiService from './api';
 
 // Demo mode flag - set to true when backend is not available
-const DEMO_MODE = true;
+const DEMO_MODE = false;
 
 // Demo users for testing
 const DEMO_USERS: User[] = [
@@ -79,19 +76,66 @@ class AuthService {
         return { user: demoUser, message: 'Demo login successful', token: 'demo-token' };
       }
 
-      // Production mode - call API
-      const users = await apiService.get<User[]>(API_CONFIG.ENDPOINTS.USERS);
+      // Production mode - call login API endpoint
+      const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.LOGIN}`;
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: credentials.email,
+          password: credentials.password,
+        }),
+      });
 
-      const user = users.find(
-        (u) => u.email === credentials.email && u.password === credentials.password
-      );
+      const responseText = await response.text();
 
-      if (user) {
-        await this.saveUserData(user);
-        return { user, message: 'Login successful', token: 'temp-token' };
+      if (!response.ok) {
+        let errorMessage = 'Invalid email or password';
+        try {
+          const errorJson = JSON.parse(responseText);
+          errorMessage = errorJson.message || errorJson.error || errorMessage;
+        } catch (_e) {
+          if (responseText) errorMessage = responseText;
+        }
+        throw new Error(errorMessage);
       }
 
-      throw new Error('Invalid email or password');
+      // Parse the JSON response with token + user data
+      let token: string;
+      let userData: any;
+
+      if (responseText.startsWith('eyJ')) {
+        // Backend returns raw JWT token string
+        token = responseText;
+        // Fetch user profile
+        const meResponse = await fetch(`${API_CONFIG.BASE_URL}/api/users/me`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!meResponse.ok) throw new Error('Failed to fetch user profile using token');
+        userData = await meResponse.json();
+      } else {
+        // Backend returns proper JSON
+        const json = JSON.parse(responseText);
+        token = json.token;
+        userData = json.user;
+      }
+
+      const user: User = {
+        id: userData.id,
+        name: userData.name,
+        email: userData.email,
+        role: userData.role,
+        apartmentNumber: userData.requestedHouseNumber || userData.apartmentNumber || '',
+      };
+
+      // Store token and user data
+      if (token) {
+        await AsyncStorage.setItem(APP_CONFIG.STORAGE_KEYS.AUTH_TOKEN, token);
+        apiService.setToken(token);
+      }
+      await this.saveUserData(user);
+
+      return { user, message: 'Login successful', token };
     } catch (error) {
       console.error('Login error:', error);
       throw error;
@@ -101,48 +145,114 @@ class AuthService {
   /**
    * Register a new user
    */
-  async register(userData: RegisterRequest): Promise<AuthResponse> {
+  async register(userData: RegisterRequest): Promise<{ message: string }> {
     try {
-      // Demo mode - create user locally
+      // Demo mode
       if (DEMO_MODE) {
-        const newUser: User = {
-          id: Date.now(),
-          name: userData.name || userData.email.split('@')[0],
-          email: userData.email,
-          role: userData.role || 'RESIDENT',
-          phone: userData.phone,
-          apartmentNumber: 'B-' + Math.floor(Math.random() * 20 + 1),
-        };
-
-        // If registering as manager, add managed apartment
-        if (userData.role === 'MANAGER') {
-          newUser.managedApartment = {
-            id: 1,
-            name: 'PrimeLux Residence Colombo',
-            location: '23/A, Bakers street, Colombo 7',
-            address: '23/A, Bakers street, Colombo 7, Sri Lanka',
-            numberOfUnits: 64,
-          };
-        }
-
-        await this.saveUserData(newUser);
-        return { user: newUser, message: 'Registration successful', token: 'demo-token' };
+        return { message: 'Registration initiated' };
       }
 
       // Production mode - call API
-      const newUserData: Partial<User> = {
+      const payload = {
         name: userData.name,
         email: userData.email,
         password: userData.password,
         role: userData.role || 'RESIDENT',
+        ...(userData.requestedHouseNumber ? { requestedHouseNumber: userData.requestedHouseNumber } : {}),
       };
 
-      const user = await apiService.post<User>(API_CONFIG.ENDPOINTS.USERS, newUserData);
-      await this.saveUserData(user);
+      await apiService.post(API_CONFIG.ENDPOINTS.REGISTER, payload);
 
-      return { user, message: 'Registration successful' };
+      return { message: 'Registration initiated' };
     } catch (error) {
       console.error('Registration error:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Verify account with code after registration
+   */
+  async verifyRegistration(email: string, code: string): Promise<AuthResponse> {
+    try {
+      if (DEMO_MODE) {
+        if (code !== '12345') {
+          throw new Error('Invalid verification code. Use 12345 for demo.');
+        }
+
+        let user = DEMO_USERS.find(u => u.email === email);
+        if (!user) {
+          user = {
+            id: Date.now(),
+            name: email.split('@')[0],
+            email: email,
+            role: 'RESIDENT',
+            apartmentNumber: 'B-' + Math.floor(Math.random() * 20 + 1),
+          };
+        }
+
+        await this.saveUserData(user);
+        return { user, message: 'Verification successful', token: 'demo-token' };
+      }
+
+      // Production mode - call verify-account API
+      const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.VERIFY}`;
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, code }),
+      });
+
+      const responseText = await response.text();
+
+      if (!response.ok) {
+        let errorMessage = 'Verification failed';
+        try {
+          const errorJson = JSON.parse(responseText);
+          errorMessage = errorJson.message || errorJson.error || errorMessage;
+        } catch (_e) {
+          if (responseText) errorMessage = responseText;
+        }
+        throw new Error(errorMessage);
+      }
+
+      // Parse the JSON response with token + user data
+      let token: string;
+      let userData: any;
+      let successMessage = 'Verification successful';
+
+      if (responseText.startsWith('eyJ')) {
+        token = responseText;
+        const meResponse = await fetch(`${API_CONFIG.BASE_URL}/api/users/me`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!meResponse.ok) throw new Error('Failed to retrieve user profile after verification');
+        userData = await meResponse.json();
+      } else {
+        const json = JSON.parse(responseText);
+        token = json.token;
+        userData = json.user;
+        if (json.message) successMessage = json.message;
+      }
+
+      const user: User = {
+        id: userData.id,
+        name: userData.name,
+        email: userData.email,
+        role: userData.role,
+        apartmentNumber: userData.requestedHouseNumber || userData.apartmentNumber || '',
+      };
+
+      // Store token and user data
+      if (token) {
+        await AsyncStorage.setItem(APP_CONFIG.STORAGE_KEYS.AUTH_TOKEN, token);
+        apiService.setToken(token);
+      }
+      await this.saveUserData(user);
+
+      return { user, message: successMessage, token };
+    } catch (error) {
+      console.error('Verification error:', error);
       throw error;
     }
   }
@@ -202,98 +312,6 @@ class AuthService {
     const user = await apiService.put<User>(endpoint, data);
     await this.saveUserData(user);
     return user;
-  }
-
-  /**
-   * Initiate registration — sends OTP to email via backend
-   */
-  async initiateRegistration(
-    userData: RegistrationInitiateRequest
-  ): Promise<RegistrationInitiateResponse> {
-    try {
-      if (DEMO_MODE) {
-        // In demo mode, simulate OTP being sent
-        console.log('[DEMO] OTP sent to:', userData.email);
-        return {
-          message: 'OTP sent successfully to ' + userData.email,
-          email: userData.email,
-        };
-      }
-
-      const response = await apiService.post<RegistrationInitiateResponse>(
-        API_CONFIG.ENDPOINTS.REGISTER,
-        userData
-      );
-      return response;
-    } catch (error) {
-      console.error('Initiate registration error:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Verify OTP and complete registration
-   */
-  async verifyOtp(request: OtpVerifyRequest): Promise<AuthResponse> {
-    try {
-      if (DEMO_MODE) {
-        // In demo mode, accept any 6-digit OTP
-        if (request.otp.length === 6) {
-          const demoUser: User = {
-            id: Date.now(),
-            name: request.email.split('@')[0],
-            email: request.email,
-            role: 'RESIDENT',
-            apartmentNumber: 'B-' + Math.floor(Math.random() * 20 + 1),
-            phone: '+94 XX XXX XXXX',
-          };
-          await this.saveUserData(demoUser);
-          return {
-            user: demoUser,
-            message: 'Registration verified successfully',
-            token: 'demo-token',
-          };
-        }
-        throw new Error('Invalid OTP. Please try again.');
-      }
-
-      const response = await apiService.post<AuthResponse>(
-        API_CONFIG.ENDPOINTS.VERIFY_OTP,
-        request
-      );
-      if (response.user) {
-        await this.saveUserData(response.user);
-        if (response.token) {
-          apiService.setToken(response.token);
-          await AsyncStorage.setItem(APP_CONFIG.STORAGE_KEYS.AUTH_TOKEN, response.token);
-        }
-      }
-      return response;
-    } catch (error) {
-      console.error('OTP verification error:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Resend OTP to email
-   */
-  async resendOtp(email: string): Promise<RegistrationInitiateResponse> {
-    try {
-      if (DEMO_MODE) {
-        console.log('[DEMO] OTP resent to:', email);
-        return { message: 'OTP resent to ' + email, email };
-      }
-
-      const response = await apiService.post<RegistrationInitiateResponse>(
-        API_CONFIG.ENDPOINTS.RESEND_OTP,
-        { email }
-      );
-      return response;
-    } catch (error) {
-      console.error('Resend OTP error:', error);
-      throw error;
-    }
   }
 }
 

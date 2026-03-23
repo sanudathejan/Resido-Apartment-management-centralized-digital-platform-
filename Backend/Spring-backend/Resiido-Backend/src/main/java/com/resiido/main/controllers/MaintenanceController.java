@@ -75,4 +75,22 @@ public class MaintenanceController {
         request.setStatus(newStatus);
         return maintenanceRepository.save(request);
     }
+
+    // 4. DELETE (Cancel) Request
+    @DeleteMapping("/{id}")
+    public void deleteRequest(@PathVariable Long id, Principal principal) {
+        User user = getLoggedInUser(principal);
+        MaintenanceRequest request = maintenanceRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Request not found"));
+
+        // Allow if User is MANAGER OR if User is the OWNER of the request
+        boolean isOwner = request.getResident().getId().equals(user.getId());
+        boolean isManager = "MANAGER".equalsIgnoreCase(user.getRole());
+
+        if (isManager || isOwner) {
+            maintenanceRepository.delete(request);
+        } else {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not authorized to delete this request.");
+        }
+    }
 }

@@ -1,6 +1,6 @@
 /**
  * Announcements Screen
- * Community news and notifications
+ * Community news and notifications - Modern 2026 light theme
  */
 
 import React, { useState, useEffect } from 'react';
@@ -11,14 +11,29 @@ import {
   ScrollView,
   RefreshControl,
   TouchableOpacity,
+  Platform,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { Card, StatusBadge, EmptyState, LoadingSpinner } from '@/components/ui';
-import { Colors } from '@/constants/colors';
 import { announcementService } from '@/services';
 import { Announcement } from '@/types';
+
+const C = {
+  bg: '#D8F3DC',
+  primary: '#2563EB',
+  primaryLight: '#EFF6FF',
+  white: '#FFFFFF',
+  textDark: '#1E293B',
+  textLight: '#64748B',
+  textMuted: '#94A3B8',
+  border: '#E2E8F0',
+  gray50: '#F8FAFC',
+  gray100: '#F1F5F9',
+  success: '#10B981',
+  warning: '#F59E0B',
+  error: '#EF4444',
+};
 
 export default function AnnouncementsScreen() {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
@@ -60,31 +75,26 @@ export default function AnnouncementsScreen() {
     ? announcements.filter((a) => a.category === selectedCategory)
     : announcements;
 
-  const getPriorityColor = (priority: string) => {
+  const getPriorityStyle = (priority: string) => {
     switch (priority) {
       case 'URGENT':
-        return Colors.error;
+        return { color: C.error, bg: '#FEF2F2', label: 'Urgent' };
       case 'HIGH':
-        return Colors.warning;
+        return { color: C.warning, bg: '#FEF3C7', label: 'High' };
       case 'NORMAL':
-        return Colors.info;
+        return { color: C.primary, bg: C.primaryLight, label: 'Normal' };
       default:
-        return Colors.gray[400];
+        return { color: C.textMuted, bg: C.gray100, label: priority };
     }
   };
 
   const getCategoryIcon = (category: string): keyof typeof Ionicons.glyphMap => {
     switch (category) {
-      case 'MAINTENANCE':
-        return 'construct';
-      case 'EVENT':
-        return 'calendar';
-      case 'SECURITY':
-        return 'shield';
-      case 'EMERGENCY':
-        return 'warning';
-      default:
-        return 'information-circle';
+      case 'MAINTENANCE': return 'construct';
+      case 'EVENT': return 'calendar';
+      case 'SECURITY': return 'shield';
+      case 'EMERGENCY': return 'warning';
+      default: return 'information-circle';
     }
   };
 
@@ -93,7 +103,6 @@ export default function AnnouncementsScreen() {
     const now = new Date();
     const diff = now.getTime() - date.getTime();
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    
     if (days === 0) return 'Today';
     if (days === 1) return 'Yesterday';
     if (days < 7) return `${days} days ago`;
@@ -101,51 +110,49 @@ export default function AnnouncementsScreen() {
   };
 
   if (loading) {
-    return <LoadingSpinner fullScreen message="Loading announcements..." />;
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color={C.primary} />
+        <Text style={{ color: C.textLight, marginTop: 12, fontSize: 14 }}>Loading announcements...</Text>
+      </View>
+    );
   }
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       {/* Header */}
-      <LinearGradient
-        colors={Colors.gradients.primary as [string, string, ...string[]]}
-        style={styles.header}
-      >
+      <View style={styles.header}>
         <Text style={styles.headerTitle}>Announcements</Text>
         <Text style={styles.headerSubtitle}>Stay updated with community news</Text>
-      </LinearGradient>
+      </View>
 
       {/* Category Filter */}
       <View style={styles.filterContainer}>
-        <ScrollView 
-          horizontal 
+        <ScrollView
+          horizontal
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.filterScroll}
         >
-          {categories.map((cat) => (
-            <TouchableOpacity
-              key={cat.key || 'all'}
-              onPress={() => setSelectedCategory(cat.key)}
-              style={[
-                styles.filterChip,
-                selectedCategory === cat.key && styles.filterChipActive,
-              ]}
-            >
-              <Ionicons
-                name={cat.icon as keyof typeof Ionicons.glyphMap}
-                size={16}
-                color={selectedCategory === cat.key ? Colors.white : Colors.text.secondary}
-              />
-              <Text
-                style={[
-                  styles.filterChipText,
-                  selectedCategory === cat.key && styles.filterChipTextActive,
-                ]}
+          {categories.map((cat) => {
+            const isActive = selectedCategory === cat.key;
+            return (
+              <TouchableOpacity
+                key={cat.key || 'all'}
+                onPress={() => setSelectedCategory(cat.key)}
+                style={[styles.filterChip, isActive && styles.filterChipActive]}
+                activeOpacity={0.7}
               >
-                {cat.label}
-              </Text>
-            </TouchableOpacity>
-          ))}
+                <Ionicons
+                  name={cat.icon as keyof typeof Ionicons.glyphMap}
+                  size={15}
+                  color={isActive ? C.white : C.textLight}
+                />
+                <Text style={[styles.filterChipText, isActive && styles.filterChipTextActive]}>
+                  {cat.label}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
         </ScrollView>
       </View>
 
@@ -154,64 +161,51 @@ export default function AnnouncementsScreen() {
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
         {filteredAnnouncements.length === 0 ? (
-          <EmptyState
-            icon="megaphone-outline"
-            title="No Announcements"
-            message="There are no announcements in this category yet."
-          />
+          <View style={styles.emptyState}>
+            <View style={styles.emptyIcon}>
+              <Ionicons name="megaphone-outline" size={40} color={C.textMuted} />
+            </View>
+            <Text style={styles.emptyTitle}>No Announcements</Text>
+            <Text style={styles.emptySubtitle}>There are no announcements in this category yet.</Text>
+          </View>
         ) : (
-          filteredAnnouncements.map((announcement) => (
-            <TouchableOpacity 
-              key={announcement.id}
-              activeOpacity={0.7}
-            >
-              <Card style={styles.announcementCard} variant="elevated">
+          filteredAnnouncements.map((announcement) => {
+            const priorityStyle = getPriorityStyle(announcement.priority);
+            return (
+              <TouchableOpacity key={announcement.id} activeOpacity={0.7} style={styles.announcementCard}>
                 <View style={styles.cardHeader}>
-                  <View
-                    style={[
-                      styles.categoryIcon,
-                      { backgroundColor: `${getPriorityColor(announcement.priority)}15` },
-                    ]}
-                  >
-                    <Ionicons
-                      name={getCategoryIcon(announcement.category)}
-                      size={20}
-                      color={getPriorityColor(announcement.priority)}
-                    />
+                  <View style={[styles.categoryIcon, { backgroundColor: `${priorityStyle.color}15` }]}>
+                    <Ionicons name={getCategoryIcon(announcement.category)} size={20} color={priorityStyle.color} />
                   </View>
                   <View style={styles.cardHeaderText}>
                     <Text style={styles.announcementTitle}>{announcement.title}</Text>
-                    <Text style={styles.announcementDate}>
-                      {formatDate(announcement.createdAt)}
-                    </Text>
+                    <Text style={styles.announcementDate}>{formatDate(announcement.createdAt)}</Text>
                   </View>
-                  <StatusBadge status={announcement.priority} />
+                  <View style={[styles.priorityBadge, { backgroundColor: priorityStyle.bg }]}>
+                    <Text style={[styles.priorityText, { color: priorityStyle.color }]}>{priorityStyle.label}</Text>
+                  </View>
                 </View>
-                
+
                 <Text style={styles.announcementContent} numberOfLines={3}>
                   {announcement.content}
                 </Text>
-                
+
                 <View style={styles.cardFooter}>
                   <View style={styles.authorInfo}>
-                    <Ionicons name="person-circle-outline" size={16} color={Colors.gray[400]} />
-                    <Text style={styles.authorText}>
-                      {announcement.createdBy?.name || 'Admin'}
-                    </Text>
+                    <Ionicons name="person-circle-outline" size={16} color={C.textMuted} />
+                    <Text style={styles.authorText}>{announcement.createdBy?.name || 'Admin'}</Text>
                   </View>
                   <TouchableOpacity style={styles.readMore}>
                     <Text style={styles.readMoreText}>Read More</Text>
-                    <Ionicons name="chevron-forward" size={14} color={Colors.primary} />
+                    <Ionicons name="chevron-forward" size={14} color={C.primary} />
                   </TouchableOpacity>
                 </View>
-              </Card>
-            </TouchableOpacity>
-          ))
+              </TouchableOpacity>
+            );
+          })
         )}
       </ScrollView>
     </SafeAreaView>
@@ -219,122 +213,57 @@ export default function AnnouncementsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.background,
-  },
-  header: {
-    paddingHorizontal: 20,
-    paddingTop: 10,
-    paddingBottom: 20,
-  },
-  headerTitle: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: Colors.white,
-    marginBottom: 4,
-  },
-  headerSubtitle: {
-    fontSize: 14,
-    color: 'rgba(255, 255, 255, 0.8)',
-  },
-  filterContainer: {
-    backgroundColor: Colors.white,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.gray[100],
-  },
-  filterScroll: {
-    paddingHorizontal: 16,
-    gap: 8,
-  },
+  container: { flex: 1, backgroundColor: C.bg },
+  header: { paddingHorizontal: 20, paddingTop: 12, paddingBottom: 16 },
+  headerTitle: { fontSize: 26, fontWeight: '800', color: C.textDark, letterSpacing: -0.5, marginBottom: 4 },
+  headerSubtitle: { fontSize: 14, color: C.textLight, fontWeight: '500' },
+
+  filterContainer: { paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: C.border },
+  filterScroll: { paddingHorizontal: 16, gap: 8 },
   filterChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 20,
-    backgroundColor: Colors.gray[100],
-    gap: 6,
+    flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14, paddingVertical: 9,
+    borderRadius: 20, backgroundColor: C.white, gap: 6, borderWidth: 1, borderColor: C.border,
   },
-  filterChipActive: {
-    backgroundColor: Colors.primary,
-  },
-  filterChipText: {
-    fontSize: 13,
-    fontWeight: '500',
-    color: Colors.text.secondary,
-  },
-  filterChipTextActive: {
-    color: Colors.white,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    padding: 16,
-    paddingBottom: 100,
-  },
+  filterChipActive: { backgroundColor: C.primary, borderColor: C.primary },
+  filterChipText: { fontSize: 13, fontWeight: '600', color: C.textLight },
+  filterChipTextActive: { color: C.white },
+
+  scrollView: { flex: 1 },
+  scrollContent: { padding: 16, paddingBottom: 100 },
+
   announcementCard: {
-    marginBottom: 12,
+    backgroundColor: C.white, borderRadius: 20, padding: 16, marginBottom: 14,
+    ...Platform.select({
+      ios: { shadowColor: C.textMuted, shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.08, shadowRadius: 10 },
+      android: { elevation: 2 },
+    }),
   },
-  cardHeader: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    marginBottom: 12,
-  },
-  categoryIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 12,
-  },
-  cardHeaderText: {
-    flex: 1,
-  },
-  announcementTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: Colors.text.primary,
-    marginBottom: 4,
-  },
-  announcementDate: {
-    fontSize: 12,
-    color: Colors.text.secondary,
-  },
-  announcementContent: {
-    fontSize: 14,
-    color: Colors.text.secondary,
-    lineHeight: 20,
-    marginBottom: 12,
-  },
+  cardHeader: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: 12 },
+  categoryIcon: { width: 44, height: 44, borderRadius: 14, alignItems: 'center', justifyContent: 'center', marginRight: 12 },
+  cardHeaderText: { flex: 1 },
+  announcementTitle: { fontSize: 16, fontWeight: '700', color: C.textDark, marginBottom: 4 },
+  announcementDate: { fontSize: 12, color: C.textLight },
+  priorityBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 },
+  priorityText: { fontSize: 11, fontWeight: '700' },
+  announcementContent: { fontSize: 14, color: C.textLight, lineHeight: 20, marginBottom: 12 },
+
   cardFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: Colors.gray[100],
+    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+    paddingTop: 12, borderTopWidth: 1, borderTopColor: C.border,
   },
-  authorInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
+  authorInfo: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  authorText: { fontSize: 12, color: C.textLight },
+  readMore: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  readMoreText: { fontSize: 13, fontWeight: '600', color: C.primary },
+
+  emptyState: { alignItems: 'center', paddingTop: 60 },
+  emptyIcon: {
+    width: 80, height: 80, borderRadius: 40, backgroundColor: C.white, alignItems: 'center', justifyContent: 'center', marginBottom: 16,
+    ...Platform.select({
+      ios: { shadowColor: C.textMuted, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.08, shadowRadius: 12 },
+      android: { elevation: 3 },
+    }),
   },
-  authorText: {
-    fontSize: 12,
-    color: Colors.text.secondary,
-  },
-  readMore: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  readMoreText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: Colors.primary,
-  },
+  emptyTitle: { fontSize: 18, fontWeight: '700', color: C.textDark, marginBottom: 6 },
+  emptySubtitle: { fontSize: 14, color: C.textLight, textAlign: 'center' },
 });

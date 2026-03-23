@@ -19,6 +19,13 @@ public class Payment {
 
     private LocalDate dueDate;
 
+    // The proof of payment (Base64 image)
+    @Column(columnDefinition = "TEXT")
+    private String receiptImage;
+
+    // PENDING, REVIEW, PAID, REJECTED
+    private String status = "PENDING";
+
     private boolean isPaid = false;
 
     @ManyToOne

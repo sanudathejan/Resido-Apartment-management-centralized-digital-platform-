@@ -1,6 +1,7 @@
 /**
  * Common Area Booking Screen
  * Book facilities like gym, pool, party hall, etc.
+ * Modern 2026 light theme design
  */
 
 import React, { useState, useEffect } from 'react';
@@ -15,18 +16,56 @@ import {
   Alert,
   Dimensions,
   TextInput,
+  Platform,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { Colors } from '@/constants/colors';
+import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@/context/AuthContext';
 import { CommonArea, CommonAreaBooking } from '@/types';
 
 const { width } = Dimensions.get('window');
 
-// Mock common areas data
+/* ── Design-system tokens ────────────────────────────────────────────── */
+const C = {
+  bg: '#F4F7FB',
+  primary: '#2563EB',
+  primaryLight: '#EFF6FF',
+  white: '#FFFFFF',
+  textDark: '#1E293B',
+  textLight: '#64748B',
+  textMuted: '#94A3B8',
+  border: '#E2E8F0',
+  success: '#10B981',
+  successBg: '#ECFDF5',
+  warning: '#F59E0B',
+  warningBg: '#FFFBEB',
+  error: '#EF4444',
+  errorBg: '#FEF2F2',
+  purple: '#7C3AED',
+  purpleBg: '#F5F3FF',
+  cancelledGray: '#94A3B8',
+  cancelledGrayBg: '#F1F5F9',
+} as const;
+
+/* ── Cross-platform shadow helper ────────────────────────────────────── */
+const shadow = (elevation: number) =>
+  Platform.select({
+    ios: {
+      shadowColor: '#64748B',
+      shadowOffset: { width: 0, height: Math.round(elevation / 2) },
+      shadowOpacity: 0.08 + elevation * 0.01,
+      shadowRadius: elevation * 1.2,
+    },
+    android: {
+      elevation,
+    },
+    default: {
+      elevation,
+    },
+  });
+
+// ─── Mock common areas data ─────────────────────────────────────────
 const mockCommonAreas: CommonArea[] = [
   {
     id: 1,
@@ -96,7 +135,7 @@ const mockCommonAreas: CommonArea[] = [
   },
 ];
 
-// Mock bookings
+// ─── Mock bookings ──────────────────────────────────────────────────
 const mockBookings: CommonAreaBooking[] = [
   {
     id: 1,
@@ -120,6 +159,8 @@ const mockBookings: CommonAreaBooking[] = [
   },
 ];
 
+/* ══════════════════════════════════════════════════════════════════════ */
+
 export default function CommonAreaScreen() {
   const router = useRouter();
   const { user } = useAuth();
@@ -130,7 +171,7 @@ export default function CommonAreaScreen() {
   const [loading, setLoading] = useState(true);
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [selectedArea, setSelectedArea] = useState<CommonArea | null>(null);
-  
+
   // Booking form state
   const [bookingForm, setBookingForm] = useState({
     date: '',
@@ -145,7 +186,6 @@ export default function CommonAreaScreen() {
 
   const loadData = async () => {
     try {
-      // Use mock data for demo
       setCommonAreas(mockCommonAreas);
       setBookings(mockBookings);
     } catch (error) {
@@ -176,7 +216,6 @@ export default function CommonAreaScreen() {
       return;
     }
 
-    // Add new booking to list
     const newBooking: CommonAreaBooking = {
       id: bookings.length + 1,
       commonArea: selectedArea!,
@@ -194,8 +233,8 @@ export default function CommonAreaScreen() {
     Alert.alert('Success', 'Booking request submitted successfully!');
   };
 
-  const getAreaIcon = (name: string): string => {
-    const icons: { [key: string]: string } = {
+  const getAreaIcon = (name: string): keyof typeof Ionicons.glyphMap => {
+    const icons: Record<string, keyof typeof Ionicons.glyphMap> = {
       'Swimming Pool': 'water',
       'Fitness Center': 'fitness',
       'Party Hall': 'musical-notes',
@@ -206,128 +245,152 @@ export default function CommonAreaScreen() {
     return icons[name] || 'business';
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusMeta = (status: string) => {
     switch (status) {
-      case 'APPROVED': return Colors.success;
-      case 'PENDING': return Colors.warning;
-      case 'REJECTED': return Colors.error;
-      case 'CANCELLED': return Colors.gray[400];
-      default: return Colors.gray[400];
+      case 'APPROVED':
+        return { color: C.success, bg: C.successBg, label: 'Approved' };
+      case 'PENDING':
+        return { color: C.warning, bg: C.warningBg, label: 'Pending' };
+      case 'REJECTED':
+        return { color: C.error, bg: C.errorBg, label: 'Rejected' };
+      case 'CANCELLED':
+        return { color: C.cancelledGray, bg: C.cancelledGrayBg, label: 'Cancelled' };
+      default:
+        return { color: C.cancelledGray, bg: C.cancelledGrayBg, label: status };
     }
   };
 
+  /* ── Area card ─────────────────────────────────────────────────────── */
   const AreaCard = ({ area }: { area: CommonArea }) => (
-    <TouchableOpacity 
-      style={styles.areaCard}
+    <TouchableOpacity
+      style={[styles.areaCard, !area.isAvailable && styles.areaCardUnavailable]}
       onPress={() => handleBookArea(area)}
-      activeOpacity={0.8}
+      activeOpacity={0.7}
     >
-      <LinearGradient
-        colors={area.isAvailable ? ['#1E5F8A', '#1A4B6E'] : ['#4A4A4A', '#333333']}
-        style={styles.areaCardGradient}
-      >
-        <View style={styles.areaCardHeader}>
-          <View style={[styles.areaIcon, { backgroundColor: area.isAvailable ? Colors.primary : Colors.gray[500] }]}>
-            <Ionicons name={getAreaIcon(area.name) as any} size={24} color={Colors.white} />
-          </View>
-          {!area.isAvailable && (
-            <View style={styles.unavailableBadge}>
-              <Text style={styles.unavailableBadgeText}>Unavailable</Text>
-            </View>
-          )}
+      <View style={styles.areaCardHeader}>
+        <View style={styles.areaIconContainer}>
+          <Ionicons name={getAreaIcon(area.name)} size={24} color={C.purple} />
         </View>
-        
-        <Text style={styles.areaName}>{area.name}</Text>
-        <Text style={styles.areaDescription} numberOfLines={2}>
-          {area.description}
-        </Text>
-        
-        <View style={styles.areaDetails}>
-          <View style={styles.areaDetailItem}>
-            <Ionicons name="people-outline" size={14} color="rgba(255,255,255,0.7)" />
-            <Text style={styles.areaDetailText}>Max {area.capacity}</Text>
+        {!area.isAvailable && (
+          <View style={styles.unavailableBadge}>
+            <View style={[styles.statusDot, { backgroundColor: C.error }]} />
+            <Text style={styles.unavailableBadgeText}>Unavailable</Text>
           </View>
-          <View style={styles.areaDetailItem}>
-            <Ionicons name="time-outline" size={14} color="rgba(255,255,255,0.7)" />
-            <Text style={styles.areaDetailText}>{area.openTime} - {area.closeTime}</Text>
-          </View>
-        </View>
-
-        {area.isAvailable && (
-          <TouchableOpacity 
-            style={styles.bookButton}
-            onPress={() => handleBookArea(area)}
-          >
-            <Text style={styles.bookButtonText}>Book Now</Text>
-          </TouchableOpacity>
         )}
-      </LinearGradient>
+        {area.isAvailable && (
+          <View style={styles.availableBadge}>
+            <View style={[styles.statusDot, { backgroundColor: C.success }]} />
+            <Text style={styles.availableBadgeText}>Available</Text>
+          </View>
+        )}
+      </View>
+
+      <Text style={styles.areaName}>{area.name}</Text>
+      <Text style={styles.areaDescription} numberOfLines={2}>
+        {area.description}
+      </Text>
+
+      <View style={styles.areaDivider} />
+
+      <View style={styles.areaDetails}>
+        <View style={styles.areaDetailItem}>
+          <Ionicons name="people-outline" size={15} color={C.textMuted} />
+          <Text style={styles.areaDetailText}>Max {area.capacity}</Text>
+        </View>
+        <View style={styles.areaDetailItem}>
+          <Ionicons name="time-outline" size={15} color={C.textMuted} />
+          <Text style={styles.areaDetailText}>
+            {area.openTime} - {area.closeTime}
+          </Text>
+        </View>
+      </View>
+
+      {area.isAvailable && (
+        <TouchableOpacity
+          style={styles.bookButton}
+          onPress={() => handleBookArea(area)}
+          activeOpacity={0.8}
+        >
+          <Ionicons name="calendar-outline" size={16} color={C.white} style={{ marginRight: 6 }} />
+          <Text style={styles.bookButtonText}>Book Now</Text>
+        </TouchableOpacity>
+      )}
     </TouchableOpacity>
   );
 
-  const BookingCard = ({ booking }: { booking: CommonAreaBooking }) => (
-    <View style={styles.bookingCard}>
-      <View style={styles.bookingHeader}>
-        <View style={[styles.bookingIcon, { backgroundColor: Colors.primary }]}>
-          <Ionicons name={getAreaIcon(booking.commonArea.name) as any} size={20} color={Colors.white} />
-        </View>
-        <View style={styles.bookingInfo}>
-          <Text style={styles.bookingArea}>{booking.commonArea.name}</Text>
-          <Text style={styles.bookingDate}>{booking.date}</Text>
-        </View>
-        <View style={[styles.statusBadge, { backgroundColor: getStatusColor(booking.status) }]}>
-          <Text style={styles.statusText}>{booking.status}</Text>
-        </View>
-      </View>
-      
-      <View style={styles.bookingDetails}>
-        <View style={styles.bookingDetailRow}>
-          <Ionicons name="time-outline" size={16} color={Colors.gray[400]} />
-          <Text style={styles.bookingDetailText}>
-            {booking.startTime} - {booking.endTime}
-          </Text>
-        </View>
-        {booking.purpose && (
-          <View style={styles.bookingDetailRow}>
-            <Ionicons name="document-text-outline" size={16} color={Colors.gray[400]} />
-            <Text style={styles.bookingDetailText}>{booking.purpose}</Text>
+  /* ── Booking card ──────────────────────────────────────────────────── */
+  const BookingCard = ({ booking }: { booking: CommonAreaBooking }) => {
+    const meta = getStatusMeta(booking.status);
+    return (
+      <View style={styles.bookingCard}>
+        <View style={styles.bookingHeader}>
+          <View style={styles.bookingIconContainer}>
+            <Ionicons name={getAreaIcon(booking.commonArea.name)} size={20} color={C.purple} />
           </View>
+          <View style={styles.bookingInfo}>
+            <Text style={styles.bookingArea}>{booking.commonArea.name}</Text>
+            <Text style={styles.bookingDate}>{booking.date}</Text>
+          </View>
+          <View style={[styles.statusBadge, { backgroundColor: meta.bg }]}>
+            <View style={[styles.statusDot, { backgroundColor: meta.color }]} />
+            <Text style={[styles.statusText, { color: meta.color }]}>{meta.label}</Text>
+          </View>
+        </View>
+
+        <View style={styles.bookingDivider} />
+
+        <View style={styles.bookingDetails}>
+          <View style={styles.bookingDetailRow}>
+            <Ionicons name="time-outline" size={16} color={C.textMuted} />
+            <Text style={styles.bookingDetailText}>
+              {booking.startTime} - {booking.endTime}
+            </Text>
+          </View>
+          {booking.purpose ? (
+            <View style={styles.bookingDetailRow}>
+              <Ionicons name="document-text-outline" size={16} color={C.textMuted} />
+              <Text style={styles.bookingDetailText}>{booking.purpose}</Text>
+            </View>
+          ) : null}
+        </View>
+
+        {booking.status === 'PENDING' && (
+          <TouchableOpacity style={styles.cancelButton} activeOpacity={0.7}>
+            <Ionicons name="close-circle-outline" size={16} color={C.error} style={{ marginRight: 4 }} />
+            <Text style={styles.cancelButtonText}>Cancel Booking</Text>
+          </TouchableOpacity>
         )}
       </View>
+    );
+  };
 
-      {booking.status === 'PENDING' && (
-        <TouchableOpacity style={styles.cancelButton}>
-          <Text style={styles.cancelButtonText}>Cancel Booking</Text>
-        </TouchableOpacity>
-      )}
-    </View>
-  );
-
+  /* ── Main render ───────────────────────────────────────────────────── */
   return (
     <View style={styles.container}>
-      <LinearGradient
-        colors={['#1A4B6E', '#0D2137']}
-        style={styles.background}
-      >
-        <SafeAreaView style={styles.safeArea}>
-          {/* Header */}
-          <View style={styles.header}>
-            <TouchableOpacity 
-              style={styles.backButton}
-              onPress={() => router.back()}
-            >
-              <Ionicons name="arrow-back" size={24} color={Colors.white} />
-            </TouchableOpacity>
-            <Text style={styles.headerTitle}>Common Area Booking</Text>
-            <View style={{ width: 40 }} />
-          </View>
+      <SafeAreaView style={styles.safeArea}>
+        {/* ── Header ──────────────────────────────────────────────────── */}
+        <View style={styles.header}>
+          <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+            <Ionicons name="arrow-back" size={22} color={C.textDark} />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Common Area Booking</Text>
+          <View style={{ width: 44 }} />
+        </View>
 
-          {/* Tab Switcher */}
+        {/* ── Tab Switcher ────────────────────────────────────────────── */}
+        <View style={styles.tabWrapper}>
           <View style={styles.tabContainer}>
             <TouchableOpacity
               style={[styles.tab, activeTab === 'areas' && styles.activeTab]}
               onPress={() => setActiveTab('areas')}
+              activeOpacity={0.8}
             >
+              <Ionicons
+                name="grid-outline"
+                size={16}
+                color={activeTab === 'areas' ? C.white : C.textLight}
+                style={{ marginRight: 6 }}
+              />
               <Text style={[styles.tabText, activeTab === 'areas' && styles.activeTabText]}>
                 Available Areas
               </Text>
@@ -335,244 +398,334 @@ export default function CommonAreaScreen() {
             <TouchableOpacity
               style={[styles.tab, activeTab === 'bookings' && styles.activeTab]}
               onPress={() => setActiveTab('bookings')}
+              activeOpacity={0.8}
             >
+              <Ionicons
+                name="calendar-outline"
+                size={16}
+                color={activeTab === 'bookings' ? C.white : C.textLight}
+                style={{ marginRight: 6 }}
+              />
               <Text style={[styles.tabText, activeTab === 'bookings' && styles.activeTabText]}>
                 My Bookings
               </Text>
             </TouchableOpacity>
           </View>
+        </View>
 
-          <ScrollView
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.scrollContent}
-            refreshControl={
-              <RefreshControl
-                refreshing={refreshing}
-                onRefresh={onRefresh}
-                tintColor={Colors.white}
-              />
-            }
-          >
-            {activeTab === 'areas' ? (
-              <View style={styles.areasGrid}>
-                {commonAreas.map((area) => (
-                  <AreaCard key={area.id} area={area} />
-                ))}
-              </View>
-            ) : (
-              <View style={styles.bookingsList}>
-                {bookings.length === 0 ? (
-                  <View style={styles.emptyState}>
-                    <Ionicons name="calendar-outline" size={60} color={Colors.gray[400]} />
-                    <Text style={styles.emptyTitle}>No Bookings Yet</Text>
-                    <Text style={styles.emptySubtitle}>
-                      Book a common area to see your reservations here
-                    </Text>
+        {/* ── Content ─────────────────────────────────────────────────── */}
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.primary} />
+          }
+        >
+          {activeTab === 'areas' ? (
+            <View style={styles.areasGrid}>
+              {commonAreas.map((area) => (
+                <AreaCard key={area.id} area={area} />
+              ))}
+            </View>
+          ) : (
+            <View style={styles.bookingsList}>
+              {bookings.length === 0 ? (
+                <View style={styles.emptyState}>
+                  <View style={styles.emptyIconCircle}>
+                    <Ionicons name="calendar-outline" size={40} color={C.purple} />
                   </View>
-                ) : (
-                  bookings.map((booking) => (
-                    <BookingCard key={booking.id} booking={booking} />
-                  ))
-                )}
-              </View>
-            )}
-          </ScrollView>
-
-          {/* Booking Modal */}
-          <Modal
-            visible={showBookingModal}
-            animationType="slide"
-            transparent={true}
-            onRequestClose={() => setShowBookingModal(false)}
-          >
-            <View style={styles.modalOverlay}>
-              <View style={styles.modalContent}>
-                <View style={styles.modalHeader}>
-                  <Text style={styles.modalTitle}>Book {selectedArea?.name}</Text>
-                  <TouchableOpacity onPress={() => setShowBookingModal(false)}>
-                    <Ionicons name="close" size={24} color={Colors.text.primary} />
-                  </TouchableOpacity>
+                  <Text style={styles.emptyTitle}>No Bookings Yet</Text>
+                  <Text style={styles.emptySubtitle}>
+                    Book a common area to see your reservations here
+                  </Text>
                 </View>
+              ) : (
+                bookings.map((booking) => <BookingCard key={booking.id} booking={booking} />)
+              )}
+            </View>
+          )}
+        </ScrollView>
 
-                <ScrollView showsVerticalScrollIndicator={false}>
-                  <Text style={styles.inputLabel}>Date *</Text>
+        {/* ── Booking Modal ───────────────────────────────────────────── */}
+        <Modal
+          visible={showBookingModal}
+          animationType="slide"
+          transparent
+          onRequestClose={() => setShowBookingModal(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              {/* Drag handle */}
+              <View style={styles.dragHandleWrapper}>
+                <View style={styles.dragHandle} />
+              </View>
+
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>Book {selectedArea?.name}</Text>
+                <TouchableOpacity
+                  style={styles.modalCloseBtn}
+                  onPress={() => setShowBookingModal(false)}
+                >
+                  <Ionicons name="close" size={20} color={C.textLight} />
+                </TouchableOpacity>
+              </View>
+
+              <ScrollView showsVerticalScrollIndicator={false}>
+                {/* Date */}
+                <Text style={styles.inputLabel}>Date *</Text>
+                <View style={styles.inputRow}>
+                  <Ionicons name="calendar-outline" size={18} color={C.textMuted} style={styles.inputIcon} />
                   <TextInput
                     style={styles.input}
                     placeholder="YYYY-MM-DD (e.g., 2026-02-10)"
-                    placeholderTextColor={Colors.gray[400]}
+                    placeholderTextColor={C.textMuted}
                     value={bookingForm.date}
                     onChangeText={(text) => setBookingForm({ ...bookingForm, date: text })}
                   />
+                </View>
 
-                  <Text style={styles.inputLabel}>Start Time *</Text>
+                {/* Start time */}
+                <Text style={styles.inputLabel}>Start Time *</Text>
+                <View style={styles.inputRow}>
+                  <Ionicons name="time-outline" size={18} color={C.textMuted} style={styles.inputIcon} />
                   <TextInput
                     style={styles.input}
                     placeholder="HH:MM (e.g., 10:00)"
-                    placeholderTextColor={Colors.gray[400]}
+                    placeholderTextColor={C.textMuted}
                     value={bookingForm.startTime}
                     onChangeText={(text) => setBookingForm({ ...bookingForm, startTime: text })}
                   />
+                </View>
 
-                  <Text style={styles.inputLabel}>End Time *</Text>
+                {/* End time */}
+                <Text style={styles.inputLabel}>End Time *</Text>
+                <View style={styles.inputRow}>
+                  <Ionicons name="time-outline" size={18} color={C.textMuted} style={styles.inputIcon} />
                   <TextInput
                     style={styles.input}
                     placeholder="HH:MM (e.g., 12:00)"
-                    placeholderTextColor={Colors.gray[400]}
+                    placeholderTextColor={C.textMuted}
                     value={bookingForm.endTime}
                     onChangeText={(text) => setBookingForm({ ...bookingForm, endTime: text })}
                   />
+                </View>
 
-                  <Text style={styles.inputLabel}>Purpose (Optional)</Text>
+                {/* Purpose */}
+                <Text style={styles.inputLabel}>Purpose (Optional)</Text>
+                <View style={[styles.inputRow, styles.inputRowMultiline]}>
+                  <Ionicons
+                    name="document-text-outline"
+                    size={18}
+                    color={C.textMuted}
+                    style={[styles.inputIcon, { alignSelf: 'flex-start', marginTop: 14 }]}
+                  />
                   <TextInput
                     style={[styles.input, styles.textArea]}
                     placeholder="What will you use this area for?"
-                    placeholderTextColor={Colors.gray[400]}
+                    placeholderTextColor={C.textMuted}
                     value={bookingForm.purpose}
                     onChangeText={(text) => setBookingForm({ ...bookingForm, purpose: text })}
                     multiline
                     numberOfLines={3}
                   />
+                </View>
 
-                  {selectedArea?.rules && (
-                    <View style={styles.rulesContainer}>
+                {/* Rules */}
+                {selectedArea?.rules && (
+                  <View style={styles.rulesContainer}>
+                    <View style={styles.rulesTitleRow}>
+                      <Ionicons name="shield-checkmark-outline" size={16} color={C.purple} />
                       <Text style={styles.rulesTitle}>Rules & Guidelines</Text>
-                      {selectedArea.rules.map((rule, index) => (
-                        <View key={index} style={styles.ruleItem}>
-                          <Ionicons name="checkmark-circle" size={16} color={Colors.primary} />
-                          <Text style={styles.ruleText}>{rule}</Text>
-                        </View>
-                      ))}
                     </View>
-                  )}
+                    {selectedArea.rules.map((rule, index) => (
+                      <View key={index} style={styles.ruleItem}>
+                        <Ionicons name="checkmark-circle" size={16} color={C.success} />
+                        <Text style={styles.ruleText}>{rule}</Text>
+                      </View>
+                    ))}
+                  </View>
+                )}
 
-                  <TouchableOpacity
-                    style={styles.submitButton}
-                    onPress={handleSubmitBooking}
-                    activeOpacity={0.8}
-                  >
-                    <LinearGradient
-                      colors={['#2ECC71', '#27AE60']}
-                      style={styles.submitButtonGradient}
-                    >
-                      <Text style={styles.submitButtonText}>Submit Booking Request</Text>
-                    </LinearGradient>
-                  </TouchableOpacity>
-                </ScrollView>
-              </View>
+                {/* Submit */}
+                <TouchableOpacity
+                  style={styles.submitButton}
+                  onPress={handleSubmitBooking}
+                  activeOpacity={0.85}
+                >
+                  <Ionicons name="checkmark-circle-outline" size={20} color={C.white} style={{ marginRight: 8 }} />
+                  <Text style={styles.submitButtonText}>Submit Booking Request</Text>
+                </TouchableOpacity>
+
+                {/* Bottom spacing for safe area inside modal */}
+                <View style={{ height: 20 }} />
+              </ScrollView>
             </View>
-          </Modal>
-        </SafeAreaView>
-      </LinearGradient>
+          </View>
+        </Modal>
+      </SafeAreaView>
     </View>
   );
 }
 
+/* ══════════════════════════════════════════════════════════════════════ */
+/* ── Styles ──────────────────────────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════════════════ */
+
 const styles = StyleSheet.create({
+  /* ── Layout ─────────────────────────────────────────────────────────── */
   container: {
     flex: 1,
-  },
-  background: {
-    flex: 1,
+    backgroundColor: C.bg,
   },
   safeArea: {
     flex: 1,
   },
+
+  /* ── Header ─────────────────────────────────────────────────────────── */
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 20,
-    paddingVertical: 15,
+    paddingVertical: 14,
+    backgroundColor: C.bg,
   },
   backButton: {
-    width: 40,
-    height: 40,
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    backgroundColor: C.white,
+    alignItems: 'center',
     justifyContent: 'center',
+    ...shadow(4),
   },
   headerTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: Colors.white,
+    color: C.textDark,
+    letterSpacing: -0.3,
+  },
+
+  /* ── Tabs ────────────────────────────────────────────────────────────── */
+  tabWrapper: {
+    paddingHorizontal: 20,
+    marginBottom: 18,
   },
   tabContainer: {
     flexDirection: 'row',
-    marginHorizontal: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: 12,
+    backgroundColor: C.white,
+    borderRadius: 14,
     padding: 4,
-    marginBottom: 20,
+    ...shadow(4),
   },
   tab: {
     flex: 1,
-    paddingVertical: 10,
+    flexDirection: 'row',
+    paddingVertical: 11,
     alignItems: 'center',
-    borderRadius: 10,
+    justifyContent: 'center',
+    borderRadius: 11,
   },
   activeTab: {
-    backgroundColor: Colors.primary,
+    backgroundColor: C.primary,
   },
   tabText: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '600',
-    color: 'rgba(255, 255, 255, 0.6)',
+    color: C.textLight,
   },
   activeTabText: {
-    color: Colors.white,
+    color: C.white,
   },
+
+  /* ── Scroll ─────────────────────────────────────────────────────────── */
   scrollContent: {
     paddingHorizontal: 20,
     paddingBottom: 100,
   },
+
+  /* ── Area cards ─────────────────────────────────────────────────────── */
   areasGrid: {
-    gap: 15,
+    gap: 14,
   },
   areaCard: {
-    borderRadius: 15,
-    overflow: 'hidden',
-    marginBottom: 0,
+    backgroundColor: C.white,
+    borderRadius: 20,
+    padding: 18,
+    ...shadow(4),
   },
-  areaCardGradient: {
-    padding: 15,
+  areaCardUnavailable: {
+    opacity: 0.7,
   },
   areaCardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 14,
   },
-  areaIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
+  areaIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 14,
+    backgroundColor: C.purpleBg,
     alignItems: 'center',
     justifyContent: 'center',
   },
   unavailableBadge: {
-    backgroundColor: 'rgba(231, 76, 60, 0.8)',
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: C.errorBg,
     paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 10,
+    paddingVertical: 5,
+    borderRadius: 20,
+    gap: 5,
   },
   unavailableBadgeText: {
     fontSize: 11,
     fontWeight: '600',
-    color: Colors.white,
+    color: C.error,
+  },
+  availableBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: C.successBg,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 20,
+    gap: 5,
+  },
+  availableBadgeText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: C.success,
+  },
+  statusDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
   },
   areaName: {
-    fontSize: 18,
+    fontSize: 17,
     fontWeight: '700',
-    color: Colors.white,
-    marginBottom: 6,
+    color: C.textDark,
+    marginBottom: 4,
+    letterSpacing: -0.2,
   },
   areaDescription: {
     fontSize: 13,
-    color: 'rgba(255, 255, 255, 0.7)',
+    color: C.textLight,
+    lineHeight: 19,
+    marginBottom: 12,
+  },
+  areaDivider: {
+    height: 1,
+    backgroundColor: C.border,
     marginBottom: 12,
   },
   areaDetails: {
     flexDirection: 'row',
     gap: 20,
-    marginBottom: 12,
+    marginBottom: 14,
   },
   areaDetailItem: {
     flexDirection: 'row',
@@ -581,36 +734,42 @@ const styles = StyleSheet.create({
   },
   areaDetailText: {
     fontSize: 12,
-    color: 'rgba(255, 255, 255, 0.7)',
+    color: C.textMuted,
+    fontWeight: '500',
   },
   bookButton: {
-    backgroundColor: 'rgba(46, 204, 113, 0.9)',
-    paddingVertical: 10,
-    borderRadius: 10,
+    flexDirection: 'row',
+    backgroundColor: C.purple,
+    paddingVertical: 12,
+    borderRadius: 12,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   bookButtonText: {
     fontSize: 14,
     fontWeight: '700',
-    color: Colors.white,
+    color: C.white,
   },
+
+  /* ── Booking cards ──────────────────────────────────────────────────── */
   bookingsList: {
-    gap: 15,
+    gap: 14,
   },
   bookingCard: {
-    backgroundColor: Colors.white,
-    borderRadius: 15,
-    padding: 15,
+    backgroundColor: C.white,
+    borderRadius: 20,
+    padding: 18,
+    ...shadow(4),
   },
   bookingHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
   },
-  bookingIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 10,
+  bookingIconContainer: {
+    width: 44,
+    height: 44,
+    borderRadius: 13,
+    backgroundColor: C.purpleBg,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -621,27 +780,33 @@ const styles = StyleSheet.create({
   bookingArea: {
     fontSize: 16,
     fontWeight: '700',
-    color: Colors.text.primary,
+    color: C.textDark,
+    letterSpacing: -0.2,
   },
   bookingDate: {
     fontSize: 13,
-    color: Colors.text.secondary,
+    color: C.textLight,
+    marginTop: 2,
   },
   statusBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 10,
+    paddingVertical: 5,
+    borderRadius: 20,
+    gap: 5,
   },
   statusText: {
     fontSize: 11,
     fontWeight: '700',
-    color: Colors.white,
+  },
+  bookingDivider: {
+    height: 1,
+    backgroundColor: C.border,
+    marginVertical: 14,
   },
   bookingDetails: {
-    gap: 8,
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: Colors.gray[200],
+    gap: 10,
   },
   bookingDetailRow: {
     flexDirection: 'row',
@@ -650,93 +815,153 @@ const styles = StyleSheet.create({
   },
   bookingDetailText: {
     fontSize: 13,
-    color: Colors.text.secondary,
+    color: C.textLight,
   },
   cancelButton: {
-    marginTop: 12,
-    paddingVertical: 10,
-    borderRadius: 10,
+    flexDirection: 'row',
+    marginTop: 14,
+    paddingVertical: 11,
+    borderRadius: 12,
     borderWidth: 1,
-    borderColor: Colors.error,
+    borderColor: C.error,
     alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: C.errorBg,
   },
   cancelButtonText: {
     fontSize: 14,
     fontWeight: '600',
-    color: Colors.error,
+    color: C.error,
   },
+
+  /* ── Empty state ────────────────────────────────────────────────────── */
   emptyState: {
     alignItems: 'center',
-    paddingTop: 60,
+    paddingTop: 72,
+  },
+  emptyIconCircle: {
+    width: 88,
+    height: 88,
+    borderRadius: 44,
+    backgroundColor: C.white,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...shadow(6),
   },
   emptyTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: Colors.white,
-    marginTop: 15,
+    color: C.textDark,
+    marginTop: 20,
   },
   emptySubtitle: {
     fontSize: 14,
-    color: 'rgba(255, 255, 255, 0.6)',
+    color: C.textLight,
     textAlign: 'center',
     marginTop: 8,
+    paddingHorizontal: 32,
+    lineHeight: 20,
   },
-  // Modal styles
+
+  /* ── Modal ──────────────────────────────────────────────────────────── */
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(15, 23, 42, 0.45)',
     justifyContent: 'flex-end',
   },
   modalContent: {
-    backgroundColor: Colors.white,
-    borderTopLeftRadius: 25,
-    borderTopRightRadius: 25,
-    padding: 20,
-    maxHeight: '85%',
+    backgroundColor: C.white,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    paddingHorizontal: 22,
+    paddingBottom: 10,
+    maxHeight: '88%',
+  },
+  dragHandleWrapper: {
+    alignItems: 'center',
+    paddingTop: 12,
+    paddingBottom: 6,
+  },
+  dragHandle: {
+    width: 40,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: C.border,
   },
   modalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 20,
+    paddingTop: 4,
   },
   modalTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: Colors.text.primary,
+    color: C.textDark,
+    letterSpacing: -0.3,
+    flex: 1,
   },
+  modalCloseBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: C.bg,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  /* ── Inputs ─────────────────────────────────────────────────────────── */
   inputLabel: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '600',
-    color: Colors.text.primary,
+    color: C.textDark,
     marginBottom: 8,
-    marginTop: 12,
+    marginTop: 14,
+  },
+  inputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: C.border,
+    borderRadius: 14,
+    backgroundColor: C.bg,
+  },
+  inputRowMultiline: {
+    alignItems: 'flex-start',
+  },
+  inputIcon: {
+    marginLeft: 14,
   },
   input: {
-    backgroundColor: Colors.gray[100],
-    borderRadius: 12,
-    paddingHorizontal: 15,
+    flex: 1,
+    paddingHorizontal: 12,
     paddingVertical: 14,
-    fontSize: 16,
-    color: Colors.text.primary,
-    borderWidth: 1,
-    borderColor: Colors.gray[200],
+    fontSize: 15,
+    color: C.textDark,
   },
   textArea: {
     height: 80,
     textAlignVertical: 'top',
   },
+
+  /* ── Rules ──────────────────────────────────────────────────────────── */
   rulesContainer: {
-    backgroundColor: Colors.gray[50],
-    borderRadius: 12,
-    padding: 15,
-    marginTop: 20,
+    backgroundColor: C.purpleBg,
+    borderRadius: 16,
+    padding: 16,
+    marginTop: 22,
+  },
+  rulesTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 12,
   },
   rulesTitle: {
     fontSize: 14,
     fontWeight: '700',
-    color: Colors.text.primary,
-    marginBottom: 10,
+    color: C.textDark,
   },
   ruleItem: {
     flexDirection: 'row',
@@ -746,22 +971,25 @@ const styles = StyleSheet.create({
   },
   ruleText: {
     fontSize: 13,
-    color: Colors.text.secondary,
+    color: C.textLight,
     flex: 1,
+    lineHeight: 18,
   },
+
+  /* ── Submit button ──────────────────────────────────────────────────── */
   submitButton: {
-    borderRadius: 12,
-    overflow: 'hidden',
-    marginTop: 25,
-    marginBottom: 20,
-  },
-  submitButtonGradient: {
+    flexDirection: 'row',
+    backgroundColor: C.purple,
+    borderRadius: 14,
     paddingVertical: 16,
     alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 26,
+    ...shadow(4),
   },
   submitButtonText: {
     fontSize: 16,
     fontWeight: '700',
-    color: Colors.white,
+    color: C.white,
   },
 });

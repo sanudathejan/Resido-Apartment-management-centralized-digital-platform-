@@ -1,7 +1,8 @@
 /**
  * Welcome Screen
- * Splash page matching High Fidelity Prototype - Green to Blue gradient
- * with centered logo and Register/Login buttons at bottom
+ * Modern 2026 light theme — premium minimal splash
+ * Logo PNG contains the building graphic + "RESIIDO" text
+ * If user is already authenticated, offer "Continue" option
  */
 
 import React from 'react';
@@ -13,121 +14,182 @@ import {
   Dimensions,
   Image,
   TouchableOpacity,
+  Platform,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Colors } from '@/constants/colors';
+import { Ionicons } from '@expo/vector-icons';
+import { useAuth } from '@/context/AuthContext';
 
 const { width, height } = Dimensions.get('window');
 
+const COLORS = {
+  background: '#F4F7FB',
+  primary: '#2563EB',
+  primaryDark: '#1D4ED8',
+  primaryLight: '#EFF6FF',
+  textDark: '#1E293B',
+  textLight: '#64748B',
+  textMuted: '#94A3B8',
+  white: '#FFFFFF',
+  border: '#E2E8F0',
+  cardShadow: '#94A3B8',
+  green: '#10B981',
+};
+
+// Cap logo at 28% of screen height so it fits well
+const LOGO_MAX_H = height * 0.28;
+
 export default function WelcomeScreen() {
   const router = useRouter();
+  const { isAuthenticated, user } = useAuth();
 
   return (
-    <LinearGradient
-      colors={['#2ECC71', '#27AE60', '#3498DB']}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 0.5, y: 1 }}
-      style={styles.container}
-    >
-      <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
+    <View style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
       <SafeAreaView style={styles.safeArea}>
-        {/* Centered Logo Section */}
-        <View style={styles.logoSection}>
+
+        {/* ── Hero: centred logo ─────────────────────────────────── */}
+        <View style={styles.heroSection}>
           <Image
             source={require('../assets/images/ResiiDo_logo_nobg.png')}
             style={styles.logo}
             resizeMode="contain"
           />
-          <Text style={styles.appName}>RESIIDO</Text>
+          <Text style={styles.tagline}>Smart living, simplified</Text>
         </View>
 
-        {/* Bottom Buttons Section - Vertical Layout */}
+        {/* ── Feature Pills ─────────────────────────────────────── */}
+        <View style={styles.pillsContainer}>
+          {[
+            { label: 'Parking', icon: 'car-sport-outline' as const },
+            { label: 'Payments', icon: 'wallet-outline' as const },
+            { label: 'Maintenance', icon: 'construct-outline' as const },
+          ].map((f) => (
+            <View key={f.label} style={styles.pill}>
+              <Ionicons name={f.icon} size={14} color={COLORS.primary} />
+              <Text style={styles.pillText}>{f.label}</Text>
+            </View>
+          ))}
+        </View>
+
+        {/* ── Bottom Buttons ────────────────────────────────────── */}
         <View style={styles.buttonSection}>
+
+
           <TouchableOpacity
             style={styles.registerButton}
             onPress={() => router.push('/register')}
-            activeOpacity={0.8}
+            activeOpacity={0.85}
           >
-            <Text style={styles.registerButtonText}>Register</Text>
+            <Text style={styles.registerButtonText}>Get Started</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={styles.loginButton}
             onPress={() => router.push('/login')}
-            activeOpacity={0.8}
+            activeOpacity={0.7}
           >
-            <Text style={styles.loginButtonText}>Log in</Text>
+            <Text style={styles.loginButtonText}>I already have an account</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
-    </LinearGradient>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: COLORS.background,
   },
   safeArea: {
     flex: 1,
-    justifyContent: 'space-between',
+    paddingHorizontal: 24,
   },
-  logoSection: {
+
+  /* ── Hero ─────────────────────────────────────────────────────── */
+  heroSection: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingTop: 60,
   },
   logo: {
-    width: width * 0.55,
-    height: width * 0.55,
-    marginBottom: 10,
+    width: width * 0.48,
+    height: LOGO_MAX_H,
+    maxWidth: 240,
+    maxHeight: LOGO_MAX_H,
+    marginBottom: 12,
   },
-  appName: {
-    fontSize: 42,
-    fontWeight: '800',
-    color: Colors.white,
-    letterSpacing: 3,
-    textShadowColor: 'rgba(0, 0, 0, 0.2)',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 4,
+  tagline: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: COLORS.textLight,
   },
+
+  /* ── Feature Pills ───────────────────────────────────────────── */
+  pillsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    gap: 8,
+    paddingBottom: 24,
+  },
+  pill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: COLORS.white,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  pillText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: COLORS.textLight,
+  },
+
+  /* ── Buttons ─────────────────────────────────────────────────── */
   buttonSection: {
-    paddingHorizontal: 30,
-    paddingBottom: 50,
-    gap: 15,
+    paddingBottom: Platform.OS === 'ios' ? 20 : 30,
+    gap: 12,
   },
+
   registerButton: {
-    backgroundColor: '#3498DB',
-    paddingVertical: 16,
-    paddingHorizontal: 35,
-    borderRadius: 30,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 3,
+    backgroundColor: COLORS.primary,
+    paddingVertical: 17,
+    borderRadius: 18,
+    alignItems: 'center',
+    ...Platform.select({
+      ios: {
+        shadowColor: COLORS.primary,
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.25,
+        shadowRadius: 14,
+      },
+      android: { elevation: 6 },
+    }),
   },
   registerButtonText: {
-    color: Colors.white,
-    fontSize: 18,
+    color: COLORS.white,
+    fontSize: 17,
     fontWeight: '700',
-    textAlign: 'center',
+    letterSpacing: 0.3,
   },
   loginButton: {
-    backgroundColor: 'transparent',
-    paddingVertical: 16,
-    paddingHorizontal: 35,
-    borderRadius: 30,
-    borderWidth: 2,
-    borderColor: Colors.white,
+    backgroundColor: COLORS.white,
+    paddingVertical: 17,
+    borderRadius: 18,
+    alignItems: 'center',
+    borderWidth: 1.5,
+    borderColor: COLORS.border,
   },
   loginButtonText: {
-    color: Colors.white,
-    fontSize: 18,
-    fontWeight: '700',
-    textAlign: 'center',
+    color: COLORS.textDark,
+    fontSize: 15,
+    fontWeight: '600',
   },
 });

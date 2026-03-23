@@ -1,6 +1,7 @@
 /**
  * Manager Dashboard Screen
  * Detailed statistics and management overview for apartment managers
+ * Modern light theme - 2026 design system
  */
 
 import React, { useState, useEffect } from 'react';
@@ -12,15 +13,62 @@ import {
   TouchableOpacity,
   RefreshControl,
   Dimensions,
+  Platform,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { Colors } from '@/constants/colors';
+import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@/context/AuthContext';
 
 const { width } = Dimensions.get('window');
+
+/** Local design-system color tokens */
+const C = {
+  background: '#D8F3DC',
+  primary: '#2563EB',
+  primaryLight: '#EFF6FF',
+  white: '#FFFFFF',
+  textDark: '#1E293B',
+  textLight: '#64748B',
+  textMuted: '#94A3B8',
+  border: '#E2E8F0',
+  success: '#10B981',
+  warning: '#F59E0B',
+  error: '#EF4444',
+} as const;
+
+/** Per-stat accent palette keyed by stat id */
+const STAT_ACCENT: Record<string, { icon: string; bg: string }> = {
+  residents:   { icon: '#2563EB', bg: '#EFF6FF' },
+  parking:     { icon: '#7C3AED', bg: '#F5F3FF' },
+};
+
+/** Cross-platform shadow helper */
+const softShadow = Platform.select({
+  ios: {
+    shadowColor: '#64748B',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+  },
+  android: {
+    elevation: 3,
+  },
+  default: {},
+}) as Record<string, unknown>;
+
+const cardShadow = Platform.select({
+  ios: {
+    shadowColor: '#64748B',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.1,
+    shadowRadius: 16,
+  },
+  android: {
+    elevation: 4,
+  },
+  default: {},
+}) as Record<string, unknown>;
 
 interface DashboardStat {
   id: string;
@@ -44,48 +92,16 @@ export default function ManagerDashboardScreen() {
       title: 'Total Residents',
       value: 128,
       icon: 'people',
-      color: '#3498DB',
+      color: '#2563EB',
       subtitle: '64 units occupied',
-    },
-    {
-      id: 'maintenance',
-      title: 'Pending Requests',
-      value: 12,
-      icon: 'construct',
-      color: '#F39C12',
-      subtitle: '3 urgent',
-    },
-    {
-      id: 'payments',
-      title: 'Pending Payments',
-      value: 'Rs. 2.4M',
-      icon: 'card',
-      color: '#E74C3C',
-      subtitle: '18 residents',
-    },
-    {
-      id: 'visitors',
-      title: 'Visitors Today',
-      value: 24,
-      icon: 'person-add',
-      color: '#2ECC71',
-      subtitle: '8 checked out',
     },
     {
       id: 'parking',
       title: 'Available Parking',
       value: '15/80',
       icon: 'car',
-      color: '#9B59B6',
+      color: '#7C3AED',
       subtitle: '15 slots free',
-    },
-    {
-      id: 'bookings',
-      title: 'Area Bookings',
-      value: 8,
-      icon: 'calendar',
-      color: '#1ABC9C',
-      subtitle: 'Today',
     },
   ];
 
@@ -104,42 +120,43 @@ export default function ManagerDashboardScreen() {
     setRefreshing(false);
   };
 
-  const StatCard = ({ stat }: { stat: DashboardStat }) => (
-    <TouchableOpacity style={styles.statCard} activeOpacity={0.8}>
-      <LinearGradient
-        colors={['#1E5F8A', '#1A4B6E']}
-        style={styles.statCardGradient}
-      >
-        <View style={[styles.statIconContainer, { backgroundColor: stat.color }]}>
-          <Ionicons name={stat.icon as any} size={24} color={Colors.white} />
+  const StatCard = ({ stat }: { stat: DashboardStat }) => {
+    const accent = STAT_ACCENT[stat.id] ?? { icon: C.primary, bg: C.primaryLight };
+
+    return (
+      <TouchableOpacity style={styles.statCard} activeOpacity={0.8}>
+        <View style={[styles.statIconContainer, { backgroundColor: accent.bg }]}>
+          <Ionicons name={stat.icon as any} size={24} color={accent.icon} />
         </View>
         <Text style={styles.statValue}>{stat.value}</Text>
         <Text style={styles.statTitle}>{stat.title}</Text>
         {stat.subtitle && (
           <Text style={styles.statSubtitle}>{stat.subtitle}</Text>
         )}
-      </LinearGradient>
-    </TouchableOpacity>
-  );
+      </TouchableOpacity>
+    );
+  };
 
-  const QuickAction = ({ 
-    icon, 
-    title, 
-    onPress, 
-    color = Colors.primary 
-  }: { 
-    icon: string; 
-    title: string; 
+  const QuickAction = ({
+    icon,
+    title,
+    onPress,
+    iconColor = C.primary,
+    iconBg = C.primaryLight,
+  }: {
+    icon: string;
+    title: string;
     onPress: () => void;
-    color?: string;
+    iconColor?: string;
+    iconBg?: string;
   }) => (
-    <TouchableOpacity 
-      style={styles.quickAction} 
+    <TouchableOpacity
+      style={styles.quickAction}
       onPress={onPress}
       activeOpacity={0.8}
     >
-      <View style={[styles.quickActionIcon, { backgroundColor: color }]}>
-        <Ionicons name={icon as any} size={22} color={Colors.white} />
+      <View style={[styles.quickActionIcon, { backgroundColor: iconBg }]}>
+        <Ionicons name={icon as any} size={22} color={iconColor} />
       </View>
       <Text style={styles.quickActionText}>{title}</Text>
     </TouchableOpacity>
@@ -147,138 +164,123 @@ export default function ManagerDashboardScreen() {
 
   return (
     <View style={styles.container}>
-      <LinearGradient
-        colors={['#1A4B6E', '#0D2137']}
-        style={styles.background}
-      >
-        <SafeAreaView style={styles.safeArea}>
-          {/* Header */}
-          <View style={styles.header}>
-            <TouchableOpacity 
-              style={styles.backButton}
-              onPress={() => router.back()}
-            >
-              <Ionicons name="arrow-back" size={24} color={Colors.white} />
-            </TouchableOpacity>
-            <Text style={styles.headerTitle}>Manager Dashboard</Text>
-            <TouchableOpacity style={styles.headerAction}>
-              <Ionicons name="notifications-outline" size={24} color={Colors.white} />
-            </TouchableOpacity>
+      <SafeAreaView style={styles.safeArea}>
+        {/* Header */}
+        <View style={styles.header}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <Ionicons name="arrow-back" size={22} color={C.textDark} />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Manager Dashboard</Text>
+          <TouchableOpacity style={styles.headerAction}>
+            <Ionicons name="notifications-outline" size={22} color={C.textDark} />
+          </TouchableOpacity>
+        </View>
+
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor={C.primary}
+              colors={[C.primary]}
+            />
+          }
+        >
+          {/* Apartment Info Banner */}
+          <View style={styles.apartmentBanner}>
+            <View style={styles.apartmentBannerRow}>
+              <View style={styles.apartmentLocationIcon}>
+                <Ionicons name="location" size={20} color={C.primary} />
+              </View>
+              <View style={styles.apartmentInfo}>
+                <Text style={styles.apartmentName}>
+                  {user?.managedApartment?.name || 'PrimeLux Residence'}
+                </Text>
+                <Text style={styles.apartmentLocation}>
+                  {user?.managedApartment?.location || '23/A, Bakers street, Colombo 7'}
+                </Text>
+              </View>
+            </View>
           </View>
 
-          <ScrollView
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.scrollContent}
-            refreshControl={
-              <RefreshControl
-                refreshing={refreshing}
-                onRefresh={onRefresh}
-                tintColor={Colors.white}
-              />
-            }
-          >
-            {/* Apartment Info Banner */}
-            <View style={styles.apartmentBanner}>
-              <Text style={styles.apartmentName}>
-                {user?.managedApartment?.name || 'PrimeLux Residence'}
-              </Text>
-              <Text style={styles.apartmentLocation}>
-                {user?.managedApartment?.location || '23/A, Bakers street, Colombo 7'}
-              </Text>
-            </View>
+          {/* Statistics Grid */}
+          <Text style={styles.sectionTitle}>Overview</Text>
+          <View style={styles.statsGrid}>
+            {stats.map((stat) => (
+              <StatCard key={stat.id} stat={stat} />
+            ))}
+          </View>
 
-            {/* Statistics Grid */}
-            <Text style={styles.sectionTitle}>Overview</Text>
-            <View style={styles.statsGrid}>
-              {stats.map((stat) => (
-                <StatCard key={stat.id} stat={stat} />
-              ))}
-            </View>
+          {/* Quick Actions */}
+          <Text style={styles.sectionTitle}>Quick Actions</Text>
+          <View style={styles.quickActionsGrid}>
+            <QuickAction
+              icon="person-add"
+              title="Add Resident"
+              onPress={() => {}}
+              iconColor="#10B981"
+              iconBg="#ECFDF5"
+            />
+            <QuickAction
+              icon="document-text"
+              title="Generate Report"
+              onPress={() => {}}
+              iconColor="#7C3AED"
+              iconBg="#F5F3FF"
+            />
+            <QuickAction
+              icon="settings"
+              title="Settings"
+              onPress={() => router.push('/(tabs)/profile')}
+              iconColor="#EA580C"
+              iconBg="#FFF7ED"
+            />
+          </View>
 
-            {/* Quick Actions */}
-            <Text style={styles.sectionTitle}>Quick Actions</Text>
-            <View style={styles.quickActionsGrid}>
-              <QuickAction
-                icon="megaphone"
-                title="Create Announcement"
-                onPress={() => router.push('/(tabs)/announcements')}
-                color="#3498DB"
-              />
-              <QuickAction
-                icon="person-add"
-                title="Add Resident"
-                onPress={() => {}}
-                color="#2ECC71"
-              />
-              <QuickAction
-                icon="document-text"
-                title="Generate Report"
-                onPress={() => {}}
-                color="#9B59B6"
-              />
-              <QuickAction
-                icon="settings"
-                title="Settings"
-                onPress={() => router.push('/(tabs)/profile')}
-                color="#F39C12"
-              />
-            </View>
-
-            {/* Recent Activity */}
-            <Text style={styles.sectionTitle}>Recent Activity</Text>
-            <View style={styles.activityList}>
-              <ActivityItem
-                icon="construct"
-                title="New maintenance request"
-                description="Unit B-12: Plumbing issue"
-                time="10 mins ago"
-                color="#F39C12"
-              />
-              <ActivityItem
-                icon="card"
-                title="Payment received"
-                description="Unit A-5: Rent for February"
-                time="1 hour ago"
-                color="#2ECC71"
-              />
-              <ActivityItem
-                icon="person-add"
-                title="Visitor check-in"
-                description="Unit C-8: Guest arrived"
-                time="2 hours ago"
-                color="#3498DB"
-              />
-              <ActivityItem
-                icon="alert-circle"
-                title="SOS Alert resolved"
-                description="Unit D-3: Medical emergency"
-                time="3 hours ago"
-                color="#E74C3C"
-              />
-            </View>
-          </ScrollView>
-        </SafeAreaView>
-      </LinearGradient>
+          {/* Recent Activity */}
+          <Text style={styles.sectionTitle}>Recent Activity</Text>
+          <View style={styles.activityList}>
+            <ActivityItem
+              icon="alert-circle"
+              title="SOS Alert resolved"
+              description="Unit D-3: Medical emergency"
+              time="3 hours ago"
+              iconColor="#EF4444"
+              iconBg="#FEF2F2"
+              isLast
+            />
+          </View>
+        </ScrollView>
+      </SafeAreaView>
     </View>
   );
 }
 
-const ActivityItem = ({ 
-  icon, 
-  title, 
-  description, 
-  time, 
-  color 
-}: { 
-  icon: string; 
-  title: string; 
-  description: string; 
+const ActivityItem = ({
+  icon,
+  title,
+  description,
+  time,
+  iconColor,
+  iconBg,
+  isLast = false,
+}: {
+  icon: string;
+  title: string;
+  description: string;
   time: string;
-  color: string;
+  iconColor: string;
+  iconBg: string;
+  isLast?: boolean;
 }) => (
-  <View style={styles.activityItem}>
-    <View style={[styles.activityIcon, { backgroundColor: color }]}>
-      <Ionicons name={icon as any} size={18} color={Colors.white} />
+  <View style={[styles.activityItem, isLast && styles.activityItemLast]}>
+    <View style={[styles.activityIcon, { backgroundColor: iconBg }]}>
+      <Ionicons name={icon as any} size={18} color={iconColor} />
     </View>
     <View style={styles.activityContent}>
       <Text style={styles.activityTitle}>{title}</Text>
@@ -291,119 +293,157 @@ const ActivityItem = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  background: {
-    flex: 1,
+    backgroundColor: C.background,
   },
   safeArea: {
     flex: 1,
   },
+
+  /* ---- Header ---- */
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 20,
-    paddingVertical: 15,
+    paddingVertical: 12,
+    backgroundColor: C.background,
   },
   backButton: {
-    width: 40,
-    height: 40,
+    width: 42,
+    height: 42,
+    borderRadius: 14,
+    backgroundColor: C.white,
+    alignItems: 'center',
     justifyContent: 'center',
+    ...softShadow,
   },
   headerTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: Colors.white,
+    color: C.textDark,
   },
   headerAction: {
-    width: 40,
-    height: 40,
-    alignItems: 'flex-end',
+    width: 42,
+    height: 42,
+    borderRadius: 14,
+    backgroundColor: C.white,
+    alignItems: 'center',
     justifyContent: 'center',
+    ...softShadow,
   },
+
+  /* ---- Scroll content ---- */
   scrollContent: {
     paddingHorizontal: 20,
     paddingBottom: 100,
   },
+
+  /* ---- Apartment Banner ---- */
   apartmentBanner: {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: 15,
-    padding: 20,
-    marginBottom: 25,
+    backgroundColor: C.white,
+    borderRadius: 16,
+    padding: 18,
+    marginBottom: 28,
+    ...cardShadow,
+  },
+  apartmentBannerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  apartmentLocationIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    backgroundColor: C.primaryLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 14,
+  },
+  apartmentInfo: {
+    flex: 1,
   },
   apartmentName: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: '700',
-    color: Colors.white,
-    marginBottom: 5,
+    color: C.textDark,
+    marginBottom: 4,
   },
   apartmentLocation: {
     fontSize: 14,
-    color: 'rgba(255, 255, 255, 0.7)',
+    color: C.textLight,
+    lineHeight: 20,
   },
+
+  /* ---- Section title ---- */
   sectionTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: Colors.white,
-    marginBottom: 15,
+    color: C.textDark,
+    marginBottom: 14,
   },
+
+  /* ---- Stats Grid ---- */
   statsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 12,
-    marginBottom: 25,
+    marginBottom: 28,
   },
   statCard: {
     width: (width - 52) / 2,
-    height: 140,
-    borderRadius: 15,
-    overflow: 'hidden',
-  },
-  statCardGradient: {
-    flex: 1,
-    padding: 15,
+    backgroundColor: C.white,
+    borderRadius: 20,
+    padding: 16,
     justifyContent: 'space-between',
+    minHeight: 148,
+    ...cardShadow,
   },
   statIconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 10,
+    width: 44,
+    height: 44,
+    borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
+    marginBottom: 12,
   },
   statValue: {
-    fontSize: 24,
+    fontSize: 26,
     fontWeight: '800',
-    color: Colors.white,
+    color: C.textDark,
+    marginBottom: 2,
   },
   statTitle: {
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '600',
-    color: 'rgba(255, 255, 255, 0.9)',
+    color: C.textLight,
   },
   statSubtitle: {
-    fontSize: 10,
-    color: 'rgba(255, 255, 255, 0.6)',
+    fontSize: 11,
+    color: C.textMuted,
+    marginTop: 2,
   },
+
+  /* ---- Quick Actions ---- */
   quickActionsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 12,
-    marginBottom: 25,
+    marginBottom: 28,
   },
   quickAction: {
     width: (width - 52) / 2,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: 15,
-    padding: 15,
+    backgroundColor: C.white,
+    borderRadius: 16,
+    padding: 14,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
+    ...cardShadow,
   },
   quickActionIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 10,
+    width: 42,
+    height: 42,
+    borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -411,24 +451,30 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 13,
     fontWeight: '600',
-    color: Colors.white,
+    color: C.textDark,
   },
+
+  /* ---- Activity List ---- */
   activityList: {
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderRadius: 15,
+    backgroundColor: C.white,
+    borderRadius: 16,
     overflow: 'hidden',
+    ...cardShadow,
   },
   activityItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 15,
+    padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+    borderBottomColor: C.border,
+  },
+  activityItemLast: {
+    borderBottomWidth: 0,
   },
   activityIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 8,
+    width: 38,
+    height: 38,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -439,15 +485,15 @@ const styles = StyleSheet.create({
   activityTitle: {
     fontSize: 14,
     fontWeight: '600',
-    color: Colors.white,
+    color: C.textDark,
   },
   activityDescription: {
     fontSize: 12,
-    color: 'rgba(255, 255, 255, 0.6)',
+    color: C.textLight,
     marginTop: 2,
   },
   activityTime: {
     fontSize: 11,
-    color: 'rgba(255, 255, 255, 0.5)',
+    color: C.textMuted,
   },
 });

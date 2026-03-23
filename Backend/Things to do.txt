@@ -1,0 +1,8 @@
+1. Build backend for managers to view all available stats to monitor residents. (Done for now)
+2. Profile pictures and maintenance request photo implementation with AWS S3 buckets (Profile pic done with Base64)
+
+This is it until frontend merging and testing
+
+Forget password implementation - code for you email. if it's applied, you can set new password.
+
+Parking requester will send visitor's car's number plate.

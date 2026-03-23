@@ -1,6 +1,6 @@
 /**
  * Profile Screen
- * User profile and account management
+ * User profile and account management — 2026 light theme
  */
 
 import React, { useState } from 'react';
@@ -12,15 +12,49 @@ import {
   TouchableOpacity,
   Alert,
   Switch,
+  Platform,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { Avatar, Card, Button } from '@/components/ui';
-import { Colors } from '@/constants/colors';
 import { useAuth } from '@/context/AuthContext';
 
+/* ── design tokens ─────────────────────────────────────────────── */
+const C = {
+  bg: '#EBF7ED',
+  primary: '#2563EB',
+  primaryLight: '#EFF6FF',
+  avatarBg: '#DBEAFE',
+  white: '#FFFFFF',
+  textDark: '#1E293B',
+  textLight: '#64748B',
+  textMuted: '#94A3B8',
+  border: '#E2E8F0',
+  success: '#10B981',
+  error: '#EF4444',
+} as const;
+
+/* ── platform shadow helper ────────────────────────────────────── */
+const shadow = (elevation: number) =>
+  Platform.select({
+    ios: {
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: elevation / 2 },
+      shadowOpacity: 0.08,
+      shadowRadius: elevation,
+    },
+    android: {
+      elevation,
+    },
+    default: {
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: elevation / 2 },
+      shadowOpacity: 0.08,
+      shadowRadius: elevation,
+    },
+  }) as object;
+
+/* ── component ─────────────────────────────────────────────────── */
 export default function ProfileScreen() {
   const router = useRouter();
   const { user, logout } = useAuth();
@@ -49,25 +83,27 @@ export default function ProfileScreen() {
   const userEmail = user?.email || 'john.doe@email.com';
   const apartmentNo = user?.apartmentNumber || 'A-101';
   const userRole = user?.role || 'RESIDENT';
+  const initial = userName.charAt(0).toUpperCase();
 
+  /* ── menu data ─────────────────────────────────────────────── */
   const menuItems = [
     {
       section: 'Account',
       items: [
         {
-          icon: 'person-outline',
+          icon: 'person-outline' as const,
           title: 'Edit Profile',
           subtitle: 'Update your personal information',
           onPress: () => {},
         },
         {
-          icon: 'lock-closed-outline',
+          icon: 'lock-closed-outline' as const,
           title: 'Change Password',
           subtitle: 'Update your password',
           onPress: () => {},
         },
         {
-          icon: 'shield-checkmark-outline',
+          icon: 'shield-checkmark-outline' as const,
           title: 'Privacy & Security',
           subtitle: 'Manage your privacy settings',
           onPress: () => {},
@@ -78,7 +114,7 @@ export default function ProfileScreen() {
       section: 'Preferences',
       items: [
         {
-          icon: 'notifications-outline',
+          icon: 'notifications-outline' as const,
           title: 'Notifications',
           subtitle: 'Manage notification preferences',
           toggle: true,
@@ -86,7 +122,7 @@ export default function ProfileScreen() {
           onToggle: setNotificationsEnabled,
         },
         {
-          icon: 'moon-outline',
+          icon: 'moon-outline' as const,
           title: 'Dark Mode',
           subtitle: 'Toggle dark theme',
           toggle: true,
@@ -94,7 +130,7 @@ export default function ProfileScreen() {
           onToggle: setDarkMode,
         },
         {
-          icon: 'language-outline',
+          icon: 'language-outline' as const,
           title: 'Language',
           subtitle: 'English (US)',
           onPress: () => {},
@@ -105,26 +141,26 @@ export default function ProfileScreen() {
       section: 'Support',
       items: [
         {
-          icon: 'help-circle-outline',
+          icon: 'help-circle-outline' as const,
           title: 'Help Center',
           subtitle: 'Get help with the app',
           onPress: () => {},
         },
         {
-          icon: 'chatbubble-outline',
+          icon: 'chatbubble-outline' as const,
           title: 'Contact Support',
           subtitle: 'Reach out to our team',
           onPress: () => {},
         },
         {
-          icon: 'document-text-outline',
+          icon: 'document-text-outline' as const,
           title: 'Terms & Conditions',
           subtitle: 'Read our terms of service',
           onPress: () => {},
         },
         {
-          icon: 'information-circle-outline',
-          title: 'About Resiido',
+          icon: 'information-circle-outline' as const,
+          title: 'About Resido',
           subtitle: 'Version 1.0.0',
           onPress: () => {},
         },
@@ -132,42 +168,44 @@ export default function ProfileScreen() {
     },
   ];
 
+  /* ── render ─────────────────────────────────────────────────── */
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      {/* Header with Profile */}
-      <LinearGradient
-        colors={Colors.gradients.primary as [string, string, ...string[]]}
-        style={styles.header}
-      >
-        <View style={styles.profileSection}>
-          <Avatar name={userName} size="xlarge" />
-          <TouchableOpacity style={styles.editAvatarButton}>
-            <Ionicons name="camera" size={16} color={Colors.white} />
+      {/* ── flat header ─────────────────────────────────────── */}
+      <View style={styles.header}>
+        {/* avatar circle */}
+        <View style={styles.avatarOuter}>
+          <View style={styles.avatar}>
+            <Text style={styles.avatarText}>{initial}</Text>
+          </View>
+          <TouchableOpacity style={styles.cameraBtn} activeOpacity={0.7}>
+            <Ionicons name="camera" size={14} color={C.white} />
           </TouchableOpacity>
         </View>
-        
+
         <Text style={styles.userName}>{userName}</Text>
         <Text style={styles.userEmail}>{userEmail}</Text>
-        
-        <View style={styles.infoBadges}>
-          <View style={styles.badge}>
-            <Ionicons name="home" size={14} color={Colors.white} />
-            <Text style={styles.badgeText}>Apt {apartmentNo}</Text>
+
+        {/* info pills */}
+        <View style={styles.pillRow}>
+          <View style={styles.pill}>
+            <Ionicons name="home-outline" size={13} color={C.primary} />
+            <Text style={styles.pillText}>Apt {apartmentNo}</Text>
           </View>
-          <View style={styles.badge}>
-            <Ionicons name="person" size={14} color={Colors.white} />
-            <Text style={styles.badgeText}>{userRole}</Text>
+          <View style={styles.pill}>
+            <Ionicons name="person-outline" size={13} color={C.primary} />
+            <Text style={styles.pillText}>{userRole}</Text>
           </View>
         </View>
-      </LinearGradient>
+      </View>
 
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Quick Stats */}
-        <View style={styles.statsContainer}>
+        {/* ── quick stats card (overlapping header) ──────── */}
+        <View style={[styles.statsCard, shadow(6)]}>
           <View style={styles.statItem}>
             <Text style={styles.statValue}>12</Text>
             <Text style={styles.statLabel}>Payments</Text>
@@ -184,223 +222,278 @@ export default function ProfileScreen() {
           </View>
         </View>
 
-        {/* Menu Sections */}
-        {menuItems.map((section, sectionIndex) => (
-          <View key={sectionIndex} style={styles.menuSection}>
+        {/* ── menu sections ──────────────────────────────── */}
+        {menuItems.map((section, sectionIdx) => (
+          <View key={sectionIdx} style={styles.menuSection}>
             <Text style={styles.sectionTitle}>{section.section}</Text>
-            <Card style={styles.menuCard}>
-              {section.items.map((item, itemIndex) => (
-                <TouchableOpacity
-                  key={itemIndex}
-                  style={[
-                    styles.menuItem,
-                    itemIndex < section.items.length - 1 && styles.menuItemBorder,
-                  ]}
-                  onPress={item.onPress}
-                  disabled={item.toggle}
-                >
-                  <View style={styles.menuIconContainer}>
-                    <Ionicons
-                      name={item.icon as keyof typeof Ionicons.glyphMap}
-                      size={22}
-                      color={Colors.primary}
-                    />
-                  </View>
-                  <View style={styles.menuContent}>
-                    <Text style={styles.menuTitle}>{item.title}</Text>
-                    <Text style={styles.menuSubtitle}>{item.subtitle}</Text>
-                  </View>
-                  {item.toggle ? (
-                    <Switch
-                      value={item.value}
-                      onValueChange={item.onToggle}
-                      trackColor={{ false: Colors.gray[200], true: `${Colors.primary}50` }}
-                      thumbColor={item.value ? Colors.primary : Colors.gray[400]}
-                    />
-                  ) : (
-                    <Ionicons name="chevron-forward" size={20} color={Colors.gray[400]} />
-                  )}
-                </TouchableOpacity>
-              ))}
-            </Card>
+
+            <View style={[styles.menuCard, shadow(4)]}>
+              {section.items.map((item, itemIdx) => {
+                const isLast = itemIdx === section.items.length - 1;
+
+                return (
+                  <TouchableOpacity
+                    key={itemIdx}
+                    style={[styles.menuItem, !isLast && styles.menuItemBorder]}
+                    onPress={item.onPress}
+                    disabled={!!item.toggle}
+                    activeOpacity={0.6}
+                  >
+                    {/* icon circle */}
+                    <View style={styles.menuIconCircle}>
+                      <Ionicons
+                        name={item.icon as keyof typeof Ionicons.glyphMap}
+                        size={20}
+                        color={C.primary}
+                      />
+                    </View>
+
+                    {/* text */}
+                    <View style={styles.menuTextBlock}>
+                      <Text style={styles.menuTitle}>{item.title}</Text>
+                      <Text style={styles.menuSubtitle}>{item.subtitle}</Text>
+                    </View>
+
+                    {/* right control */}
+                    {item.toggle ? (
+                      <Switch
+                        value={item.value}
+                        onValueChange={item.onToggle}
+                        trackColor={{ false: C.border, true: '#93BBFD' }}
+                        thumbColor={item.value ? C.primary : C.textMuted}
+                        ios_backgroundColor={C.border}
+                      />
+                    ) : (
+                      <Ionicons
+                        name="chevron-forward"
+                        size={18}
+                        color={C.textMuted}
+                      />
+                    )}
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
           </View>
         ))}
 
-        {/* Logout Button */}
-        <Button
-          title="Logout"
+        {/* ── logout button ──────────────────────────────── */}
+        <TouchableOpacity
+          style={styles.logoutBtn}
           onPress={handleLogout}
-          variant="outline"
-          size="large"
-          icon={<Ionicons name="log-out-outline" size={20} color={Colors.error} />}
-          style={styles.logoutButton}
-          textStyle={styles.logoutText}
-        />
+          activeOpacity={0.65}
+        >
+          <Ionicons name="log-out-outline" size={20} color={C.error} />
+          <Text style={styles.logoutText}>Logout</Text>
+        </TouchableOpacity>
 
+        {/* ── footer credit ──────────────────────────────── */}
         <Text style={styles.footerText}>
-          Made with ❤️ by SDGP Team{'\n'}University of Westminster
+          SDGP Project{'\n'}University of Westminster
         </Text>
       </ScrollView>
     </SafeAreaView>
   );
 }
 
+/* ── styles ────────────────────────────────────────────────────── */
 const styles = StyleSheet.create({
+  /* layout */
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
-  },
-  header: {
-    alignItems: 'center',
-    paddingTop: 20,
-    paddingBottom: 30,
-    paddingHorizontal: 20,
-  },
-  profileSection: {
-    position: 'relative',
-    marginBottom: 16,
-  },
-  editAvatarButton: {
-    position: 'absolute',
-    bottom: 0,
-    right: 0,
-    backgroundColor: Colors.secondary,
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 3,
-    borderColor: Colors.white,
-  },
-  userName: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: Colors.white,
-    marginBottom: 4,
-  },
-  userEmail: {
-    fontSize: 14,
-    color: 'rgba(255, 255, 255, 0.8)',
-    marginBottom: 12,
-  },
-  infoBadges: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  badge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
-    gap: 6,
-  },
-  badgeText: {
-    fontSize: 12,
-    color: Colors.white,
-    fontWeight: '500',
-    textTransform: 'capitalize',
+    backgroundColor: C.bg,
   },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
-    padding: 16,
+    paddingHorizontal: 20,
     paddingBottom: 100,
   },
-  statsContainer: {
+
+  /* ── header ─────────────────────────────────────────────────── */
+  header: {
+    backgroundColor: C.bg,
+    alignItems: 'center',
+    paddingTop: 16,
+    paddingBottom: 32,
+    paddingHorizontal: 20,
+  },
+
+  /* avatar */
+  avatarOuter: {
+    position: 'relative',
+    marginBottom: 14,
+  },
+  avatar: {
+    width: 88,
+    height: 88,
+    borderRadius: 44,
+    backgroundColor: '#DBEAFE',
+    borderWidth: 3,
+    borderColor: C.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarText: {
+    fontSize: 34,
+    fontWeight: '700',
+    color: C.primary,
+  },
+  cameraBtn: {
+    position: 'absolute',
+    bottom: 2,
+    right: 2,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: C.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: C.bg,
+  },
+
+  /* name / email */
+  userName: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: C.textDark,
+    marginBottom: 2,
+  },
+  userEmail: {
+    fontSize: 14,
+    color: C.textLight,
+    marginBottom: 14,
+  },
+
+  /* pills */
+  pillRow: {
     flexDirection: 'row',
-    backgroundColor: Colors.white,
+    gap: 10,
+  },
+  pill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    backgroundColor: C.primaryLight,
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 20,
+  },
+  pillText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: C.primary,
+    textTransform: 'capitalize',
+  },
+
+  /* ── stats card ─────────────────────────────────────────────── */
+  statsCard: {
+    flexDirection: 'row',
+    backgroundColor: C.white,
     borderRadius: 16,
-    padding: 20,
+    paddingVertical: 20,
+    paddingHorizontal: 12,
     marginTop: -20,
-    marginBottom: 20,
-    shadowColor: Colors.shadow,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
+    marginBottom: 24,
   },
   statItem: {
     flex: 1,
     alignItems: 'center',
   },
   statValue: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: '700',
-    color: Colors.primary,
+    color: C.primary,
     marginBottom: 4,
   },
   statLabel: {
     fontSize: 12,
-    color: Colors.text.secondary,
+    color: C.textLight,
+    fontWeight: '500',
   },
   statDivider: {
     width: 1,
-    backgroundColor: Colors.gray[200],
-    marginVertical: 4,
+    backgroundColor: C.border,
+    marginVertical: 2,
   },
+
+  /* ── menu sections ──────────────────────────────────────────── */
   menuSection: {
-    marginBottom: 20,
+    marginBottom: 22,
   },
   sectionTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: Colors.text.secondary,
+    fontSize: 12,
+    fontWeight: '700',
+    color: C.textMuted,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
     marginBottom: 10,
     marginLeft: 4,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
   },
   menuCard: {
-    padding: 0,
+    backgroundColor: C.white,
+    borderRadius: 16,
     overflow: 'hidden',
   },
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
   },
   menuItemBorder: {
     borderBottomWidth: 1,
-    borderBottomColor: Colors.gray[100],
+    borderBottomColor: C.border,
   },
-  menuIconContainer: {
+  menuIconCircle: {
     width: 40,
     height: 40,
     borderRadius: 12,
-    backgroundColor: `${Colors.primary}10`,
+    backgroundColor: C.primaryLight,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 14,
   },
-  menuContent: {
+  menuTextBlock: {
     flex: 1,
   },
   menuTitle: {
     fontSize: 15,
     fontWeight: '600',
-    color: Colors.text.primary,
+    color: C.textDark,
     marginBottom: 2,
   },
   menuSubtitle: {
     fontSize: 12,
-    color: Colors.text.secondary,
+    color: C.textLight,
   },
-  logoutButton: {
-    borderColor: Colors.error,
-    marginTop: 10,
-    marginBottom: 20,
+
+  /* ── logout ─────────────────────────────────────────────────── */
+  logoutBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 14,
+    borderRadius: 14,
+    borderWidth: 1.5,
+    borderColor: C.error,
+    marginTop: 8,
+    marginBottom: 24,
   },
   logoutText: {
-    color: Colors.error,
+    fontSize: 16,
+    fontWeight: '600',
+    color: C.error,
   },
+
+  /* ── footer ─────────────────────────────────────────────────── */
   footerText: {
     textAlign: 'center',
     fontSize: 12,
-    color: Colors.text.tertiary,
+    color: C.textMuted,
     lineHeight: 18,
     marginBottom: 20,
   },

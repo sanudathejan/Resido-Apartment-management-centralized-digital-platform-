@@ -1,25 +1,3 @@
-###example resident
-POST http://localhost:8080/api/users
-Content-Type: application/json
-
-{
-    "name": "Sanithi Doe",
-    "email": "sanithi@example.com",
-    "password": "sanithi123",
-    "role": "RESIDENT"
-}
-
-### example manager
-POST http://localhost:8080/api/users
-Content-Type: application/json
-
-{
-    "name": "Shenal Arosha",
-    "email": "shenalA@example.com",
-    "password": "shenal123",
-    "role": "MANAGER"
-}
-
 ### Create a Maintenance Request
 POST http://localhost:8080/api/maintenance
 Content-Type: application/json
@@ -40,7 +18,7 @@ Content-Type: text/plain
 IN_PROGRESS
 
 ### Resident #1 hits the SOS Button
-POST http://localhost:8080/api/sos/1
+POST http://localhost:8080/api/sos/3
 
 ### See all ongoing SOS situations
 GET http://localhost:8080/api/sos/active
@@ -163,9 +141,20 @@ POST http://localhost:8080/api/auth/register
 Content-Type: application/json
 
 {
-  "name": "Alice Resident",
-  "email": "alice@test.com",
-  "password": "password123",
+  "name": "Amy Parker",
+  "email": "aparker@test.com",
+  "password": "amyp@143",
+  "role": "RESIDENT"
+}
+
+### 1. Register a New User
+POST http://localhost:8080/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "New Alice",
+  "email": "aliceN@test.com",
+  "password": "new_me_alice",
   "role": "RESIDENT"
 }
 
@@ -174,9 +163,20 @@ POST http://localhost:8080/api/auth/login
 Content-Type: application/json
 
 {
-  "email": "alice@test.com",
-  "password": "password123"
+  "email": "aparker@test.com",
+  "password": "amyp@143"
 }
+
+
+### 2. Login to get Token
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "aliceN@test.com",
+  "password": "new_me_alice"
+}
+
 
 ### 3. Try to get requests WITHOUT Token (Should Fail)
 GET http://localhost:8080/api/maintenance
@@ -257,17 +257,983 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhbGljZUB0ZXN0LmNvbSIsImlhd
 ### 1. Trigger SOS (Using ALICE'S Token)
 POST http://localhost:8080/api/sos
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhbGljZUB0ZXN0LmNvbSIsImlhdCI6MTc3MDIwMTgwMywiZXhwIjoxNzcwMjM3ODAzfQ.V6H5iRTLGomt1_dBAjiA03bQ98kqVN7p8KuHS0a2thw
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJmcmFua0ByZXNpZGVudC5jb20iLCJpYXQiOjE3NzAzMDcyNTEsImV4cCI6MTc3MDM0MzI1MX0.W9D7qCGB562eYsYdVHHM8xHxZNGyaSyueTwdrQOvquI
 
 {}
 
 
 ### 2. View Active Alerts
 GET http://localhost:8080/api/sos/active
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhbGljZUB0ZXN0LmNvbSIsImlhdCI6MTc3MDIwMTgwMywiZXhwIjoxNzcwMjM3ODAzfQ.V6H5iRTLGomt1_dBAjiA03bQ98kqVN7p8KuHS0a2thw
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJleGFtcGxlcmVzaWRlbmNlMUBnbWFpbC5jb20iLCJpYXQiOjE3NzAzMDc1ODAsImV4cCI6MTc3MDM0MzU4MH0.Ltag7XCl2IyGzI5u7u6wVzZdK3h57u0fEZdVN1otDgc
 
 
 ### 3. Clear SOS (Manager clears it)
 # Make sure to grab the ID from Step 2 result (likely ID: 1)
+PUT http://localhost:8080/api/sos/1/clear
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJleGFtcGxlcmVzaWRlbmNlMUBnbWFpbC5jb20iLCJpYXQiOjE3NzAzMDc1ODAsImV4cCI6MTc3MDM0MzU4MH0.Ltag7XCl2IyGzI5u7u6wVzZdK3h57u0fEZdVN1otDgc
+
+### 1. (Manager Only) List all Users to find the IDs
+GET http://localhost:8080/api/users
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqYXNvbmxvbHNAdGVzdC5jb20iLCJpYXQiOjE3NzAyMTA2NzQsImV4cCI6MTc3MDI0NjY3NH0.vAxu4gmdo3fr8Y00y70PnJV8fLPMaQYWEgbu3HD4aSw
+
+
+### Replace '123' with the actual ID you see in the list above
+DELETE http://localhost:8080/api/users/13
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqYXNvbmxvbHNAdGVzdC5jb20iLCJpYXQiOjE3NzAyNzAzODcsImV4cCI6MTc3MDMwNjM4N30.sFtUc7qgKFlEvQjhC3XkI6qFFUBs0vsc_rFexqJvXUQ
+### 1. Post Notice as Manager (Should work)
+POST http://localhost:8080/api/notices
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqYXNvbmxvbHNAdGVzdC5jb20iLCJpYXQiOjE3NzAyMjEwNzMsImV4cCI6MTc3MDI1NzA3M30.e1F4q5Yysq92-LXdIJSK55i91TpEXHDBbSvnRAL8oLw
+
+{
+  "title": "Water Maintenance",
+  "content": "Water will be shut off on Friday from 10 AM to 2 PM."
+}
+
+### 2. Post Notice as Alice (Should fail with 403 Forbidden)
+POST http://localhost:8080/api/notices
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhcGFya2VyQHRlc3QuY29tIiwiaWF0IjoxNzcwMjIxMTQ2LCJleHAiOjE3NzAyNTcxNDZ9.P-XHojPuXfedUaE3lRRgROYXDWG5l8L2dmCiyDxQn1o
+
+{
+  "title": "I am a Hacker",
+  "content": "Hehehe"
+}
+
+### 3. View Notices (Anyone can see these)
+GET http://localhost:8080/api/notices
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhcGFya2VyQHRlc3QuY29tIiwiaWF0IjoxNzcwMjIxMTQ2LCJleHAiOjE3NzAyNTcxNDZ9.P-XHojPuXfedUaE3lRRgROYXDWG5l8L2dmCiyDxQn1o
+
+
+### 1. Get the list to find a Notice ID
+GET http://localhost:8080/api/notices
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqYXNvbmxvbHNAdGVzdC5jb20iLCJpYXQiOjE3NzAyNjY1MzUsImV4cCI6MTc3MDMwMjUzNX0.LXcPL-gV_7JY9egAcR_NNHeEfZO8rbxgKa-bIyV8HrE
+
+### 2. Delete that specific notice (e.g., ID 5)
+DELETE http://localhost:8080/api/notices/6
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqYXNvbmxvbHNAdGVzdC5jb20iLCJpYXQiOjE3NzAyNjY1MzUsImV4cCI6MTc3MDMwMjUzNX0.LXcPL-gV_7JY9egAcR_NNHeEfZO8rbxgKa-bIyV8HrE
+
+### 1. ALICE: Login to get token
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "aparker@test.com",
+  "password": "amyp@143"
+}
+
+### 2. ALICE: Make her spot available for lending
+# No ID needed in URL - it finds her slot automatically via Token
+PUT http://localhost:8080/api/parking/my-slot/availability?available=true
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhcGFya2VyQHRlc3QuY29tIiwiaWF0IjoxNzcwMjY4NDg2LCJleHAiOjE3NzAzMDQ0ODZ9.1NNX240H8zNB3eyII8uWPYVK_9TOWJlb5lEGPju0f5I
+
+
+
+### 1. MANAGER: Create a Slot and assign it to Alice
+# Replace owner id: 1 with Alice's actual User ID
+POST http://localhost:8080/api/parking/admin/create-slot
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqYXNvbmxvbHNAdGVzdC5jb20iLCJpYXQiOjE3NzAyNjg4ODcsImV4cCI6MTc3MDMwNDg4N30.J40ae4JvBEv9hzfvOgM0KM3AimuToRIK81Jg3Ju2oNM
+
+{
+    "slotNumber": "A-101",
+    "isAvailableForLending": false,
+    "owner": { "id": 6 }
+}
+
+### 2. MANAGER: Create a Slot and assign it to Bob
+# Replace owner id: 2 with Bob's actual User ID
+POST http://localhost:8080/api/parking/admin/create-slot
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqYXNvbmxvbHNAdGVzdC5jb20iLCJpYXQiOjE3NzAyNjg4ODcsImV4cCI6MTc3MDMwNDg4N30.J40ae4JvBEv9hzfvOgM0KM3AimuToRIK81Jg3Ju2oNM
+
+{
+    "slotNumber": "B-202",
+    "isAvailableForLending": false,
+    "owner": { "id": 12 }
+}
+
+
+### 2. MANAGER: Create a Slot and assign it to New Alice
+# Replace owner id: 2 with Bob's actual User ID
+POST http://localhost:8080/api/parking/admin/create-slot
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqYXNvbmxvbHNAdGVzdC5jb20iLCJpYXQiOjE3NzAyNjg4ODcsImV4cCI6MTc3MDMwNDg4N30.J40ae4JvBEv9hzfvOgM0KM3AimuToRIK81Jg3Ju2oNM
+
+{
+    "slotNumber": "C-303",
+    "isAvailableForLending": false,
+    "owner": { "id": 13 }
+}
+
+
+### 2. ALICE: Make her spot available for lending
+# No ID needed in URL - it finds her slot automatically via Token
+PUT http://localhost:8080/api/parking/my-slot/availability?available=true
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhcGFya2VyQHRlc3QuY29tIiwiaWF0IjoxNzcwMjY4NDg2LCJleHAiOjE3NzAzMDQ0ODZ9.1NNX240H8zNB3eyII8uWPYVK_9TOWJlb5lEGPju0f5I
+
+
+### 3. Amy: Login to get token
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "aparker@test.com",
+  "password": "amyp@143"
+}
+
+### 4. New Alice: See all available spots
+# This helps New Alice find Amy's Slot ID
+GET http://localhost:8080/api/parking/available
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhcGFya2VyQHRlc3QuY29tIiwiaWF0IjoxNzcwMjcwMDYyLCJleHAiOjE3NzAzMDYwNjJ9.DDkhlMiLBpJFZNv8P6CvUrrfzWUFNbC-cobD58a-eVg
+
+### 5. New Alice: Request Amys spot
+# Replace "id": 1 with the actual Slot ID from the GET request above
+POST http://localhost:8080/api/parking/request
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhcGFya2VyQHRlc3QuY29tIiwiaWF0IjoxNzcwMjcwMjM3LCJleHAiOjE3NzAzMDYyMzd9.c3lrEVVjvIw2fMDbYE8QDHdcm1nS_hP2D6Am0yUg1dE
+
+{
+    "slot": { "id": 4 },
+    "startTime": "2026-02-10T10:00:00",
+    "endTime": "2026-02-10T18:00:00"
+}
+
+
+
+
+
+
+
+
+
+
+
+
+//Clean Start!
+
+
+### 1. Register Manager
+POST http://localhost:8080/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Super Manager",
+  "email": "manager@test.com",
+  "password": "password123",
+  "role": "MANAGER"
+}
+
+### 2. Register Alice (Resident)
+POST http://localhost:8080/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Alice Smith",
+  "email": "alice@test.com",
+  "password": "password123",
+  "role": "RESIDENT"
+}
+
+### 3. Register Bob (Resident)
+POST http://localhost:8080/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Bob Jones",
+  "email": "bob@test.com",
+  "password": "password123",
+  "role": "RESIDENT"
+}
+
+
+### 1. Login Manager 
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "manager@test.com",
+  "password": "password123"
+}
+
+//eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYW5hZ2VyQHRlc3QuY29tIiwiaWF0IjoxNzcwMjg4NTQ1LCJleHAiOjE3NzAzMjQ1NDV9.0IE-ruKKk4PbFDJnheOZaXMKgI17RsY-TZQboW7MygQ
+
+
+### 1. Login Alice (Resident)
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "alice@test.com",
+  "password": "password123"
+}
+
+//eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhbGljZUB0ZXN0LmNvbSIsImlhdCI6MTc3MDI4ODU5OSwiZXhwIjoxNzcwMzI0NTk5fQ.1UedC4oBI9Rq6EjIp2BX1R4kt0bE6tRyqzuO2UnB9h4
+
+### 1. Login Bob (Resident)
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "bob@test.com",
+  "password": "password123"
+}
+
+//eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJib2JAdGVzdC5jb20iLCJpYXQiOjE3NzAyNzE3MjAsImV4cCI6MTc3MDMwNzcyMH0.VEDKnPJwd9a5aqz_kQPBHDHgUW40MHWbrfbh7NWo81s
+
+### 4. Create Slot for Alice (Assume Alice ID is 16)
+POST http://localhost:8080/api/parking/admin/create-slot
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYW5hZ2VyQHRlc3QuY29tIiwiaWF0IjoxNzcwMjcxMTg3LCJleHAiOjE3NzAzMDcxODd9.9WnXEhBEuZQEex-tsgvMKP9_yUgXuauKgXdP4sb17Ts
+Content-Type: application/json
+
+{
+    "slotNumber": "A-101",
+    "owner": { "id": 16 }
+}
+
+### 5. Create Slot for Bob (Assume Bob ID is 15)
+POST http://localhost:8080/api/parking/admin/create-slot
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYW5hZ2VyQHRlc3QuY29tIiwiaWF0IjoxNzcwMjcxMTg3LCJleHAiOjE3NzAzMDcxODd9.9WnXEhBEuZQEex-tsgvMKP9_yUgXuauKgXdP4sb17Ts
+Content-Type: application/json
+
+{
+    "slotNumber": "B-202",
+    "owner": { "id": 15 }
+}
+
+### 6. ALICE: Make her spot available
+# Login as Alice first to get her token
+PUT http://localhost:8080/api/parking/my-slot/availability?available=true
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhbGljZUB0ZXN0LmNvbSIsImlhdCI6MTc3MDI3MTY4MCwiZXhwIjoxNzcwMzA3NjgwfQ.At7aszeUA-N__060Nm1iWiGO-d-Pv95jm2qw6ErWGKQ
+
+### 7. BOB: See available spots
+# Login as Bob first to get his token
+GET http://localhost:8080/api/parking/available
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJib2JAdGVzdC5jb20iLCJpYXQiOjE3NzAyNzE3MjAsImV4cCI6MTc3MDMwNzcyMH0.VEDKnPJwd9a5aqz_kQPBHDHgUW40MHWbrfbh7NWo81s
+
+### 8. BOB: Request Alice's spot
+# Look at the ID from request #7 (likely id: 6)
+POST http://localhost:8080/api/parking/request
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJib2JAdGVzdC5jb20iLCJpYXQiOjE3NzAyNzE3MjAsImV4cCI6MTc3MDMwNzcyMH0.VEDKnPJwd9a5aqz_kQPBHDHgUW40MHWbrfbh7NWo81s
+Content-Type: application/json
+
+{
+    "slot": { "id": 6 },
+    "startTime": "2026-02-10T08:00:00",
+    "endTime": "2026-02-10T18:00:00"
+}
+
+### 9. ALICE: Approve Bob
+# Alice checks her pending list, finds Request ID (likely 1)
+PUT http://localhost:8080/api/parking/request/2?status=APPROVED
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhbGljZUB0ZXN0LmNvbSIsImlhdCI6MTc3MDI3MTY4MCwiZXhwIjoxNzcwMzA3NjgwfQ.At7aszeUA-N__060Nm1iWiGO-d-Pv95jm2qw6ErWGKQ
+
+
+
+### 1. ALICE: Trigger SOS
+# Alice is in trouble and hits the button. 
+# Her identity is pulled automatically from the token.
+POST http://localhost:8080/api/sos
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJmcmFua0ByZXNpZGVudC5jb20iLCJpYXQiOjE3NzAzMDc3MzgsImV4cCI6MTc3MDM0MzczOH0.BV1bbS5NlrGkFvmkOY7iSyWYZkYd9LrL0DpcNJelKnw
+
+### 2. MANAGER: View Active Emergencies
+# The security desk sees the active alert.
+GET http://localhost:8080/api/sos/active
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYW5hZ2VyQHRlc3QuY29tIiwiaWF0IjoxNzcwMjcxMTg3LCJleHAiOjE3NzAzMDcxODd9.9WnXEhBEuZQEex-tsgvMKP9_yUgXuauKgXdP4sb17Ts
+
+### 3. BOB: Attempt to Clear Alice's SOS (Should FAIL 403)
+# Bob tries to dismiss Alice's emergency. The system should block him.
+PUT http://localhost:8080/api/sos/1/clear
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJib2JAdGVzdC5jb20iLCJpYXQiOjE3NzAyNzE3MjAsImV4cCI6MTc3MDMwNzcyMH0.VEDKnPJwd9a5aqz_kQPBHDHgUW40MHWbrfbh7NWo81s
+
+### 4. MANAGER: Clear/Resolve the SOS
+# After the manager helps Alice, they clear the alert.
+# Replace "1" with the Alert ID from request #2
+PUT http://localhost:8080/api/sos/6/clear
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYW5hZ2VyQHRlc3QuY29tIiwiaWF0IjoxNzcwMjcxMTg3LCJleHAiOjE3NzAzMDcxODd9.9WnXEhBEuZQEex-tsgvMKP9_yUgXuauKgXdP4sb17Ts
+
+### 5. VERIFY: Check active alerts again
+# Should return an empty list []
+GET http://localhost:8080/api/sos/active
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYW5hZ2VyQHRlc3QuY29tIiwiaWF0IjoxNzcwMjcxMTg3LCJleHAiOjE3NzAzMDcxODd9.9WnXEhBEuZQEex-tsgvMKP9_yUgXuauKgXdP4sb17Ts
+
+### 6. ALICE: View her own SOS history
+GET http://localhost:8080/api/sos/my-history
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhbGljZUB0ZXN0LmNvbSIsImlhdCI6MTc3MDI3MTY4MCwiZXhwIjoxNzcwMzA3NjgwfQ.At7aszeUA-N__060Nm1iWiGO-d-Pv95jm2qw6ErWGKQ 
+
+
+
+### 1. ALICE: Check Calendar for Rooftop (Should be empty initially)
+GET http://localhost:8080/api/common-area/calendar?area=Rooftop
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhbGljZUB0ZXN0LmNvbSIsImlhdCI6MTc3MDI5Mjg5NCwiZXhwIjoxNzcwMzI4ODk0fQ.Qi4Jwgz4S6cC9JyWtLyfLal3PaMRKbkTr8SAFCWbAcI
+Content-Type: application/json
+
+### 2. ALICE: Request the Rooftop for a Party
+POST http://localhost:8080/api/common-area/book
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhbGljZUB0ZXN0LmNvbSIsImlhdCI6MTc3MDI5Mjg5NCwiZXhwIjoxNzcwMzI4ODk0fQ.Qi4Jwgz4S6cC9JyWtLyfLal3PaMRKbkTr8SAFCWbAcI
+Content-Type: application/json
+
+{
+  "areaName": "Rooftop",
+  "startTime": "2026-03-10T18:00:00",
+  "endTime": "2026-03-10T22:00:00"
+}
+
+### 3. ALICE: Request the Gym (Should Fail - Invalid Area)
+POST http://localhost:8080/api/common-area/book
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhbGljZUB0ZXN0LmNvbSIsImlhdCI6MTc3MDI5Mjg5NCwiZXhwIjoxNzcwMzI4ODk0fQ.Qi4Jwgz4S6cC9JyWtLyfLal3PaMRKbkTr8SAFCWbAcI
+Content-Type: application/json
+
+{
+  "areaName": "Gym", 
+  "startTime": "2026-03-11T10:00:00",
+  "endTime": "2026-03-11T11:00:00"
+}
+
+### 4. MANAGER: View Pending Requests
+GET http://localhost:8080/api/common-area/pending
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYW5hZ2VyQHRlc3QuY29tIiwiaWF0IjoxNzcwMjg4NTQ1LCJleHAiOjE3NzAzMjQ1NDV9.0IE-ruKKk4PbFDJnheOZaXMKgI17RsY-TZQboW7MygQ
+
+### 5. MANAGER: Approve Alice's Request
+# Replace '1' with the actual ID from step 4
+PUT http://localhost:8080/api/common-area/request/1?status=APPROVED
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYW5hZ2VyQHRlc3QuY29tIiwiaWF0IjoxNzcwMjg4NTQ1LCJleHAiOjE3NzAzMjQ1NDV9.0IE-ruKKk4PbFDJnheOZaXMKgI17RsY-TZQboW7MygQ
+### 6. BOB: Check Calendar (Should now see Alice's booking)
+GET http://localhost:8080/api/common-area/calendar?area=Rooftop
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJib2JAdGVzdC5jb20iLCJpYXQiOjE3NzAyNzE3MjAsImV4cCI6MTc3MDMwNzcyMH0.VEDKnPJwd9a5aqz_kQPBHDHgUW40MHWbrfbh7NWo81s
+
+
+
+//After admin0 is created
+
+
+### 1. Login as Admin0 (Should work immediately)
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "exampleresidence1@gmail.com",
+  "password": "exampleadmin0"
+}
+
+//eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJleGFtcGxlcmVzaWRlbmNlMUBnbWFpbC5jb20iLCJpYXQiOjE3NzAzMDAwNjAsImV4cCI6MTc3MDMzNjA2MH0.HwYnxhK68F4y8PFWkn49S9-bEteduC828P5saGKrKhY
+
+
+### 2. Register a Normal Resident
+POST http://localhost:8080/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Charlie Resident",
+  "email": "charlie@test.com",
+  "password": "password123",
+  "role": "RESIDENT"
+}
+
+### 3. Login as Charlie (Should work immediately)
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "charlie@test.com",
+  "password": "password123"
+}
+
+//eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJjaGFybGllQHRlc3QuY29tIiwiaWF0IjoxNzcwMzAwMTUyLCJleHAiOjE3NzAzMzYxNTJ9.pxAKHIq9CVT2uWEtPD-44rHpiIRMJcFvEscLYxfiqj0
+
+### 4. Register New Manager (Dave)
+# ACTION: After running this, check exampleresidence1@gmail.com for the code!
+POST http://localhost:8080/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Dave Manager",
+  "email": "dave@manager.com",
+  "password": "managerpass",
+  "role": "MANAGER"
+}
+
+### 5. Attempt Login as Dave (Should FAIL with 403 Forbidden)
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "dave@manager.com",
+  "password": "managerpass"
+}
+
+//eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkYXZlQG1hbmFnZXIuY29tIiwiaWF0IjoxNzcwMzAwNDQwLCJleHAiOjE3NzAzMzY0NDB9.UVeQZqunePpIx66DzXAp8F0lm_tgEaHz3TnuCbN2iIs
+
+### 6. Verify Dave (Input Code from Email)
+POST http://localhost:8080/api/auth/verify-manager
+Content-Type: application/json
+
+{
+  "email": "dave@manager.com",
+  "code": "81316" 
+}
+
+
+### 4. Register New Manager (Alvin)
+# ACTION: After running this, check exampleresidence1@gmail.com for the code!
+POST http://localhost:8080/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Alvin the Manager",
+  "email": "alvin@manager.com",
+  "password": "managerpass",
+  "role": "MANAGER"
+}
+
+### 5. Attempt Login as Dave (Should FAIL with 403 Forbidden)
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "alvin@manager.com",
+  "password": "managerpass"
+}
+
+//
+
+### 6. Verify Dave (Input Code from Email)
+POST http://localhost:8080/api/auth/verify-account
+Content-Type: application/json
+
+{
+  "email": "alvin@manager.com",
+  "code": "99975" 
+}
+
+
+
+
+
+//AFTER 2FA FOR ALL USERS
+
+
+
+
+
+
+
+### 1. Login as Admin0 (To check system is awake)
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "exampleresidence1@gmail.com",
+  "password": "exampleadmin0"
+}
+
+//eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJleGFtcGxlcmVzaWRlbmNlMUBnbWFpbC5jb20iLCJpYXQiOjE3NzAzMDI5MzQsImV4cCI6MTc3MDMzODkzNH0.e0xyDbNRNAV-_9ByaC0zwj6HGZIVu54JB2SrtbpyPmU
+
+### 2. Register Resident (Frank wants House 1-05)
+# ACTION: Check Admin's Email after sending this!
+POST http://localhost:8080/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Frank Resident",
+  "email": "frank@resident.com",
+  "password": "password123",
+  "role": "RESIDENT",
+  "requestedHouseNumber": "1-05"
+}
+
+### 3. Try Login as Frank (Should FAIL - 403 Forbidden)
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "frank@resident.com",
+  "password": "password123"
+}
+
+### 4. Verify Frank (Enter Code from Admin's Email)
+# REPLACE '12345' with the code you received in exampleresidence1@gmail.com
+POST http://localhost:8080/api/auth/verify-account
+Content-Type: application/json
+
+{
+  "email": "frank@resident.com",
+  "code": "69107"
+}
+
+### 5. Login as Gina
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "gina@resident.com",
+  "password": "password123"
+}
+
+### 6. (Optional) Fail Test: Try to register for the SAME house
+# This should fail because Frank already owns 1-05
+POST http://localhost:8080/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Greedy Gary",
+  "email": "gary@resident.com",
+  "password": "password123",
+  "role": "RESIDENT",
+  "requestedHouseNumber": "1-05"
+}
+
+### Verify Manager (Dave) - UPDATED ENDPOINT
+# Make sure to use the code sent to exampleresidence1@gmail.com
+POST http://localhost:8080/api/auth/verify-account
+Content-Type: application/json
+
+{
+  "email": "dave@manager.com",
+  "code": "81316" 
+}
+
+
+
+
+
+### 1. Register Resident (Gina -> House 1-06)
+# ACTION: Check Admin's Email (exampleresidence1@gmail.com) for the code
+POST http://localhost:8080/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Gina Resident",
+  "email": "gina@resident.com",
+  "password": "password123",
+  "role": "RESIDENT",
+  "requestedHouseNumber": "1-06"
+}
+
+### 2. Verify Gina (Enter Code)
+# REPLACE '12345' with the code from email
+# EXPECTED RESPONSE: "Verification successful! Housing and Parking assigned."
+POST http://localhost:8080/api/auth/verify-account
+Content-Type: application/json
+
+{
+  "email": "gina@resident.com",
+  "code": "39242"
+}
+
+### 3. Register Manager (Mike)
+# ACTION: Check Admin's Email again for a NEW code
+POST http://localhost:8080/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Mike Manager",
+  "email": "mike@manager.com",
+  "password": "managerpass",
+  "role": "MANAGER"
+}
+
+### 4. Verify Mike (Enter Code)
+# REPLACE '67890' with the new code from email
+# EXPECTED RESPONSE: "Verification successful! Manager account activated."
+POST http://localhost:8080/api/auth/verify-account
+Content-Type: application/json
+
+{
+  "email": "mike@manager.com",
+  "code": "52707"
+}
+
+### 5. Register Resident (Harry -> House 2-01)
+# ACTION: Check Admin's Email (exampleresidence1@gmail.com) for the code
+POST http://localhost:8080/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Harry Resident",
+  "email": "harry@resident.com",
+  "password": "password123",
+  "role": "RESIDENT",
+  "requestedHouseNumber": "2-01"
+}
+
+### 2. Verify Harry (Enter Code)
+# REPLACE '12345' with the code from email
+# EXPECTED RESPONSE: "Verification successful! Housing and Parking assigned."
+POST http://localhost:8080/api/auth/verify-account
+Content-Type: application/json
+
+{
+  "email": "harry@resident.com",
+  "code": "24074"
+}
+
+
+
+
+### A. Resident (Frank) books the Rooftop
+POST http://localhost:8080/api/common-area/book
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJmcmFua0ByZXNpZGVudC5jb20iLCJpYXQiOjE3NzAzMTc0MjIsImV4cCI6MTc3MDM1MzQyMn0.WE9wjUZVz2c03eQ_-yvdO-qTsQaPqaMXJaMCTXHHTxA
+
+{
+  "areaName": "Rooftop",
+  "startTime": "2026-05-20T10:00:00",
+  "endTime": "2026-05-20T12:00:00"
+}
+
+### B. Resident cancels their OWN booking
+# Replace '1' with the ID returned above
+DELETE http://localhost:8080/api/common-area/1
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJmcmFua0ByZXNpZGVudC5jb20iLCJpYXQiOjE3NzAzMTc0MjIsImV4cCI6MTc3MDM1MzQyMn0.WE9wjUZVz2c03eQ_-yvdO-qTsQaPqaMXJaMCTXHHTxA
+
+### C. Resident books again (for Manager to delete)
+POST http://localhost:8080/api/common-area/book
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJmcmFua0ByZXNpZGVudC5jb20iLCJpYXQiOjE3NzAzMTc0MjIsImV4cCI6MTc3MDM1MzQyMn0.WE9wjUZVz2c03eQ_-yvdO-qTsQaPqaMXJaMCTXHHTxA
+
+{
+  "areaName": "Swimming Pool",
+  "startTime": "2026-05-21T14:00:00",
+  "endTime": "2026-05-21T16:00:00"
+}
+
+### D. Manager deletes Resident's booking
+# Replace '2' with the ID returned above
+DELETE http://localhost:8080/api/common-area/2
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJleGFtcGxlcmVzaWRlbmNlMUBnbWFpbC5jb20iLCJpYXQiOjE3NzAzMTc0NjIsImV4cCI6MTc3MDM1MzQ2Mn0.bxy7KvkXxGOgnaTiyLvwPe1T4Dh64w-ZVsy2Rma9pJw
+
+
+
+### A. Resident creates a request
+POST http://localhost:8080/api/maintenance
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJmcmFua0ByZXNpZGVudC5jb20iLCJpYXQiOjE3NzAzMTc0MjIsImV4cCI6MTc3MDM1MzQyMn0.WE9wjUZVz2c03eQ_-yvdO-qTsQaPqaMXJaMCTXHHTxA
+
+{
+  "title": "Leaky Faucet",
+  "description": "Kitchen sink is dripping."
+}
+
+### B. Resident deletes their own request
+# Replace '1' with ID
+DELETE http://localhost:8080/api/maintenance/1
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJmcmFua0ByZXNpZGVudC5jb20iLCJpYXQiOjE3NzAzMTc0MjIsImV4cCI6MTc3MDM1MzQyMn0.WE9wjUZVz2c03eQ_-yvdO-qTsQaPqaMXJaMCTXHHTxA
+
+### C. Resident creates another request
+POST http://localhost:8080/api/maintenance
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJmcmFua0ByZXNpZGVudC5jb20iLCJpYXQiOjE3NzAzMTc0MjIsImV4cCI6MTc3MDM1MzQyMn0.WE9wjUZVz2c03eQ_-yvdO-qTsQaPqaMXJaMCTXHHTxA
+
+{
+  "title": "Broken Window",
+  "description": "Living room window won't close."
+}
+
+### D. Manager deletes the request
+# Replace '2' with ID
+DELETE http://localhost:8080/api/maintenance/2
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJleGFtcGxlcmVzaWRlbmNlMUBnbWFpbC5jb20iLCJpYXQiOjE3NzAzMTc0NjIsImV4cCI6MTc3MDM1MzQ2Mn0.bxy7KvkXxGOgnaTiyLvwPe1T4Dh64w-ZVsy2Rma9pJw
+
+
+### A. Manager posts a notice
+POST http://localhost:8080/api/notices
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJleGFtcGxlcmVzaWRlbmNlMUBnbWFpbC5jb20iLCJpYXQiOjE3NzAzMTc0NjIsImV4cCI6MTc3MDM1MzQ2Mn0.bxy7KvkXxGOgnaTiyLvwPe1T4Dh64w-ZVsy2Rma9pJw
+
+{
+  "title": "Test Notice",
+  "content": "This will be deleted."
+}
+
+### B. Manager deletes the notice
+# Replace '1' with ID
+DELETE http://localhost:8080/api/notices/1
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJleGFtcGxlcmVzaWRlbmNlMUBnbWFpbC5jb20iLCJpYXQiOjE3NzAzMTc0NjIsImV4cCI6MTc3MDM1MzQ2Mn0.bxy7KvkXxGOgnaTiyLvwPe1T4Dh64w-ZVsy2Rma9pJw
+
+
+
+
+
+### A. Gina requests Frank's Slot (P-1-05)
+# Ensure Frank has set his slot to 'Available' first!
+POST http://localhost:8080/api/parking/request
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJnaW5hQHJlc2lkZW50LmNvbSIsImlhdCI6MTc3MDMxNzg4MywiZXhwIjoxNzcwMzUzODgzfQ.BumE-nFOLsTN8mKveQyGjiQd6ANyuXj6CXVKhmeqGCg
+
+{
+  "slot": { "id": 1 }, 
+  "startTime": "2026-06-01T08:00:00",
+  "endTime": "2026-06-01T10:00:00"
+}
+
+### B. Borrower (Gina) Cancels Request
+# Replace '1' with ID
+DELETE http://localhost:8080/api/parking/request/1
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJnaW5hQHJlc2lkZW50LmNvbSIsImlhdCI6MTc3MDMxNzg4MywiZXhwIjoxNzcwMzUzODgzfQ.BumE-nFOLsTN8mKveQyGjiQd6ANyuXj6CXVKhmeqGCg
+
+### C. Gina requests again (For Lender Test)
+POST http://localhost:8080/api/parking/request
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJnaW5hQHJlc2lkZW50LmNvbSIsImlhdCI6MTc3MDMxNzg4MywiZXhwIjoxNzcwMzUzODgzfQ.BumE-nFOLsTN8mKveQyGjiQd6ANyuXj6CXVKhmeqGCg
+
+{
+  "slot": { "id": 1 },
+  "startTime": "2026-06-02T08:00:00",
+  "endTime": "2026-06-02T10:00:00"
+}
+
+### D. Lender (Frank) Rejects/Deletes the PENDING request
+# Replace '2' with ID. Should work because status is PENDING.
+DELETE http://localhost:8080/api/parking/request/2
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJmcmFua0ByZXNpZGVudC5jb20iLCJpYXQiOjE3NzAzMTc0MjIsImV4cCI6MTc3MDM1MzQyMn0.WE9wjUZVz2c03eQ_-yvdO-qTsQaPqaMXJaMCTXHHTxA
+
+
+
+
+
+
+
+
+### 1. Frank sets his slot to "Available"
+# This makes Slot P-1-05 (ID 1) visible to borrowers
+PUT http://localhost:8080/api/parking/my-slot/availability?available=true
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJmcmFua0ByZXNpZGVudC5jb20iLCJpYXQiOjE3NzAzMTc0MjIsImV4cCI6MTc3MDM1MzQyMn0.WE9wjUZVz2c03eQ_-yvdO-qTsQaPqaMXJaMCTXHHTxA
+
+### 2. Gina requests Frank's slot
+# Assuming Frank's slot has ID 12. If not, check /api/parking/available to find the ID.
+POST http://localhost:8080/api/parking/request
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJnaW5hQHJlc2lkZW50LmNvbSIsImlhdCI6MTc3MDMxNzg4MywiZXhwIjoxNzcwMzUzODgzfQ.BumE-nFOLsTN8mKveQyGjiQd6ANyuXj6CXVKhmeqGCg
+
+{
+  "slot": { "id": 12 },
+  "startTime": "2026-07-01T10:00:00",
+  "endTime": "2026-07-01T12:00:00"
+}
+
+### 3. Frank Approves the Request
+# REPLACE '1' with the requestId returned from the step above
+PUT http://localhost:8080/api/parking/request/1?status=APPROVED
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJmcmFua0ByZXNpZGVudC5jb20iLCJpYXQiOjE3NzAzMTc0MjIsImV4cCI6MTc3MDM1MzQyMn0.WE9wjUZVz2c03eQ_-yvdO-qTsQaPqaMXJaMCTXHHTxA
+
+### 4. TEST: Frank tries to Cancel/Delete the APPROVED request
+# EXPECTED RESPONSE: 403 Forbidden
+# Message: "You cannot cancel a booking once you have approved it."
+DELETE http://localhost:8080/api/parking/request/1
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJmcmFua0ByZXNpZGVudC5jb20iLCJpYXQiOjE3NzAzMTc0MjIsImV4cCI6MTc3MDM1MzQyMn0.WE9wjUZVz2c03eQ_-yvdO-qTsQaPqaMXJaMCTXHHTxA
+
+
+
+### A. Frank triggers SOS
+POST http://localhost:8080/api/sos
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJpbWV0aEB0ZXN0LmNvbSIsImlhdCI6MTc3MDM2NjU2OSwiZXhwIjoxNzcwNDAyNTY5fQ.wq65nHT7ocNaGozOvFVH0ZdI8ba-gvkeBTuZzZBdoG4
+
+### B. Frank deletes the SOS log entry
+# Replace '1' with ID
+DELETE http://localhost:8080/api/sos/5
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJmcmFua0ByZXNpZGVudC5jb20iLCJpYXQiOjE3NzAzMTc0MjIsImV4cCI6MTc3MDM1MzQyMn0.WE9wjUZVz2c03eQ_-yvdO-qTsQaPqaMXJaMCTXHHTxA
+
+
+
+### B. admin deletes the SOS log entry
+# Replace '1' with ID
+DELETE http://localhost:8080/api/sos/5
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJleGFtcGxlcmVzaWRlbmNlMUBnbWFpbC5jb20iLCJpYXQiOjE3NzAzMTg5NDcsImV4cCI6MTc3MDM1NDk0N30.kdopr0-C90qMB_A8WTK48Zl0urm_RT6iZb6yzPnNo8o
+
+### Resident (Frank) clears his own SOS
+# Replace '1' with the actual SOS Alert ID
+PUT http://localhost:8080/api/sos/3/clear
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJmcmFua0ByZXNpZGVudC5jb20iLCJpYXQiOjE3NzAzMTc0MjIsImV4cCI6MTc3MDM1MzQyMn0.WE9wjUZVz2c03eQ_-yvdO-qTsQaPqaMXJaMCTXHHTxA
+
+
+### Manager (Admin) clears a Resident's SOS
+# Replace '1' with the actual SOS Alert ID
 PUT http://localhost:8080/api/sos/2/clear
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqYXNvbmxvbHNAdGVzdC5jb20iLCJpYXQiOjE3NzAyMDIwNzYsImV4cCI6MTc3MDIzODA3Nn0.y0jNOCDIlyU-45xgXtclrhSMg8qMtMzL85LfhqsCWUo
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJleGFtcGxlcmVzaWRlbmNlMUBnbWFpbC5jb20iLCJpYXQiOjE3NzAzMTg5NDcsImV4cCI6MTc3MDM1NDk0N30.kdopr0-C90qMB_A8WTK48Zl0urm_RT6iZb6yzPnNo8o
+
+
+### 1. Register Shenal Manager
+POST http://localhost:8080/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Shenal Arosha",
+  "email": "shenalarosha7@gmail.com",
+  "password": "shenal12345",
+  "role": "MANAGER"
+}
+
+
+### Verify Manager shenal - UPDATED ENDPOINT
+# Make sure to use the code sent to exampleresidence1@gmail.com
+POST http://localhost:8080/api/auth/verify-account
+Content-Type: application/json
+
+{
+  "email": "shenalarosha7@gmail.com",
+  "code": "15174" 
+}
+
+
+
+### 1. Login as Manager Shenal (To check system is awake)
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "shenalarosha7@gmail.com",
+  "password": "shenal12345"
+}
+
+### 2. Register Resident (Imeth wants House 4-05)
+# ACTION: Check Admin's Email after sending this!
+POST http://localhost:8080/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Imeth Rathnayake",
+  "email": "imeth@test.com",
+  "password": "password123",
+  "role": "RESIDENT",
+  "requestedHouseNumber": "4-05"
+}
+
+
+### 4. Verify Imeth (Enter Code from Admin's Email)
+# REPLACE '12345' with the code you received in exampleresidence1@gmail.com
+POST http://localhost:8080/api/auth/verify-account
+Content-Type: application/json
+
+{
+  "email": "imeth@test.com",
+  "code": "69890"
+}
+
+### 3. Try Login as Harry
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "harry@resident.com",
+  "password": "password123"
+}
+
+### Get Resident Table (Manager Only)
+GET http://localhost:8080/api/manager/residents
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJleGFtcGxlcmVzaWRlbmNlMUBnbWFpbC5jb20iLCJpYXQiOjE3NzAzNjY0ODMsImV4cCI6MTc3MDQwMjQ4M30.Xs45-wklidJ7Y6sAB0SwQ4pVmqr876-z2TlK3Pj9P6I
+
+
+### Deleting users
+DELETE http://localhost:8080/api/users/3
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJleGFtcGxlcmVzaWRlbmNlMUBnbWFpbC5jb20iLCJpYXQiOjE3NzA0NDc1MTMsImV4cCI6MTc3MDQ4MzUxM30.LAh1FZqj6TEOopEksX_Eady_plYbrnSmKQZiA7-YTYY
+
+
+
+
+
+### 1. HELPER: Get All Users (To find the IDs)
+# Use this to see who is ID 2, ID 3, etc.
+GET http://localhost:8080/api/manager/residents
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJleGFtcGxlcmVzaWRlbmNlMUBnbWFpbC5jb20iLCJpYXQiOjE3NzA0NDc1MTMsImV4cCI6MTc3MDQ4MzUxM30.LAh1FZqj6TEOopEksX_Eady_plYbrnSmKQZiA7-YTYY
+
+### ---------------------------------------------------
+
+### 2. TEST: Manager deletes a RESIDENT
+# Replace '2' with the actual ID of a resident (e.g., Frank)
+DELETE http://localhost:8080/api/auth/delete/3
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJleGFtcGxlcmVzaWRlbmNlMUBnbWFpbC5jb20iLCJpYXQiOjE3NzA0NDc1MTMsImV4cCI6MTc3MDQ4MzUxM30.LAh1FZqj6TEOopEksX_Eady_plYbrnSmKQZiA7-YTYY
+
+### ---------------------------------------------------
+
+### 3. TEST: Manager deletes another MANAGER
+# Replace '3' with the ID of another manager
+# (Do not delete yourself, or your token will stop working!)
+DELETE http://localhost:8080/api/auth/delete/9
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJleGFtcGxlcmVzaWRlbmNlMUBnbWFpbC5jb20iLCJpYXQiOjE3NzA0NDc1MTMsImV4cCI6MTc3MDQ4MzUxM30.LAh1FZqj6TEOopEksX_Eady_plYbrnSmKQZiA7-YTYY
+
+
+
+### 1. Upload Profile Picture (Gina)
+# We send a small Base64 string representing a Red Dot image.
+PUT http://localhost:8080/api/users/profile-picture
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJnaW5hQHJlc2lkZW50LmNvbSIsImlhdCI6MTc3MDQ1MDQ4MSwiZXhwIjoxNzcwNDg2NDgxfQ.m8fYSbt6muf_GeNS_VWH-XWjB4iF1MogET9FQJcYdbo
+
+{
+  "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg=="
+}
+
+### ---------------------------------------------------
+
+### 2. Verify: Get My Profile Picture
+# Should return the JSON object with the "image" key containing the string above.
+GET http://localhost:8080/api/users/profile-picture
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJnaW5hQHJlc2lkZW50LmNvbSIsImlhdCI6MTc3MDQ1MDQ4MSwiZXhwIjoxNzcwNDg2NDgxfQ.m8fYSbt6muf_GeNS_VWH-XWjB4iF1MogET9FQJcYdbo
+
+### ---------------------------------------------------
+
+### 3. Verify: Get Full Profile
+# Check the "profilePicture" field in the main User object.
+GET http://localhost:8080/api/users/me
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJnaW5hQHJlc2lkZW50LmNvbSIsImlhdCI6MTc3MDQ1MDQ4MSwiZXhwIjoxNzcwNDg2NDgxfQ.m8fYSbt6muf_GeNS_VWH-XWjB4iF1MogET9FQJcYdbo
+
+
+
+
+
+
+### ==========================================
+### STEP 1: MANAGER CREATES A BILL
+### ==========================================
+POST http://localhost:8080/api/payments
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkYXZlQG1hbmFnZXIuY29tIiwiaWF0IjoxNzcxMjIzNTY1LCJleHAiOjE3NzEyNTk1NjV9.fz3od75tMi0LDpsb6IYnJJFmZCWhiZJrRR2t5idFldg
+
+{
+  "amount": 150.00,
+  "type": "UTILITY",
+  "dueDate": "2026-03-01",
+  "resident": { "id": 7 }
+}
+
+### ==========================================
+### STEP 2: RESIDENT CHECKS UNPAID BILLS
+### ==========================================
+# Harry should see the new bill here with status "PENDING"
+GET http://localhost:8080/api/payments/unpaid
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJoYXJyeUByZXNpZGVudC5jb20iLCJpYXQiOjE3NzEyMjYwODcsImV4cCI6MTc3MTI2MjA4N30.i6GV_XdpcHzmk6sIk7N46_6tUeGgxCe_yx8OEHq-Gwo
+
+### ==========================================
+### STEP 3: RESIDENT UPLOADS PROOF (PAY)
+### ==========================================
+# Replace '1' with the actual Payment ID from Step 2
+PUT http://localhost:8080/api/payments/3/submit-proof
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJoYXJyeUByZXNpZGVudC5jb20iLCJpYXQiOjE3NzEyMjYwODcsImV4cCI6MTc3MTI2MjA4N30.i6GV_XdpcHzmk6sIk7N46_6tUeGgxCe_yx8OEHq-Gwo
+
+{
+  "receiptImage": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg=="
+}
+
+### ==========================================
+### STEP 4: MANAGER CHECKS REVIEW QUEUE
+### ==========================================
+# Manager should see the bill here now (Status: REVIEW)
+GET http://localhost:8080/api/payments/pending-review
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkYXZlQG1hbmFnZXIuY29tIiwiaWF0IjoxNzcxMjIzNTY1LCJleHAiOjE3NzEyNTk1NjV9.fz3od75tMi0LDpsb6IYnJJFmZCWhiZJrRR2t5idFldg
+
+### ==========================================
+### STEP 5: MANAGER APPROVES PAYMENT
+### ==========================================
+# Replace '1' with the Payment ID
+# approved=true marks it PAID. approved=false rejects it.
+PUT http://localhost:8080/api/payments/3/verify?approved=true
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkYXZlQG1hbmFnZXIuY29tIiwiaWF0IjoxNzcxMjIzNTY1LCJleHAiOjE3NzEyNTk1NjV9.fz3od75tMi0LDpsb6IYnJJFmZCWhiZJrRR2t5idFldg
+
+### ==========================================
+### STEP 6: VERIFY FINAL STATUS
+### ==========================================
+# Harry checks his history. The bill should now be marked isPaid=true.
+GET http://localhost:8080/api/payments
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJoYXJyeUByZXNpZGVudC5jb20iLCJpYXQiOjE3NzEyMjYwODcsImV4cCI6MTc3MTI2MjA4N30.i6GV_XdpcHzmk6sIk7N46_6tUeGgxCe_yx8OEHq-Gwo

@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import com.resiido.main.services.NotificationService;
 
 import java.security.Principal;
 import java.time.LocalDateTime;
@@ -23,6 +24,9 @@ public class SosController {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private NotificationService notificationService;
+
     // Helper: Get logged-in user
     private User getLoggedInUser(Principal principal) {
         return userRepository.findByEmail(principal.getName())
@@ -30,7 +34,6 @@ public class SosController {
     }
 
     // 1. Trigger SOS
-    // URL is just POST /api/sos (No ID needed)
     @PostMapping
     public SosAlert triggerSos(Principal principal) {
         User currentUser = getLoggedInUser(principal);
@@ -40,7 +43,12 @@ public class SosController {
         alert.setTimestamp(LocalDateTime.now());
         alert.setActive(true);
 
-        return sosRepository.save(alert);
+        SosAlert savedAlert = sosRepository.save(alert);
+
+        // TRIGGER NOTIFICATIONS
+        notificationService.sendSosNotifications(currentUser);
+
+        return savedAlert;
     }
 
     // 2. View Active Alerts (Managers & Residents need to see this)
@@ -67,5 +75,12 @@ public class SosController {
 
         alert.setActive(false);
         return sosRepository.save(alert);
+    }
+
+    // 4. Resident: View my own SOS history
+    @GetMapping("/my-history")
+    public List<SosAlert> getMyHistory(Principal principal) {
+        User currentUser = getLoggedInUser(principal);
+        return sosRepository.findByResident(currentUser);
     }
 }

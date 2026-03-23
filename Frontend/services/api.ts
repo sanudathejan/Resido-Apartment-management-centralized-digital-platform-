@@ -54,11 +54,29 @@ class ApiService {
         body: JSON.stringify(data),
       });
 
+      const responseText = await response.text();
+
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        // Try to extract error message from backend response
+        let errorMessage = `HTTP error! status: ${response.status}`;
+        try {
+          const errorJson = JSON.parse(responseText);
+          errorMessage = errorJson.message || errorJson.error || errorMessage;
+        } catch (_e) {
+          // If response is plain text, use it as the error message
+          if (responseText) {
+            errorMessage = responseText;
+          }
+        }
+        throw new Error(errorMessage);
       }
 
-      return await response.json();
+      // Try to parse as JSON, return text if not JSON
+      try {
+        return JSON.parse(responseText) as T;
+      } catch (_e) {
+        return responseText as unknown as T;
+      }
     } catch (error) {
       console.error('API POST Error:', error);
       throw error;

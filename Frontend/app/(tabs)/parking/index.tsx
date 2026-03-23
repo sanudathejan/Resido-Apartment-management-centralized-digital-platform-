@@ -1,6 +1,7 @@
 /**
- * Parking Screen
- * Parking slots and visitor management
+ * Parking & Visitor Management Screen
+ * Purpose: Allows residents to manage their parking slot availability,
+ * respond to lending requests, and track visitor entry/exit.
  */
 
 import React, { useState, useEffect } from 'react';
@@ -13,571 +14,354 @@ import {
   TouchableOpacity,
   Modal,
   Alert,
+  Platform,
+  TextInput,
+  KeyboardAvoidingView,
+  Switch,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { Card, Button, InputField, StatusBadge, EmptyState } from '@/components/ui';
-import { Colors } from '@/constants/colors';
 import { useAuth } from '@/context/AuthContext';
 import { parkingService } from '@/services';
 import { ParkingSlot, VisitorEntry } from '@/types';
 
+/* ─── Updated Design Tokens ─── */
+const C = {
+  bg: '#EBF7ED',        // Slightly darker grey background to make white boxes "pop"
+  primary: '#1D4ED8',   // Deeper blue for better text contrast
+  primaryLight: '#DBEAFE',
+  white: '#FFFFFF',
+  textDark: '#0F172A',  // Deep slate for headers
+  textLight: '#334155', // Darkened from #64748B for significantly better readability
+  textMuted: '#64748B', // Standard grey for secondary info
+  border: '#CBD5E1',    // Slightly darker border for clearer definition
+  success: '#065F46',   // Deep emerald (much easier to read than bright green)
+  warning: '#92400E',
+  error: '#991B1B',
+  secondary: '#5B21B6',
+} as const;
+
+const shadow = (elevation: number) => ({
+  ...Platform.select({
+    ios: {
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: elevation },
+      shadowOpacity: 0.1,
+      shadowRadius: elevation * 2,
+    },
+    android: { elevation },
+  }),
+});
+
 export default function ParkingScreen() {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState<'parking' | 'visitors'>('parking');
-  const [parkingSlot, setParkingSlot] = useState<ParkingSlot | null>(null);
-  const [visitors, setVisitors] = useState<VisitorEntry[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [showVisitorModal, setShowVisitorModal] = useState(false);
-  
-  // Visitor form state
-  const [visitorForm, setVisitorForm] = useState({
-    name: '',
-    phone: '',
-    vehicleNumber: '',
-    purpose: '',
-  });
+  const [activeTab, setActiveTab] = useState<'my_parking' | 'requests'>('my_parking');
+  const [parkingSlot, setParkingSlot] = useState<any>(null); // Replace any with your type
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    loadData();
-  }, []);
+  // Derive parking slot number from user's apartment number
+  const derivedSlotNumber = user?.apartmentNumber ? `P-${user.apartmentNumber}` : 'P-Unassigned';
 
-  const loadData = async () => {
-    try {
-      if (user?.id) {
-        const [slot, visitorData] = await Promise.all([
-          parkingService.getUserParkingSlot(user.id),
-          parkingService.getVisitorEntries(user.id),
-        ]);
-        setParkingSlot(slot);
-        setVisitors(visitorData);
-      }
-    } catch (error) {
-      console.error('Error loading parking data:', error);
-    } finally {
-      setLoading(false);
-    }
+// Toggle State for the "Lend My Slot" switch
+  const [isLending, setIsLending] = useState(false);
+
+/* ─── UI HANDLERS ─── */
+  const handleToggleLending = (value: boolean) => {
+    setIsLending(value);
+    // Add logic here to update the backend via parkingService
   };
 
-  const onRefresh = async () => {
-    setRefreshing(true);
-    await loadData();
-    setRefreshing(false);
-  };
+/* ─── RENDER: MY PARKING TAB ─── */
+  const renderMyParkingTab = () => (
+    <>
+      {/* 1. Slot Visual Card: Displays current assignment status */}
+      <View style={[styles.card, shadow(2)]}>
+        <Image
+          source={{ uri: 'https://images.unsplash.com/photo-1506521781263-d8422e82f27a?q=80&w=1000&auto=format&fit=crop' }}
+          style={styles.slotImage}
+        />
+        <View style={styles.slotHeaderOverlay}>
+            <View style={styles.badgePrimary}>
+                <Text style={styles.badgeTextWhite}>YOUR SLOT</Text>
+            </View>
+        </View>
 
-  const handleRegisterVisitor = async () => {
-    if (!visitorForm.name || !visitorForm.purpose) {
-      Alert.alert('Error', 'Please fill in required fields');
-      return;
-    }
+        <View style={styles.slotDetails}>
+            <View>
+                <Text style={styles.slotSubLabel}>ASSIGNED SLOT</Text>
+                <Text style={styles.slotMainTitle}>Slot {derivedSlotNumber}</Text>
+            </View>
+            <View style={isLending ? styles.statusBadgeGreen : styles.statusBadgeMuted}>
+                <View style={isLending ? styles.dotGreen : styles.dotMuted} />
+                <Text style={isLending ? styles.statusTextGreen : styles.statusTextMuted}>
+                    {isLending ? 'Lending Active' : 'Private'}
+                </Text>
+            </View>
+        </View>
+      </View>
 
-    try {
-      if (user) {
-        await parkingService.registerVisitor({
-          visitorName: visitorForm.name,
-          visitorPhone: visitorForm.phone,
-          vehicleNumber: visitorForm.vehicleNumber,
-          purpose: visitorForm.purpose,
-          resident: user,
-        });
-        Alert.alert('Success', 'Visitor registered successfully');
-        setShowVisitorModal(false);
-        setVisitorForm({ name: '', phone: '', vehicleNumber: '', purpose: '' });
-        loadData();
-      }
-    } catch (error) {
-      Alert.alert('Error', 'Failed to register visitor');
-    }
-  };
+      {/* 2. Lending Management: Switch to allow others to use the slot */}
+      <View style={[styles.toggleCard, shadow(2)]}>
+        <View style={{ flex: 1 }}>
+            <Text style={styles.cardTitle}>Lend My Slot</Text>
+            <Text style={styles.cardSubtitle}>
+                Mark your slot as free for other residents to use temporarily while you're away.
+            </Text>
+        </View>
+        <Switch
+            value={isLending}
+            onValueChange={handleToggleLending}
+            trackColor={{ false: '#CBD5E1', true: '#2563EB' }}
+            thumbColor={Platform.OS === 'android' ? C.white : ''}
+        />
+      </View>
+    </>
+  );
 
-  const toggleSlotAvailability = async () => {
-    if (parkingSlot) {
-      try {
-        const updated = await parkingService.toggleSlotAvailability(
-          parkingSlot.id,
-          !parkingSlot.isAvailableForLending
-        );
-        setParkingSlot(updated);
-        Alert.alert(
-          'Success',
-          updated.isAvailableForLending
-            ? 'Your slot is now available for lending'
-            : 'Your slot is no longer available for lending'
-        );
-      } catch (error) {
-        Alert.alert('Error', 'Failed to update slot availability');
-      }
-    }
-  };
+/* ─── RENDER: REQUESTS TAB ─── */
+  const renderRequestsTab = () => (
+    <>
+      <View style={styles.sectionHeader}>
+        <Text style={styles.sectionTitle}>PENDING REQUESTS</Text>
+        <View style={styles.countBadge}>
+            <Text style={styles.countText}>2 New</Text>
+        </View>
+      </View>
 
-  // Mock data for demo
-  const mockParkingSlot: ParkingSlot = {
-    id: 1,
-    slotNumber: 'P-A12',
-    isAvailableForLending: false,
-    owner: user!,
-    vehicleNumber: 'ABC-1234',
-    vehicleType: 'Car',
-  };
+      <RequestCard
+        name="Resident ID: 405" 
+        date="25 Feb 2026"
+        startTime="09:00 AM"
+        endTime="12:00 PM"
+        note="Need a spot for my guest's car."
+        onAccept={() => Alert.alert("Accepted", `Slot ${derivedSlotNumber} is now booked.`)}
+        onDecline={() => Alert.alert("Denied", "Request has been removed.")}
+      />
 
-  const mockVisitors: VisitorEntry[] = [
-    {
-      id: 1,
-      visitorName: 'John Smith',
-      visitorPhone: '+94 77 123 4567',
-      vehicleNumber: 'XYZ-5678',
-      purpose: 'Family visit',
-      resident: user!,
-      entryTime: new Date().toISOString(),
-      status: 'CHECKED_IN',
-    },
-    {
-      id: 2,
-      visitorName: 'Jane Doe',
-      purpose: 'Delivery',
-      resident: user!,
-      entryTime: new Date(Date.now() - 86400000).toISOString(),
-      exitTime: new Date(Date.now() - 82800000).toISOString(),
-      status: 'CHECKED_OUT',
-    },
-  ];
-
-  const displaySlot = parkingSlot || mockParkingSlot;
-  const displayVisitors = visitors.length > 0 ? visitors : mockVisitors;
+      <RequestCard
+        name="Resident ID: 112" 
+        date="26 Feb 2026"
+        startTime="06:00 PM"
+        endTime="10:00 PM"
+        note="Quick visit for a delivery."
+        onAccept={() => {}}
+        onDecline={() => {}}
+      />
+    </>
+  );
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      {/* Header */}
-      <LinearGradient
-        colors={Colors.gradients.secondary as [string, string, ...string[]]}
-        style={styles.header}
-      >
-        <Text style={styles.headerTitle}>Parking & Visitors</Text>
-        <Text style={styles.headerSubtitle}>Manage parking and visitor entries</Text>
-      </LinearGradient>
+        {/* Header Section */}
+        <View style={styles.header}>
+            <Text style={styles.headerTitle}>Parking</Text>
+            <Text style={styles.headerSubtitle}>Manage your parking space and requests</Text>
+        </View>
 
-      {/* Tab Selector */}
-      <View style={styles.tabContainer}>
-        <TouchableOpacity
-          onPress={() => setActiveTab('parking')}
-          style={[styles.tab, activeTab === 'parking' && styles.tabActive]}
+        {/* Custom Tab Switcher */}
+        <View style={styles.tabContainer}>
+            <TabButton
+                active={activeTab === 'my_parking'}
+                label="My Parking"
+                icon="car"
+                onPress={() => setActiveTab('my_parking')}
+            />
+            <TabButton
+                active={activeTab === 'requests'}
+                label="Requests"
+                icon="list"
+                onPress={() => setActiveTab('requests')}
+            />
+        </View>
+
+        <ScrollView
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
         >
-          <Ionicons
-            name="car"
-            size={20}
-            color={activeTab === 'parking' ? Colors.primary : Colors.text.secondary}
-          />
-          <Text style={[styles.tabText, activeTab === 'parking' && styles.tabTextActive]}>
-            My Parking
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => setActiveTab('visitors')}
-          style={[styles.tab, activeTab === 'visitors' && styles.tabActive]}
-        >
-          <Ionicons
-            name="people"
-            size={20}
-            color={activeTab === 'visitors' ? Colors.primary : Colors.text.secondary}
-          />
-          <Text style={[styles.tabText, activeTab === 'visitors' && styles.tabTextActive]}>
-            Visitors
-          </Text>
-        </TouchableOpacity>
-      </View>
-
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
-      >
-        {activeTab === 'parking' ? (
-          // Parking Section
-          <>
-            <Card variant="elevated" style={styles.slotCard}>
-              <View style={styles.slotHeader}>
-                <View style={styles.slotIconContainer}>
-                  <Ionicons name="car" size={32} color={Colors.secondary} />
-                </View>
-                <View style={styles.slotInfo}>
-                  <Text style={styles.slotLabel}>Your Parking Slot</Text>
-                  <Text style={styles.slotNumber}>{displaySlot.slotNumber}</Text>
-                </View>
-                <StatusBadge 
-                  status={displaySlot.isAvailableForLending ? 'Available' : 'Occupied'} 
-                />
-              </View>
-
-              <View style={styles.vehicleInfo}>
-                <View style={styles.infoRow}>
-                  <Ionicons name="speedometer-outline" size={18} color={Colors.text.secondary} />
-                  <Text style={styles.infoText}>
-                    Vehicle: {displaySlot.vehicleNumber || 'Not registered'}
-                  </Text>
-                </View>
-                <View style={styles.infoRow}>
-                  <Ionicons name="car-sport-outline" size={18} color={Colors.text.secondary} />
-                  <Text style={styles.infoText}>
-                    Type: {displaySlot.vehicleType || 'Car'}
-                  </Text>
-                </View>
-              </View>
-
-              <Button
-                title={displaySlot.isAvailableForLending ? 'Mark as Unavailable' : 'Lend My Slot'}
-                onPress={toggleSlotAvailability}
-                variant={displaySlot.isAvailableForLending ? 'outline' : 'primary'}
-                icon={
-                  <Ionicons
-                    name={displaySlot.isAvailableForLending ? 'close-circle-outline' : 'share-outline'}
-                    size={20}
-                    color={displaySlot.isAvailableForLending ? Colors.primary : Colors.white}
-                  />
-                }
-              />
-            </Card>
-
-            {/* Parking Rules */}
-            <Card style={styles.rulesCard}>
-              <Text style={styles.cardTitle}>Parking Guidelines</Text>
-              <View style={styles.ruleItem}>
-                <Ionicons name="checkmark-circle" size={18} color={Colors.success} />
-                <Text style={styles.ruleText}>Park only in your assigned slot</Text>
-              </View>
-              <View style={styles.ruleItem}>
-                <Ionicons name="checkmark-circle" size={18} color={Colors.success} />
-                <Text style={styles.ruleText}>Register visitors before entry</Text>
-              </View>
-              <View style={styles.ruleItem}>
-                <Ionicons name="checkmark-circle" size={18} color={Colors.success} />
-                <Text style={styles.ruleText}>Speed limit: 10 km/h in premises</Text>
-              </View>
-            </Card>
-          </>
-        ) : (
-          // Visitors Section
-          <>
-            <Button
-              title="Register New Visitor"
-              onPress={() => setShowVisitorModal(true)}
-              gradient
-              icon={<Ionicons name="person-add" size={20} color={Colors.white} />}
-              style={styles.addVisitorButton}
-            />
-
-            <Text style={styles.sectionTitle}>Visitor History</Text>
-            
-            {displayVisitors.length === 0 ? (
-              <EmptyState
-                icon="people-outline"
-                title="No Visitors"
-                message="You haven't registered any visitors yet."
-              />
-            ) : (
-              displayVisitors.map((visitor) => (
-                <Card key={visitor.id} style={styles.visitorCard}>
-                  <View style={styles.visitorHeader}>
-                    <View style={styles.visitorAvatar}>
-                      <Ionicons name="person" size={24} color={Colors.white} />
-                    </View>
-                    <View style={styles.visitorInfo}>
-                      <Text style={styles.visitorName}>{visitor.visitorName}</Text>
-                      <Text style={styles.visitorPurpose}>{visitor.purpose}</Text>
-                    </View>
-                    <StatusBadge status={visitor.status} />
-                  </View>
-                  
-                  <View style={styles.visitorDetails}>
-                    {visitor.visitorPhone && (
-                      <View style={styles.detailRow}>
-                        <Ionicons name="call-outline" size={16} color={Colors.text.secondary} />
-                        <Text style={styles.detailText}>{visitor.visitorPhone}</Text>
-                      </View>
-                    )}
-                    {visitor.vehicleNumber && (
-                      <View style={styles.detailRow}>
-                        <Ionicons name="car-outline" size={16} color={Colors.text.secondary} />
-                        <Text style={styles.detailText}>{visitor.vehicleNumber}</Text>
-                      </View>
-                    )}
-                    <View style={styles.detailRow}>
-                      <Ionicons name="time-outline" size={16} color={Colors.text.secondary} />
-                      <Text style={styles.detailText}>
-                        {new Date(visitor.entryTime).toLocaleString()}
-                      </Text>
-                    </View>
-                  </View>
-                </Card>
-              ))
-            )}
-          </>
-        )}
-      </ScrollView>
-
-      {/* Visitor Registration Modal */}
-      <Modal
-        visible={showVisitorModal}
-        animationType="slide"
-        presentationStyle="pageSheet"
-        onRequestClose={() => setShowVisitorModal(false)}
-      >
-        <SafeAreaView style={styles.modalContainer}>
-          <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Register Visitor</Text>
-            <TouchableOpacity onPress={() => setShowVisitorModal(false)}>
-              <Ionicons name="close" size={24} color={Colors.text.primary} />
-            </TouchableOpacity>
-          </View>
-
-          <ScrollView style={styles.modalContent}>
-            <InputField
-              label="Visitor Name *"
-              placeholder="Enter visitor's name"
-              value={visitorForm.name}
-              onChangeText={(value) => setVisitorForm((prev) => ({ ...prev, name: value }))}
-              icon="person-outline"
-            />
-
-            <InputField
-              label="Phone Number"
-              placeholder="Enter phone number"
-              value={visitorForm.phone}
-              onChangeText={(value) => setVisitorForm((prev) => ({ ...prev, phone: value }))}
-              keyboardType="phone-pad"
-              icon="call-outline"
-            />
-
-            <InputField
-              label="Vehicle Number"
-              placeholder="Enter vehicle number (optional)"
-              value={visitorForm.vehicleNumber}
-              onChangeText={(value) => setVisitorForm((prev) => ({ ...prev, vehicleNumber: value }))}
-              icon="car-outline"
-              autoCapitalize="characters"
-            />
-
-            <InputField
-              label="Purpose of Visit *"
-              placeholder="e.g., Family visit, Delivery"
-              value={visitorForm.purpose}
-              onChangeText={(value) => setVisitorForm((prev) => ({ ...prev, purpose: value }))}
-              icon="document-text-outline"
-            />
-
-            <Button
-              title="Register Visitor"
-              onPress={handleRegisterVisitor}
-              gradient
-              size="large"
-              style={styles.submitButton}
-            />
-          </ScrollView>
-        </SafeAreaView>
-      </Modal>
+            {activeTab === 'my_parking' ? renderMyParkingTab() : renderRequestsTab()}
+        </ScrollView>
     </SafeAreaView>
   );
 }
 
+/* ─── SUB-COMPONENTS ─── */
+
+/**
+ * TabButton: Navigates between Parking management and Visitor lists
+ */
+const TabButton = ({ active, label, icon, onPress }: any) => (
+    <TouchableOpacity onPress={onPress} style={[styles.tab, active && styles.tabActive]}>
+        <Ionicons name={icon} size={18} color={active ? C.primary : C.textMuted} />
+        <Text style={[styles.tabText, active && styles.tabTextActive]}>{label}</Text>
+    </TouchableOpacity>
+);
+
+
+/**
+ * RequestCard: Display for other residents asking to use your parking slot
+ */
+const RequestCard = ({ name, time, note }: any) => (
+    <View style={[styles.requestCard, shadow(1)]}>
+        <View style={styles.visitorRow}>
+            <View style={styles.avatarSmall} />
+            <View style={{ flex: 1 }}>
+                <Text style={styles.visitorName}>{name}</Text>
+                <Text style={styles.visitorSub}>{time}</Text>
+            </View>
+            <Ionicons name="chatbubble-ellipses" size={20} color={C.textMuted} />
+        </View>
+        <Text style={styles.requestNote}>"{note}"</Text>
+        <View style={styles.actionRow}>
+            <TouchableOpacity style={styles.declineBtn}>
+                <Text style={styles.declineText}>Decline</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.acceptBtn}>
+                <Text style={styles.acceptText}>Accept</Text>
+            </TouchableOpacity>
+        </View>
+    </View>
+);
+
+/* ─── High-Readability StyleSheet ─── */
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.background,
-  },
-  header: {
-    paddingHorizontal: 20,
-    paddingTop: 10,
-    paddingBottom: 20,
-  },
-  headerTitle: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: Colors.white,
-    marginBottom: 4,
-  },
-  headerSubtitle: {
-    fontSize: 14,
-    color: 'rgba(255, 255, 255, 0.8)',
-  },
+  container: { flex: 1, backgroundColor: C.bg },
+  header: { paddingHorizontal: 20, paddingTop: 10, paddingBottom: 20 },
+  headerTitle: { fontSize: 24, fontWeight: '800', color: C.textDark },
+  headerSubtitle: { fontSize: 14, color: C.textLight, marginTop: 4 },
+
+  // Tabs
   tabContainer: {
     flexDirection: 'row',
-    backgroundColor: Colors.white,
-    padding: 8,
-    gap: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.gray[100],
+    marginHorizontal: 20,
+    backgroundColor: '#CBD5E1',//Darker track
+    borderRadius: 14,
+    padding: 4
   },
   tab: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
-    paddingVertical: 12,
-    borderRadius: 12,
+    paddingVertical: 10,
+    borderRadius: 10
   },
-  tabActive: {
-    backgroundColor: `${Colors.primary}10`,
+  tabActive: { backgroundColor: C.white },
+  tabText: { marginLeft: 8, fontSize: 14, fontWeight: '600', color: C.textMuted },
+  tabTextActive: { color: C.primary },
+
+  scrollContent: { padding: 20, paddingBottom: 40 },
+
+// Parking Slot Card
+card: {
+  backgroundColor: C.white,
+  borderRadius: 24,
+  overflow: 'hidden',
+  marginBottom: 20,
+  borderWidth: 1,
+  borderColor: '#94A3B8'    // (Medium border color)
+},
+  slotImage: { width: '100%', height: 160 },
+  slotHeaderOverlay: { position: 'absolute', top: 12, right: 12 },
+  badgePrimary: { backgroundColor: C.primary, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 8 },
+  badgeTextWhite: { color: C.white, fontSize: 10, fontWeight: '800' },
+  slotDetails: { padding: 18, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  slotSubLabel: { fontSize: 11, fontWeight: '700', color: C.primary, letterSpacing: 0.5 },
+  slotMainTitle: { fontSize: 22, fontWeight: '800', color: C.textDark },
+
+  // Status Badges (Green/Available)
+  statusBadgeGreen: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#ECFDF5',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 12
   },
-  tabText: {
+  dotGreen: { width: 6, height: 6, borderRadius: 3, backgroundColor: C.success, marginRight: 6 },
+  statusTextGreen: { color: C.success, fontSize: 12, fontWeight: '700' },
+
+  // Status Badges (Muted/Private)
+  statusBadgeMuted: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F1F5F9',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 12
+  },
+  dotMuted: { width: 6, height: 6, borderRadius: 3, backgroundColor: C.textMuted, marginRight: 6 },
+  statusTextMuted: { color: C.textMuted, fontSize: 12, fontWeight: '700' },
+
+  // Lending Toggle Card
+  toggleCard: {
+    backgroundColor: C.white,
+    borderRadius: 20,
+    padding: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 24,
+    borderWidth: 1,
+    borderColor: '#94A3B8'
+  },
+  cardTitle: { fontSize: 16, fontWeight: '700', color: C.textDark },
+  cardSubtitle: { fontSize: 13, color: C.textLight, marginTop: 4, lineHeight: 18 },
+
+  // Section Headers
+  sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
+  sectionTitle: { fontSize: 12, fontWeight: '700', color: C.textLight, letterSpacing: 1 },
+  countBadge: { backgroundColor: '#DBEAFE', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 10 },
+  countText: { color: C.primary, fontSize: 11, fontWeight: '700' },
+
+// Request Cards
+  requestCard: { backgroundColor: C.white, borderRadius: 20, padding: 16, marginBottom: 12 ,borderWidth: 1,borderColor: '#94A3B8'},
+  avatarSmall: { width: 32, height: 32, borderRadius: 16, backgroundColor: '#F1F5F9' },
+  // Increased darkness and line height for notes
+  requestNote: {
     fontSize: 14,
-    fontWeight: '600',
-    color: Colors.text.secondary,
+    fontStyle: 'italic',
+    color: C.textDark,
+    marginVertical: 12,
+    lineHeight: 20
   },
-  tabTextActive: {
-    color: Colors.primary,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    padding: 16,
-    paddingBottom: 100,
-  },
-  slotCard: {
-    marginBottom: 16,
-  },
-  slotHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  slotIconContainer: {
-    width: 60,
-    height: 60,
-    borderRadius: 16,
-    backgroundColor: `${Colors.secondary}15`,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 16,
-  },
-  slotInfo: {
-    flex: 1,
-  },
-  slotLabel: {
-    fontSize: 12,
-    color: Colors.text.secondary,
-    marginBottom: 4,
-  },
-  slotNumber: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: Colors.text.primary,
-  },
-  vehicleInfo: {
-    backgroundColor: Colors.gray[50],
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 16,
-    gap: 8,
-  },
-  infoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  infoText: {
-    fontSize: 14,
-    color: Colors.text.secondary,
-  },
-  rulesCard: {
-    marginBottom: 16,
-  },
-  cardTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: Colors.text.primary,
-    marginBottom: 12,
-  },
-  ruleItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    marginBottom: 8,
-  },
-  ruleText: {
-    fontSize: 14,
-    color: Colors.text.secondary,
-  },
-  addVisitorButton: {
-    marginBottom: 20,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: Colors.text.primary,
-    marginBottom: 12,
-  },
-  visitorCard: {
-    marginBottom: 12,
-  },
-  visitorHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  visitorAvatar: {
-    width: 48,
-    height: 48,
+  actionRow: { flexDirection: 'row', gap: 12, marginTop: 4 },
+  declineBtn: { flex: 1, padding: 12, borderRadius: 12, borderWidth: 1, borderColor: C.border, alignItems: 'center' },
+  acceptBtn: { flex: 1, padding: 12, borderRadius: 12, backgroundColor: C.primary, alignItems: 'center' },
+  declineText: { fontWeight: '700', color: C.textDark },
+  acceptText: { fontWeight: '700', color: C.white },
+
+// Visitor History - Darker labels
+  visitorCard: { backgroundColor: C.white, borderRadius: 20, padding: 16, marginBottom: 12,borderWidth: 1,borderColor: '#94A3B8' },
+  visitorRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  avatar: { width: 44, height: 44, borderRadius: 22, backgroundColor:'#F3E8FF', alignItems: 'center', justifyContent: 'center' },
+  avatarText: { color: C.secondary, fontWeight: '700' },
+  visitorName: { fontSize: 16, fontWeight: '700', color: C.textDark },
+  visitorSub: { fontSize: 12, color: C.textMuted, marginTop: 1 },
+  statusIn: { backgroundColor: '#DCFCE7', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12 },
+  statusInText: { color: C.success, fontSize: 11, fontWeight: '700' },
+
+// Details Box - Darkened background and added border for visibility
+  detailsBox: {
+    backgroundColor: '#F1F5F9',
     borderRadius: 14,
-    backgroundColor: Colors.secondary,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 12,
-  },
-  visitorInfo: {
-    flex: 1,
-  },
-  visitorName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: Colors.text.primary,
-  },
-  visitorPurpose: {
-    fontSize: 13,
-    color: Colors.text.secondary,
-    marginTop: 2,
-  },
-  visitorDetails: {
-    backgroundColor: Colors.gray[50],
-    borderRadius: 10,
-    padding: 10,
-    gap: 6,
-  },
-  detailRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    padding: 12,
+    marginTop: 14,
     gap: 8,
+    borderWidth: 1,
+    borderColor: C.border
   },
-  detailText: {
-    fontSize: 13,
-    color: Colors.text.secondary,
-  },
-  modalContainer: {
-    flex: 1,
-    backgroundColor: Colors.background,
-  },
-  modalHeader: {
+  detailItem: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  detailText: { fontSize: 13, color: C.textLight, fontWeight: '500' },
+
+  registerButton: {
+    backgroundColor: C.primary,
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    padding: 16,
+    borderRadius: 16,
+    justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.gray[100],
+    marginBottom: 24
   },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: Colors.text.primary,
-  },
-  modalContent: {
-    padding: 20,
-  },
-  submitButton: {
-    marginTop: 20,
-  },
+  registerButtonText: { color: C.white, fontWeight: '700', marginLeft: 8 },
 });
+

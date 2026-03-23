@@ -4,16 +4,15 @@
 
 // API Configuration
 export const API_CONFIG = {
-  BASE_URL: 'http://10.0.2.2:8080', // Android emulator localhost
+  // BASE_URL: 'http://10.0.2.2:8080', // Android emulator localhost
   // BASE_URL: 'http://localhost:8080', // iOS simulator or web
-  // BASE_URL: 'http://YOUR_IP:8080', // Physical device - replace with your machine's IP
+  BASE_URL: 'http://192.168.1.79:8080', // Physical device - your machine's IP
 
   ENDPOINTS: {
     // Auth
     LOGIN: '/api/auth/login',
     REGISTER: '/api/auth/register',
-    VERIFY_OTP: '/api/auth/verify-otp',
-    RESEND_OTP: '/api/auth/resend-otp',
+    VERIFY: '/api/auth/verify-account',
 
     // Users
     USERS: '/api/users',
@@ -44,9 +43,8 @@ export const API_CONFIG = {
     BOOKINGS: '/api/bookings',
     BOOKINGS_BY_USER: (userId: number) => `/api/bookings/user/${userId}`,
 
-    // Visitors
-    VISITORS: '/api/visitors',
-    VISITORS_BY_USER: (userId: number) => `/api/visitors/user/${userId}`,
+    // Houses
+    HOUSES: '/api/houses/status',
 
     // Apartments (Manager)
     APARTMENTS: '/api/apartments',
@@ -110,7 +108,7 @@ export const FEATURES = {
   DARK_MODE_ENABLED: true,
   OTP_LOGIN_ENABLED: false,
   COMMON_AREA_BOOKING_ENABLED: true,
-  VISITOR_MANAGEMENT_ENABLED: true,
+
 };
 
 // API endpoint aliases for backward compatibility

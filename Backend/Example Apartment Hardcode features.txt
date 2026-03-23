@@ -6,7 +6,15 @@ Info - These features must be implemented!
 -MANAGER
 
 -A manager named 'Admin0' is created by hardcoding when deploying to each apartment. These admin0 emails would be owned by the Resiido team. This entity cannot be deleted from the database.
-(Example: for Apartment named 'Example Residence', an email named Example_Residence_Admin0@gmail.com will be created manually.) 
+(Example: for Apartment named 'Example Residence', an email named Example_Residence_Admin0@gmail.com will be created manually.)
+
+Hardcoding apartment
+
+Apartment admin0 Username - Example Residence
+   email - exampleresidence1@gmail.com
+      Pw - resiidoadmin0
+       Recovery phone number - +94 77 900 5940
+ 
 -When the first manager for the particular apartment is registered, a randomly generated security code will be sent to admin0 email. this will be provided to the first manager by the Resiido team.
 -For all subsequent manager registrations, all managers' emails (including admin0) will be sent an expirable token.
 -Managers must communicate and send the token to the new manager for them to register manually.
@@ -17,8 +25,36 @@ Info - These features must be implemented!
 
 -A layout of each apartment will be hardcoded for each apartment client. when a resident is registered, they will have to enter their apartment residence address and request register. this will be sent to all managers. Managers can either accept or deny registration.
 
+This will be the layout. (First digit is the floor level, ex: G for ground floor, 1 for first floor and 3 for third floor, the number after the dash would be the house in that floor.
+G-01, G-02 G-03 ... up to G-07
+1-01, 1-02, 1-03 ... up to 1-07
+... up to
+10-07
+So in total, there are 77 houses in the apartment
+
 
 
 -PARKING
 
--For parking, all residents are required to enter their garage lot number.   
+-For parking, all residents are given a parking lot number since the number of houses = number of parking slots
+
+
+-PAYMENTS
+
+-Residents will submit a proof of payment (a pic) to the managers. Then managers can either accept payment or reject it.
+
+
+-COMMON AREA BOOKING
+
+-hardcoded areas - "Rooftop", "Swimming Pool".
+
+
+-SOS Alert
+
+-An alert will be sent to all residents of the requester's floor.
+For the notifications to work, Firebase Cloud Messaging (FCM) is needed. A free version is available for small scale projects.
+Need to update code when the project is deployed.
+For now a mock notification will be sent to server console
+
+
+WHEN DEVELOPING FRONTEND some requests might fail because Content-Type: application/json isn't stated specifically. Be carefull.

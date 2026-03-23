@@ -8,8 +8,6 @@ import { authService } from '@/services';
 import {
   LoginRequest,
   RegisterRequest,
-  RegistrationInitiateRequest,
-  RegistrationInitiateResponse,
   User,
 } from '@/types';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -21,8 +19,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   login: (credentials: LoginRequest) => Promise<void>;
   register: (userData: RegisterRequest) => Promise<void>;
-  initiateRegistration: (userData: RegistrationInitiateRequest) => Promise<RegistrationInitiateResponse>;
-  verifyRegistrationOtp: (email: string, otp: string) => Promise<void>;
+  verifyRegistration: (email: string, code: string) => Promise<void>;
   logout: () => Promise<void>;
   updateUser: (userData: Partial<User>) => void;
 }
@@ -65,37 +62,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const register = useCallback(async (userData: RegisterRequest) => {
     try {
-      const response = await authService.register(userData);
-      setUser(response.user);
-      await AsyncStorage.setItem(
-        APP_CONFIG.STORAGE_KEYS.USER_DATA,
-        JSON.stringify(response.user)
-      );
+      await authService.register(userData);
+      // Wait for verification before setting user
     } catch (error) {
       throw error;
     }
   }, []);
 
-  /**
-   * Initiate registration — triggers OTP to be sent to the user's email
-   */
-  const initiateRegistration = useCallback(async (
-    userData: RegistrationInitiateRequest
-  ): Promise<RegistrationInitiateResponse> => {
+  const verifyRegistration = useCallback(async (email: string, code: string) => {
     try {
-      const response = await authService.initiateRegistration(userData);
-      return response;
-    } catch (error) {
-      throw error;
-    }
-  }, []);
-
-  /**
-   * Verify OTP to complete registration and log the user in
-   */
-  const verifyRegistrationOtp = useCallback(async (email: string, otp: string): Promise<void> => {
-    try {
-      const response = await authService.verifyOtp({ email, otp });
+      const response = await authService.verifyRegistration(email, code);
       setUser(response.user);
       await AsyncStorage.setItem(
         APP_CONFIG.STORAGE_KEYS.USER_DATA,
@@ -136,12 +112,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isAuthenticated: !!user,
       login,
       register,
-      initiateRegistration,
-      verifyRegistrationOtp,
+      verifyRegistration,
       logout,
       updateUser,
     }),
-    [user, isLoading, login, register, initiateRegistration, verifyRegistrationOtp, logout, updateUser]
+    [user, isLoading, login, register, verifyRegistration, logout, updateUser]
   );
 
   return (

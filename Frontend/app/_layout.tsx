@@ -13,7 +13,7 @@ import { AuthProvider } from '@/context/AuthContext';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
 export const unstable_settings = {
-  initialRouteName: 'welcome',
+  initialRouteName: 'index',
 };
 
 export default function RootLayout() {
@@ -24,11 +24,25 @@ export default function RootLayout() {
       <AuthProvider>
         <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
           <Stack screenOptions={{ headerShown: false }}>
+<<<<<<< HEAD
+=======
+            {/* Entry Point */}
+            <Stack.Screen name="index" />
+            <Stack.Screen
+              name="splash"
+              options={{ animation: 'fade' }}
+            />
+
+>>>>>>> main
             {/* Public Screens */}
             <Stack.Screen name="welcome" />
             <Stack.Screen name="login" />
             <Stack.Screen name="register" />
+<<<<<<< HEAD
             <Stack.Screen name="otp-verify" />
+=======
+            <Stack.Screen name="verify" />
+>>>>>>> main
 
             {/* Authenticated Screens */}
             <Stack.Screen name="(tabs)" />
@@ -63,6 +77,7 @@ export default function RootLayout() {
                 title: 'Manager Dashboard'
               }}
             />
+<<<<<<< HEAD
             <Stack.Screen
               name="visitor-management"
               options={{
@@ -70,6 +85,9 @@ export default function RootLayout() {
                 title: 'Visitor Management'
               }}
             />
+=======
+
+>>>>>>> main
           </Stack>
           <StatusBar style="auto" />
         </ThemeProvider>
