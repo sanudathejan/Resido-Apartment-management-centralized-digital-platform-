@@ -32,7 +32,7 @@ export default function OtpVerifyScreen() {
     const router = useRouter();
     const { email } = useLocalSearchParams<{ email: string }>();
 
-    const { verifyRegistrationOtp } = useAuth();
+    const { verifyRegistration } = useAuth();
 
     const [otp, setOtp] = useState<string[]>(Array(OTP_LENGTH).fill(''));
     const [isLoading, setIsLoading] = useState(false);
@@ -113,7 +113,7 @@ export default function OtpVerifyScreen() {
         setErrorMsg('');
         try {
             if (email) {
-                await verifyRegistrationOtp(email, otpString);
+                await verifyRegistration(email, otpString);
                 // On success, go to tabs
                 router.replace('/(tabs)');
             } else {
